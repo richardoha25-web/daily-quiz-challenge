@@ -1,0 +1,3 @@
+Source snapshot obtained from AppDeploy app daily-quiz-challenge-zd50r1, version 1786786045544, on 2026-08-16.
+Original AppDeploy files: index.html, package.json, postcss.config.js, public/icon.svg, public/manifest.webmanifest, public/sw.js, src/App.tsx, src/index.css, src/main.tsx, tailwind.config.js, tests/tests.txt, tsconfig.json, vite.config.ts, PROJECT_INFORMATION.md.
+This starter additionally includes Capacitor configuration, Android dependencies, README, and a GitHub Actions debug-APK workflow.

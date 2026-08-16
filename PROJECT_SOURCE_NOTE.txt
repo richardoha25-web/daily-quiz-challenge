@@ -1,0 +1,1 @@
+This package was reconstructed from the AppDeploy source snapshot for Daily Quiz & Challenge (app id daily-quiz-challenge-zd50r1, version 1786786045544) and made Capacitor-ready for the no-PC cloud Android workflow.

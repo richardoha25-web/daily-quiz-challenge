@@ -1,0 +1,26 @@
+# Tests
+
+## Test 1 - Complete a quiz from the 100-question category bank [sanity]
+Viewport: mobile (375x667)
+Covers: 100-question category bank, random selection, 10-question quiz, timer, scoring, result screen
+Expected: General Knowledge shows 100 questions, the quiz has 10 questions, and the result shows a score out of 100.
+
+## Test 2 - Verify all four categories total 400 questions
+Viewport: desktop (1280x800)
+Expected: Each category shows exactly 100 questions, totaling 400 questions.
+
+## Test 3 - Handle a question timeout
+Viewport: mobile (375x667)
+Expected: The timed-out question receives no points, the quiz advances, and the user can continue normally.
+
+## Test 4 - Persist best score and streak
+Viewport: mobile (375x667)
+Expected: The best score and streak remain visible in the header.
+
+## Test 5 - Show varied wrong answers for different questions
+Viewport: mobile (375x667)
+Expected: Each question has one correct answer and three distinct wrong answers, and the wrong-answer set changes across questions.
+
+## Test 6 - Expose monetization-ready ad placement markers
+Viewport: mobile (375x667)
+Expected: Reserved ad areas are visible at the home, quiz, and result stages.
