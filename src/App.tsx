@@ -158,10 +158,10 @@ const cats: Cat[] = [
 
 const all = cats.map((c, i) => ({ ...c, questions: makeQuestions(c.facts, i) }));
 
-// ===== Google Official TEST Ad Units (100% safe for testing) =====
-const BANNER_ID = 'ca-app-pub-3940256099942544/6300978111';
-const INTERSTITIAL_ID = 'ca-app-pub-3940256099942544/1033173712';
-const REWARDED_ID = 'ca-app-pub-3940256099942544/5224354917';
+// ===== REAL AdMob IDs =====
+const BANNER_ID = 'ca-app-pub-8496227439538798/2899800506';
+const INTERSTITIAL_ID = 'ca-app-pub-8496227439538798/8159866041';
+const REWARDED_ID = 'ca-app-pub-8496227439538798/9137905794';
 
 // ===== AdMob helpers =====
 async function initAdMob() {
@@ -177,11 +177,9 @@ async function initAdMob() {
 async function showHomeBanner() {
   if (!Capacitor.isNativePlatform()) return;
   try {
-    // Always hide first to reset state
     try {
       await AdMob.hideBanner();
     } catch {}
-    // Small delay helps reliability on some devices
     await new Promise((r) => setTimeout(r, 300));
 
     const options: BannerAdOptions = {
@@ -189,7 +187,7 @@ async function showHomeBanner() {
       adSize: BannerAdSize.ADAPTIVE_BANNER,
       position: BannerAdPosition.BOTTOM_CENTER,
       margin: 0,
-      isTesting: true,
+      isTesting: false, // REAL ads
     };
     await AdMob.showBanner(options);
     console.log('[AdMob] Banner shown');
@@ -212,7 +210,7 @@ async function showInterstitial() {
   try {
     const options: AdOptions = {
       adId: INTERSTITIAL_ID,
-      isTesting: true,
+      isTesting: false, // REAL ads
     };
     await AdMob.prepareInterstitial(options);
     await AdMob.showInterstitial();
@@ -227,7 +225,7 @@ async function showRewarded(): Promise<boolean> {
   try {
     const options: AdOptions = {
       adId: REWARDED_ID,
-      isTesting: true,
+      isTesting: false, // REAL ads
     };
     await AdMob.prepareRewardVideoAd(options);
     await AdMob.showRewardVideoAd();
@@ -258,12 +256,11 @@ function App() {
     initAdMob();
   }, []);
 
-  // Show / hide banner based on screen (more reliable)
+  // Show / hide banner based on screen
   useEffect(() => {
     let cancelled = false;
 
     if (screen === 'home') {
-      // Longer delay when returning from quiz/result helps the plugin reset
       const t = setTimeout(() => {
         if (!cancelled) showHomeBanner();
       }, 800);
