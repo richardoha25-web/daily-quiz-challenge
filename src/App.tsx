@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { Capacitor } from '@capacitor/core';
 import {
   AdMob,
   BannerAdOptions,
   BannerAdSize,
   BannerAdPosition,
-  BannerAdPluginEvents,
+  AdOptions,
 } from '@capacitor-community/admob';
 
 type Q = { q: string; a: string; o: string[] };
@@ -158,32 +158,37 @@ const cats: Cat[] = [
 
 const all = cats.map((c, i) => ({ ...c, questions: makeQuestions(c.facts, i) }));
 
-// Real Ad Unit IDs
+// ===== REAL AdMob IDs =====
 const BANNER_ID = 'ca-app-pub-8496227439538798/2899800506';
+const INTERSTITIAL_ID = 'ca-app-pub-8496227439538798/8159866041';
+const REWARDED_ID = 'ca-app-pub-8496227439538798/9137905794';
 
+// ===== AdMob helpers =====
 async function initAdMob() {
   if (!Capacitor.isNativePlatform()) return;
   try {
     await AdMob.initialize();
-    console.log('AdMob initialized');
+    console.log('[AdMob] initialized');
   } catch (e) {
-    console.error('AdMob init failed', e);
+    console.error('[AdMob] init failed', e);
   }
 }
 
 async function showHomeBanner() {
   if (!Capacitor.isNativePlatform()) return;
   try {
+    try { await AdMob.hideBanner(); } catch {}
     const options: BannerAdOptions = {
       adId: BANNER_ID,
-      adSize: BannerAdSize.BANNER,
+      adSize: BannerAdSize.ADAPTIVE_BANNER,
       position: BannerAdPosition.BOTTOM_CENTER,
       margin: 0,
-      isTesting: true, // safe while testing – remove later for production
+      isTesting: true,
     };
     await AdMob.showBanner(options);
+    console.log('[AdMob] Banner requested');
   } catch (e) {
-    console.error('Banner failed', e);
+    console.error('[AdMob] Banner failed', e);
   }
 }
 
@@ -193,6 +198,38 @@ async function hideBanner() {
     await AdMob.hideBanner();
   } catch {
     // ignore
+  }
+}
+
+async function showInterstitial() {
+  if (!Capacitor.isNativePlatform()) return;
+  try {
+    const options: AdOptions = {
+      adId: INTERSTITIAL_ID,
+      isTesting: true,
+    };
+    await AdMob.prepareInterstitial(options);
+    await AdMob.showInterstitial();
+    console.log('[AdMob] Interstitial shown');
+  } catch (e) {
+    console.error('[AdMob] Interstitial failed', e);
+  }
+}
+
+async function showRewarded(): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return false;
+  try {
+    const options: AdOptions = {
+      adId: REWARDED_ID,
+      isTesting: true,
+    };
+    await AdMob.prepareRewardVideoAd(options);
+    await AdMob.showRewardVideoAd();
+    console.log('[AdMob] Rewarded finished');
+    return true;
+  } catch (e) {
+    console.error('[AdMob] Rewarded failed', e);
+    return false;
   }
 }
 
@@ -206,6 +243,8 @@ function App() {
   const [picked, setPicked] = useState<string | null>(null);
   const [streak, setStreak] = useState(Number(localStorage.getItem('dq-streak') || 0));
   const [best, setBest] = useState(Number(localStorage.getItem('dq-best') || 0));
+  const [rewardClaimed, setRewardClaimed] = useState(false);
+  const interstitialShown = useRef(false);
   const bank = useMemo(() => all[cat].questions, [cat]);
 
   // Initialize AdMob once
@@ -216,13 +255,27 @@ function App() {
   // Show / hide banner based on screen
   useEffect(() => {
     if (screen === 'home') {
-      showHomeBanner();
+      const t = setTimeout(() => showHomeBanner(), 500);
+      return () => {
+        clearTimeout(t);
+        hideBanner();
+      };
     } else {
       hideBanner();
     }
-    return () => {
-      hideBanner();
-    };
+  }, [screen]);
+
+  // Show Interstitial when entering result screen
+  useEffect(() => {
+    if (screen === 'result' && !interstitialShown.current) {
+      interstitialShown.current = true;
+      const t = setTimeout(() => showInterstitial(), 900);
+      return () => clearTimeout(t);
+    }
+    if (screen !== 'result') {
+      interstitialShown.current = false;
+      setRewardClaimed(false);
+    }
   }, [screen]);
 
   const start = (c: number) => {
@@ -232,6 +285,7 @@ function App() {
     setScore(0);
     setTime(15);
     setPicked(null);
+    setRewardClaimed(false);
     setScreen('quiz');
   };
 
@@ -278,6 +332,21 @@ function App() {
   const reset = () => {
     setScreen('home');
     setPicked(null);
+    setRewardClaimed(false);
+  };
+
+  const claimReward = async () => {
+    if (rewardClaimed) return;
+    const watched = await showRewarded();
+    if (watched) {
+      const bonus = 20;
+      const newScore = score + bonus;
+      setScore(newScore);
+      setRewardClaimed(true);
+      const nb = Math.max(best, newScore);
+      setBest(nb);
+      localStorage.setItem('dq-best', String(nb));
+    }
   };
 
   return (
@@ -300,10 +369,6 @@ function App() {
               <em>Beat your score.</em>
             </h1>
             <p>10 questions · 15 seconds each · 100 points</p>
-            {/* Banner is now shown natively at the bottom via AdMob */}
-            <div className="adslot" data-ad-placement="home-banner">
-              Banner ad appears at bottom of screen
-            </div>
           </section>
           <h2>Choose a category</h2>
           <div className="grid">
@@ -369,7 +434,7 @@ function App() {
           <p>{score >= 80 ? 'Excellent work!' : score >= 50 ? 'Good job!' : 'Keep practicing!'}</p>
           <div className="resultstats">
             <div>
-              <b>{score / 10}</b>
+              <b>{Math.floor(score / 10)}</b>
               <span>Correct</span>
             </div>
             <div>
@@ -381,6 +446,16 @@ function App() {
               <span>Streak</span>
             </div>
           </div>
+
+          {!rewardClaimed && (
+            <button className="primary" onClick={claimReward} style={{ marginBottom: 12 }}>
+              🎬 Watch Ad for +20 Bonus Points
+            </button>
+          )}
+          {rewardClaimed && (
+            <p style={{ color: '#4ade80', marginBottom: 12 }}>✅ Bonus claimed! +20 points</p>
+          )}
+
           <button className="primary" onClick={() => start(cat)}>
             Play Again
           </button>
