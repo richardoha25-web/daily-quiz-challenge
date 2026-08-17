@@ -17,30 +17,33 @@ jobs:
       - run: npx cap sync android
       - name: Inject AdMob App ID
         run: |
-          # Add AdMob App ID string
+          # 1. Add the App ID string resource
           if ! grep -q "admob_app_id" android/app/src/main/res/values/strings.xml; then
             sed -i 's|</resources>|<string name="admob_app_id">ca-app-pub-8496227439538798~7943409473</string>\n</resources>|' android/app/src/main/res/values/strings.xml
           fi
-          # Add meta-data to AndroidManifest.xml inside <application>
-          if ! grep -q "com.google.android.gms.ads.APPLICATION_ID" android/app/src/main/AndroidManifest.xml; then
-            sed -i '/<application/,/android:name=".*MainActivity/ s|<application|<application>\n        <meta-data\n            android:name="com.google.android.gms.ads.APPLICATION_ID"\n            android:value="@string/admob_app_id" />\n        <!-- keep original -->|' android/app/src/main/AndroidManifest.xml || true
-            # More reliable approach using a temporary file
-            python3 -c '
-import re
-with open("android/app/src/main/AndroidManifest.xml") as f:
-    content = f.read()
-if "com.google.android.gms.ads.APPLICATION_ID" not in content:
-    content = re.sub(
-        r"(<application[^>]*>)",
-        r"""\1\n        <meta-data\n            android:name=\"com.google.android.gms.ads.APPLICATION_ID\"\n            android:value=\"@string/admob_app_id\" />""",
-        content,
-        count=1
-    )
-    with open("android/app/src/main/AndroidManifest.xml", "w") as f:
-        f.write(content)
-print("AdMob App ID injected")
-'
-          fi
+
+          # 2. Add the meta-data tag inside <application>
+          python3 << 'EOF'
+          import re
+          path = "android/app/src/main/AndroidManifest.xml"
+          with open(path) as f:
+              content = f.read()
+          if "com.google.android.gms.ads.APPLICATION_ID" not in content:
+              content = re.sub(
+                  r"(<application[^>]*>)",
+                  r'''\1
+          <meta-data
+              android:name="com.google.android.gms.ads.APPLICATION_ID"
+              android:value="@string/admob_app_id" />''',
+                  content,
+                  count=1
+              )
+              with open(path, "w") as f:
+                  f.write(content)
+              print("AdMob App ID injected successfully")
+          else:
+              print("AdMob App ID already present")
+          EOF
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
