@@ -158,10 +158,10 @@ const cats: Cat[] = [
 
 const all = cats.map((c, i) => ({ ...c, questions: makeQuestions(c.facts, i) }));
 
-// ===== REAL AdMob IDs =====
-const BANNER_ID = 'ca-app-pub-8496227439538798/2899800506';
-const INTERSTITIAL_ID = 'ca-app-pub-8496227439538798/8159866041';
-const REWARDED_ID = 'ca-app-pub-8496227439538798/9137905794';
+// ===== Google Official TEST Ad Units (100% safe for testing) =====
+const BANNER_ID = 'ca-app-pub-3940256099942544/6300978111';
+const INTERSTITIAL_ID = 'ca-app-pub-3940256099942544/1033173712';
+const REWARDED_ID = 'ca-app-pub-3940256099942544/5224354917';
 
 // ===== AdMob helpers =====
 async function initAdMob() {
@@ -177,7 +177,13 @@ async function initAdMob() {
 async function showHomeBanner() {
   if (!Capacitor.isNativePlatform()) return;
   try {
-    try { await AdMob.hideBanner(); } catch {}
+    // Always hide first to reset state
+    try {
+      await AdMob.hideBanner();
+    } catch {}
+    // Small delay helps reliability on some devices
+    await new Promise((r) => setTimeout(r, 300));
+
     const options: BannerAdOptions = {
       adId: BANNER_ID,
       adSize: BannerAdSize.ADAPTIVE_BANNER,
@@ -186,7 +192,7 @@ async function showHomeBanner() {
       isTesting: true,
     };
     await AdMob.showBanner(options);
-    console.log('[AdMob] Banner requested');
+    console.log('[AdMob] Banner shown');
   } catch (e) {
     console.error('[AdMob] Banner failed', e);
   }
@@ -252,11 +258,18 @@ function App() {
     initAdMob();
   }, []);
 
-  // Show / hide banner based on screen
+  // Show / hide banner based on screen (more reliable)
   useEffect(() => {
+    let cancelled = false;
+
     if (screen === 'home') {
-      const t = setTimeout(() => showHomeBanner(), 500);
+      // Longer delay when returning from quiz/result helps the plugin reset
+      const t = setTimeout(() => {
+        if (!cancelled) showHomeBanner();
+      }, 800);
+
       return () => {
+        cancelled = true;
         clearTimeout(t);
         hideBanner();
       };
