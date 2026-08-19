@@ -75,6 +75,32 @@ jobs:
             -alias dailyquiz \
             -storepass "$KEYSTORE_PASSWORD" >/dev/null
 
+      - name: Diagnose release key password
+        working-directory: android
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          rm -f diagnostic-keystore.p12
+          if keytool -importkeystore \
+              -srckeystore daily-quiz-release.keystore \
+              -srcstoretype PKCS12 \
+              -srcstorepass "$KEYSTORE_PASSWORD" \
+              -srcalias dailyquiz \
+              -srckeypass "$KEY_PASSWORD" \
+              -destkeystore diagnostic-keystore.p12 \
+              -deststoretype PKCS12 \
+              -deststorepass "$KEYSTORE_PASSWORD" \
+              -destkeypass "$KEYSTORE_PASSWORD" \
+              -noprompt >/dev/null 2>&1; then
+            echo "KEY_PASSWORD successfully unlocks the dailyquiz signing key."
+          else
+            echo "KEY_PASSWORD does NOT unlock the dailyquiz signing key in the restored keystore."
+            echo "The release signing failure is a key-password/keystore mismatch."
+            exit 1
+          fi
+          rm -f diagnostic-keystore.p12
+
       - name: Configure Gradle release signing
         working-directory: android
         env:
