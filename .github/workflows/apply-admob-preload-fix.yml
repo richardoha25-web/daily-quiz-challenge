@@ -1,0 +1,333 @@
+name: Apply AdMob preload fix
+
+on:
+  push:
+    branches:
+      - fix/admob-preload-lifecycle
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch AdMob lifecycle and preload logic
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p = Path('src/App.tsx')
+          s = p.read_text(encoding='utf-8')
+
+          old_helpers = s[s.index('// ===== AdMob helpers ====='):s.index('function App() {')]
+          new_helpers = r'''// ===== AdMob helpers =====
+let adMobInitPromise: Promise<void> | null = null;
+let interstitialLoadPromise: Promise<void> | null = null;
+let rewardedLoadPromise: Promise<void> | null = null;
+let interstitialReady = false;
+let rewardedReady = false;
+
+async function initAdMob(): Promise<void> {
+  if (!Capacitor.isNativePlatform()) return;
+  if (!adMobInitPromise) {
+    adMobInitPromise = AdMob.initialize()
+      .then(() => console.log('[AdMob] initialized'))
+      .catch((e) => {
+        console.error('[AdMob] init failed', e);
+        adMobInitPromise = null;
+        throw e;
+      });
+  }
+  await adMobInitPromise;
+}
+
+async function showHomeBanner() {
+  if (!Capacitor.isNativePlatform()) return;
+  try {
+    await initAdMob();
+    try {
+      await AdMob.hideBanner();
+    } catch {}
+    await new Promise((r) => setTimeout(r, 300));
+
+    const options: BannerAdOptions = {
+      adId: BANNER_ID,
+      adSize: BannerAdSize.ADAPTIVE_BANNER,
+      position: BannerAdPosition.BOTTOM_CENTER,
+      margin: 0,
+      isTesting: false, // REAL ads
+    };
+    await AdMob.showBanner(options);
+    console.log('[AdMob] Banner shown');
+  } catch (e) {
+    console.error('[AdMob] Banner failed', e);
+  }
+}
+
+async function hideBanner() {
+  if (!Capacitor.isNativePlatform()) return;
+  try {
+    await AdMob.hideBanner();
+  } catch {
+    // ignore
+  }
+}
+
+async function preloadInterstitial() {
+  if (!Capacitor.isNativePlatform()) return;
+  if (interstitialReady || interstitialLoadPromise) return interstitialLoadPromise;
+
+  interstitialLoadPromise = (async () => {
+    try {
+      await initAdMob();
+      interstitialReady = false;
+      await AdMob.prepareInterstitial({
+        adId: INTERSTITIAL_ID,
+        isTesting: false, // REAL ads
+      });
+      interstitialReady = true;
+      console.log('[AdMob] Interstitial preloaded');
+    } catch (e) {
+      interstitialReady = false;
+      console.error('[AdMob] Interstitial preload failed', e);
+    } finally {
+      interstitialLoadPromise = null;
+    }
+  })();
+
+  return interstitialLoadPromise;
+}
+
+async function showInterstitial() {
+  if (!Capacitor.isNativePlatform()) return false;
+  try {
+    await initAdMob();
+    if (!interstitialReady) await preloadInterstitial();
+    if (!interstitialReady) return false;
+
+    await AdMob.showInterstitial();
+    interstitialReady = false;
+    void preloadInterstitial();
+    console.log('[AdMob] Interstitial shown; next one preloading');
+    return true;
+  } catch (e) {
+    interstitialReady = false;
+    console.error('[AdMob] Interstitial failed', e);
+    void preloadInterstitial();
+    return false;
+  }
+}
+
+async function preloadRewarded() {
+  if (!Capacitor.isNativePlatform()) return;
+  if (rewardedReady || rewardedLoadPromise) return rewardedLoadPromise;
+
+  rewardedLoadPromise = (async () => {
+    try {
+      await initAdMob();
+      rewardedReady = false;
+      await AdMob.prepareRewardVideoAd({
+        adId: REWARDED_ID,
+        isTesting: false, // REAL ads
+      });
+      rewardedReady = true;
+      console.log('[AdMob] Rewarded ad preloaded');
+    } catch (e) {
+      rewardedReady = false;
+      console.error('[AdMob] Rewarded preload failed', e);
+    } finally {
+      rewardedLoadPromise = null;
+    }
+  })();
+
+  return rewardedLoadPromise;
+}
+
+async function showRewarded(): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return false;
+  try {
+    await initAdMob();
+    if (!rewardedReady) await preloadRewarded();
+    if (!rewardedReady) return false;
+
+    const reward = await AdMob.showRewardVideoAd();
+    rewardedReady = false;
+    void preloadRewarded();
+    console.log('[AdMob] Rewarded finished; next one preloading');
+    return Number(reward?.amount || 0) > 0;
+  } catch (e) {
+    rewardedReady = false;
+    console.error('[AdMob] Rewarded failed', e);
+    void preloadRewarded();
+    return false;
+  }
+}
+
+'''
+          s = s.replace(old_helpers, new_helpers, 1)
+
+          old_hooks = '''  // Initialize AdMob once
+  useEffect(() => {
+    initAdMob();
+  }, []);
+
+  // Show / hide banner based on screen
+  useEffect(() => {
+    let cancelled = false;
+
+    if (screen === 'home') {
+      const t = setTimeout(() => {
+        if (!cancelled) showHomeBanner();
+      }, 800);
+
+      return () => {
+        cancelled = true;
+        clearTimeout(t);
+        hideBanner();
+      };
+    } else {
+      hideBanner();
+    }
+  }, [screen]);
+
+  // Show Interstitial when entering result screen
+  useEffect(() => {
+    if (screen === 'result' && !interstitialShown.current) {
+      interstitialShown.current = true;
+      const t = setTimeout(() => showInterstitial(), 900);
+      return () => clearTimeout(t);
+    }
+    if (screen !== 'result') {
+      interstitialShown.current = false;
+      setRewardClaimed(false);
+    }
+  }, [screen]);
+'''
+          new_hooks = '''  // Initialize AdMob and preload fullscreen ads as soon as the native app is ready.
+  useEffect(() => {
+    let cancelled = false;
+
+    const startAds = async () => {
+      try {
+        await initAdMob();
+        if (cancelled) return;
+        void preloadInterstitial();
+        void preloadRewarded();
+      } catch {
+        // Individual ad preload functions log their own failures and retry later.
+      }
+    };
+
+    void startAds();
+
+    // Android WebView resumes can leave previously loaded ad objects stale.
+    // Re-show the banner and refresh fullscreen ads whenever the app becomes visible again.
+    const handleVisibility = () => {
+      if (document.visibilityState !== 'visible' || cancelled) return;
+      void startAds();
+      if (screen === 'home') {
+        setTimeout(() => {
+          if (!cancelled && document.visibilityState === 'visible') showHomeBanner();
+        }, 500);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', handleVisibility);
+
+    return () => {
+      cancelled = true;
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', handleVisibility);
+    };
+  }, [screen]);
+
+  // Show / hide banner based on screen. The banner is recreated after app resume.
+  useEffect(() => {
+    let cancelled = false;
+
+    if (screen === 'home') {
+      const t = setTimeout(() => {
+        if (!cancelled) showHomeBanner();
+      }, 800);
+
+      return () => {
+        cancelled = true;
+        clearTimeout(t);
+        hideBanner();
+      };
+    }
+
+    hideBanner();
+  }, [screen]);
+
+  // Show the already-preloaded interstitial when entering the result screen.
+  useEffect(() => {
+    if (screen === 'result' && !interstitialShown.current) {
+      interstitialShown.current = true;
+      const t = setTimeout(() => {
+        void showInterstitial();
+      }, 900);
+      return () => clearTimeout(t);
+    }
+    if (screen !== 'result') {
+      interstitialShown.current = false;
+      setRewardClaimed(false);
+    }
+  }, [screen]);
+'''
+          if old_hooks not in s:
+            raise SystemExit('Expected AdMob hook block not found')
+          s = s.replace(old_hooks, new_hooks, 1)
+
+          old_claim = '''  const claimReward = async () => {
+    if (rewardClaimed) return;
+    const watched = await showRewarded();
+    if (watched) {
+      const bonus = 20;
+      const newScore = score + bonus;
+      setScore(newScore);
+      setRewardClaimed(true);
+      const nb = Math.max(best, newScore);
+      setBest(nb);
+      localStorage.setItem('dq-best', String(nb));
+    }
+  };
+'''
+          new_claim = '''  const claimReward = async () => {
+    if (rewardClaimed) return;
+    const watched = await showRewarded();
+    if (watched) {
+      const bonus = 20;
+      const newScore = score + bonus;
+      setScore(newScore);
+      setRewardClaimed(true);
+      const nb = Math.max(best, newScore);
+      setBest(nb);
+      localStorage.setItem('dq-best', String(nb));
+    }
+  };
+'''
+          if old_claim not in s:
+            raise SystemExit('Expected reward claim block not found')
+          s = s.replace(old_claim, new_claim, 1)
+
+          p.write_text(s, encoding='utf-8')
+
+      - name: Verify source changes
+        run: |
+          grep -n "preloadInterstitial\|preloadRewarded\|visibilitychange\|Interstitial preloaded\|Rewarded ad preloaded" src/App.tsx
+
+      - name: Commit patched App.tsx
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- src/App.tsx
+          git diff --cached --exit-code && exit 1 || true
+          git commit -m "fix: preload and refresh AdMob ads across app lifecycle"
+          git push
