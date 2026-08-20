@@ -164,19 +164,30 @@ const INTERSTITIAL_ID = 'ca-app-pub-8496227439538798/8159866041';
 const REWARDED_ID = 'ca-app-pub-8496227439538798/9137905794';
 
 // ===== AdMob helpers =====
-async function initAdMob() {
+let adMobInitPromise: Promise<void> | null = null;
+let interstitialLoadPromise: Promise<void> | null = null;
+let rewardedLoadPromise: Promise<void> | null = null;
+let interstitialReady = false;
+let rewardedReady = false;
+
+async function initAdMob(): Promise<void> {
   if (!Capacitor.isNativePlatform()) return;
-  try {
-    await AdMob.initialize();
-    console.log('[AdMob] initialized');
-  } catch (e) {
-    console.error('[AdMob] init failed', e);
+  if (!adMobInitPromise) {
+    adMobInitPromise = AdMob.initialize()
+      .then(() => console.log('[AdMob] initialized'))
+      .catch((e) => {
+        console.error('[AdMob] init failed', e);
+        adMobInitPromise = null;
+        throw e;
+      });
   }
+  await adMobInitPromise;
 }
 
 async function showHomeBanner() {
   if (!Capacitor.isNativePlatform()) return;
   try {
+    await initAdMob();
     try {
       await AdMob.hideBanner();
     } catch {}
@@ -205,34 +216,92 @@ async function hideBanner() {
   }
 }
 
-async function showInterstitial() {
+async function preloadInterstitial() {
   if (!Capacitor.isNativePlatform()) return;
+  if (interstitialReady || interstitialLoadPromise) return interstitialLoadPromise;
+
+  interstitialLoadPromise = (async () => {
+    try {
+      await initAdMob();
+      interstitialReady = false;
+      await AdMob.prepareInterstitial({
+        adId: INTERSTITIAL_ID,
+        isTesting: false, // REAL ads
+      });
+      interstitialReady = true;
+      console.log('[AdMob] Interstitial preloaded');
+    } catch (e) {
+      interstitialReady = false;
+      console.error('[AdMob] Interstitial preload failed', e);
+    } finally {
+      interstitialLoadPromise = null;
+    }
+  })();
+
+  return interstitialLoadPromise;
+}
+
+async function showInterstitial() {
+  if (!Capacitor.isNativePlatform()) return false;
   try {
-    const options: AdOptions = {
-      adId: INTERSTITIAL_ID,
-      isTesting: false, // REAL ads
-    };
-    await AdMob.prepareInterstitial(options);
+    await initAdMob();
+    if (!interstitialReady) await preloadInterstitial();
+    if (!interstitialReady) return false;
+
     await AdMob.showInterstitial();
-    console.log('[AdMob] Interstitial shown');
+    interstitialReady = false;
+    void preloadInterstitial();
+    console.log('[AdMob] Interstitial shown; next one preloading');
+    return true;
   } catch (e) {
+    interstitialReady = false;
     console.error('[AdMob] Interstitial failed', e);
+    void preloadInterstitial();
+    return false;
   }
+}
+
+async function preloadRewarded() {
+  if (!Capacitor.isNativePlatform()) return;
+  if (rewardedReady || rewardedLoadPromise) return rewardedLoadPromise;
+
+  rewardedLoadPromise = (async () => {
+    try {
+      await initAdMob();
+      rewardedReady = false;
+      await AdMob.prepareRewardVideoAd({
+        adId: REWARDED_ID,
+        isTesting: false, // REAL ads
+      });
+      rewardedReady = true;
+      console.log('[AdMob] Rewarded ad preloaded');
+    } catch (e) {
+      rewardedReady = false;
+      console.error('[AdMob] Rewarded preload failed', e);
+    } finally {
+      rewardedLoadPromise = null;
+    }
+  })();
+
+  return rewardedLoadPromise;
 }
 
 async function showRewarded(): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) return false;
   try {
-    const options: AdOptions = {
-      adId: REWARDED_ID,
-      isTesting: false, // REAL ads
-    };
-    await AdMob.prepareRewardVideoAd(options);
-    await AdMob.showRewardVideoAd();
-    console.log('[AdMob] Rewarded finished');
-    return true;
+    await initAdMob();
+    if (!rewardedReady) await preloadRewarded();
+    if (!rewardedReady) return false;
+
+    const reward = await AdMob.showRewardVideoAd();
+    rewardedReady = false;
+    void preloadRewarded();
+    console.log('[AdMob] Rewarded finished; next one preloading');
+    return Number(reward?.amount || 0) > 0;
   } catch (e) {
+    rewardedReady = false;
     console.error('[AdMob] Rewarded failed', e);
+    void preloadRewarded();
     return false;
   }
 }
@@ -251,35 +320,70 @@ function App() {
   const interstitialShown = useRef(false);
   const bank = useMemo(() => all[cat].questions, [cat]);
 
-  // Initialize AdMob once
+  // Initialize AdMob and preload fullscreen ads as soon as the native app is ready.
   useEffect(() => {
-    initAdMob();
-  }, []);
+    let cancelled = false;
 
-  // Show / hide banner based on screen
+    const startAds = async () => {
+      try {
+        await initAdMob();
+        if (cancelled) return;
+        void preloadInterstitial();
+        void preloadRewarded();
+      } catch {
+        // Individual preload functions log their own failures.
+      }
+    };
+
+    void startAds();
+
+    // Refresh ads whenever the Android WebView becomes visible/focused again.
+    const handleVisibility = () => {
+      if (document.visibilityState !== 'visible' || cancelled) return;
+      void startAds();
+      if (screen === 'home') {
+        setTimeout(() => {
+          if (!cancelled && document.visibilityState === 'visible') void showHomeBanner();
+        }, 500);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', handleVisibility);
+
+    return () => {
+      cancelled = true;
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', handleVisibility);
+    };
+  }, [screen]);
+
+  // Show / hide banner based on screen.
   useEffect(() => {
     let cancelled = false;
 
     if (screen === 'home') {
       const t = setTimeout(() => {
-        if (!cancelled) showHomeBanner();
+        if (!cancelled) void showHomeBanner();
       }, 800);
 
       return () => {
         cancelled = true;
         clearTimeout(t);
-        hideBanner();
+        void hideBanner();
       };
-    } else {
-      hideBanner();
     }
+
+    void hideBanner();
   }, [screen]);
 
-  // Show Interstitial when entering result screen
+  // Show the already-preloaded interstitial when entering the result screen.
   useEffect(() => {
     if (screen === 'result' && !interstitialShown.current) {
       interstitialShown.current = true;
-      const t = setTimeout(() => showInterstitial(), 900);
+      const t = setTimeout(() => {
+        void showInterstitial();
+      }, 900);
       return () => clearTimeout(t);
     }
     if (screen !== 'result') {
