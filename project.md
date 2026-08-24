@@ -1,185 +1,228 @@
 # Daily Quiz & Challenge — Project Continuity Record
 
-**Last updated:** 21 August 2026  
-**Project stage:** V2 architecture planning after successful AdMob integration and testing
+**Last updated:** 24 August 2026
+**Project stage:** V2 Firebase backend foundation — protected question data and Firestore security verified
 
 ## 1. Project identity
-- App name: Daily Quiz & Challenge
+- App: Daily Quiz & Challenge
 - AppDeploy project ID: `daily-quiz-challenge-zd50r1`
-- Technology: React + Vite + Capacitor 8.4.2
+- Stack: React + Vite + Capacitor 8.4.2
 - Android package ID: `com.richard.dailyquizchallenge`
-- Development constraint: all development, GitHub work, cloud builds, testing and release preparation must be possible from the user's Android phone; no PC/laptop.
-- Current Android approach: Capacitor + GitHub Actions/cloud builds.
+- Development is phone/cloud based; no PC/laptop.
+- GitHub: `richardoha25-web/daily-quiz-challenge`
 
-## 2. V1 app
-Original plan:
-- 10 questions per quiz
-- 15 seconds per question
-- 100 points maximum
-- streak and best-score tracking
-- General Knowledge, Bible, Africa & Nigeria, Science
-- intended 400-question bank: 100 per category
+## 2. V1 lessons
+V1 used a static question bank and did not provide enough reliable variety; questions and distractors could repeat. V2 will use an internet-powered dynamic system with validation and duplicate prevention.
 
-### V1 problem discovered
-The installed app did not reliably provide the intended 400-question variety. Questions and wrong answers could repeat too often. The static question-bank approach is therefore not sufficient for the desired production experience.
+Original quiz format remains the target: 10 questions, 15 seconds/question, scoring/streaks, with Bible, Science, General Knowledge and Africa & Nigeria categories.
 
-V2 will replace this with an internet-powered dynamic question system.
+## 3. Existing build and AdMob status
+Cloud Android builds and signed APK/AAB infrastructure are working. The existing app remains the fallback baseline.
 
-## 3. Current source/build structure
-Current app is React/Vite packaged with Capacitor. Much of the current logic is centered in `src/App.tsx`.
+AdMob types: Banner, Interstitial, Rewarded.
 
-Important source areas:
+AdMob preload/lifecycle work:
+- branch: `fix/admob-preload-lifecycle`
+- latest tested commit: `a5dad65ea4628a216d041833b7db8dd804243c7c`
+- PR #1 remains unmerged.
+
+Rewarded preload/retry flow is working as desired and must be preserved. Interstitial and banner behavior is acceptable under good network conditions. Do not unnecessarily change the working rewarded implementation.
+
+Never record signing passwords, keystore Base64 data, private AdMob identifiers, Firebase private credentials, banking/payment credentials or other secrets here.
+
+## 4. Firebase — current
+Firebase project:
+- Public-facing name: `project-269333544747`
+- Support email: `richardoha25@gmail.com`
+- Plan: Spark/no-cost development; no paid billing should be assumed.
+
+Authentication enabled:
+- Email/Password
+- Google
+
+A real test Auth user exists. Never record its UID in this document.
+
+Firestore:
+- Database: `(default)`
+- Location: `africa-south1` (Johannesburg)
+- Production mode
+- Spark/no-cost development
+
+## 5. Current Firestore data model
 ```text
-src/
-├── App.tsx
-├── index.css
-└── main.tsx
-
-public/
-├── icon.svg
-├── manifest.webmanifest
-└── sw.js
+(default)
+├── questions
+│   └── question_001
+│       ├── question
+│       ├── options
+│       ├── category
+│       ├── difficulty
+│       └── createdAt
+│
+├── answer_keys
+│   └── question_001
+│       ├── correctAnswer
+│       └── explanation
+│
+├── quiz_results
+│   └── test_result_001
+│       ├── userId
+│       ├── score
+│       ├── totalQuestions
+│       ├── category
+│       ├── completedAt
+│       ├── correctAnswers
+│       └── incorrectAnswers
+│
+├── users
+│   └── [Firebase Auth UID]
+│       ├── email
+│       ├── displayName
+│       ├── points
+│       ├── streak
+│       └── createdAt
+│
+└── categories
+    ├── bible
+    ├── science
+    ├── general_knowledge
+    └── africa_nigeria
 ```
 
-Important project files include `capacitor.config.ts`, `package.json`, `vite.config.ts`, TypeScript/Tailwind configuration and GitHub Actions workflows.
+Question `options` is an array of strings. Numeric score/count fields use int64. Boolean fields use Boolean. Date/time fields use Timestamp. Firestore field order does not matter.
 
-## 4. Cloud Android builds
-Because there is no PC, Android builds use GitHub Actions/cloud infrastructure.
+### Protected answer-key architecture — DONE
+The client-readable `questions/{questionId}` document must contain only quiz content. We removed:
+- `correctAnswer`
+- `explanation`
 
-The debug APK has been successfully built, downloaded, installed and tested on the user's phone.
+Both were moved to `answer_keys/{questionId}` because an explanation can reveal the answer.
 
-Release signing/build infrastructure has also been developed and tested, including signed APK/AAB production.
+Therefore the app can receive a question and its options without receiving the answer key or an answer-revealing explanation.
 
-## 5. Release signing
-A dedicated release keystore was created and secured using GitHub Repository Secrets.
+## 6. Firestore Security Rules — PUBLISHED AND VERIFIED
+Current security architecture:
+```text
+questions
+  authenticated users: READ
+  client WRITE: DENIED
 
-Never put these or other secrets in this document or GitHub:
-- `KEYSTORE_PASSWORD`
-- `KEY_PASSWORD`
-- `KEYSTORE_BASE64`
-- private AdMob identifiers
-- payment/banking credentials
-- other account-security information
+categories
+  authenticated users: READ
+  client WRITE: DENIED
 
-The original release keystore remains the signing source of truth.
+answer_keys/{questionId}
+  client READ: DENIED
+  client WRITE: DENIED
 
-## 6. AdMob — completed
-AdMob was successfully integrated into the Android app and real ads have been confirmed showing.
+users/{uid}
+  matching authenticated user: READ OWN DOCUMENT
+  client WRITE: DENIED
 
-Configured ad types:
-- Banner
-- Interstitial
-- Rewarded
+quiz_results/{resultId}
+  matching authenticated user: READ OWN RESULTS
+  client WRITE: DENIED
 
-The private AdMob App ID and Ad Unit IDs exist and are saved by the user; literal values are intentionally not recorded here.
+all other paths
+  READ/WRITE: DENIED
+```
 
-Do not repeatedly click live ads for testing.
+Published rules:
+```firestore
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /questions/{questionId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /categories/{categoryId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /answer_keys/{questionId} {
+      allow read, write: if false;
+    }
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+    match /quiz_results/{resultId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+```
 
-## 7. AdMob preload/lifecycle work
-The latest lifecycle/preload improvement was developed on:
+### Rules Playground — all 8 tests PASSED
+1. Authenticated read `questions/question_001` → **Allowed**
+2. Authenticated read `answer_keys/question_001` → **Denied**
+3. Authenticated read `categories/bible` → **Allowed**
+4. Authenticated update `questions/question_001` → **Denied**
+5. Authenticated update `answer_keys/question_001` → **Denied**
+6. Authenticated update own `users/{uid}` → **Denied**
+7. Authenticated create `quiz_results/test_result_001` → **Denied**
+8. Unauthenticated read `questions/question_001` → **Denied**
 
-`fix/admob-preload-lifecycle`
+**Security milestone: PASSED.** The client can read quiz content but cannot read or modify protected answer keys, questions, user authoritative data or quiz results.
 
-Latest tested commit:
+## 7. UID security
+Firebase Authentication owns the UID. Users must not be able to edit their UID. The UID is the identity represented by `users/{uid}` and is part of the security model.
 
-`a5dad65ea4628a216d041833b7db8dd804243c7c`
+Users may eventually edit safe profile fields such as `displayName`, but points, streak and other authoritative values remain backend-controlled.
 
-PR #1 remains unmerged.
+## 8. Secure scoring architecture — DECISION
+The Android client has zero write authority over authoritative quiz results and user statistics.
 
-### Rewarded
-The rewarded system now:
-1. preloads;
-2. waits/loads when needed;
-3. shows after the user taps the +20 bonus button;
-4. grants +20 bonus;
-5. immediately starts loading the next rewarded ad;
-6. retries failed loads.
+```text
+Android App
+    ↓
+User answers quiz
+    ↓
+Trusted Quiz Backend
+    ├── validates submitted answers
+    ├── reads protected answer_keys
+    ├── calculates score
+    ├── calculates points
+    ├── calculates streak changes
+    ├── checks history/duplicates
+    └── writes authoritative Firestore records
+             ↓
+       quiz_results / users
+```
 
-User testing found this is now working essentially exactly as desired.
+Never trust client-supplied score, points, streak or authoritative result values.
 
-**Status: GOOD — preserve this implementation.**
+## 9. V2 backend direction
+The Android app should not perform uncontrolled internet searching directly.
 
-### Interstitial
-The interstitial system now preloads, shows at the quiz/result transition, immediately starts loading a replacement, and retries failed loads.
+```text
+Android App
+    ↓
+Secure Quiz Backend / API
+    ├── authentication-aware requests
+    ├── question retrieval/generation
+    ├── answer validation
+    ├── duplicate detection
+    ├── current-affairs sourcing
+    ├── scoring
+    ├── points/streak calculation
+    └── user-specific question history
+```
 
-It is much better than the original behavior, although testing initially still showed occasional `WORKS → FAILS → WORKS`.
+Sensitive API keys and trusted credentials stay server-side. Firebase Authentication identifies the user; Firestore stores persistent data; the trusted backend controls scoring and protected game-state changes.
 
-Later testing showed that network quality has a significant effect on ad availability.
-
-**Status: ACCEPTABLE FOR NOW — do not risk breaking the working rewarded system.**
-
-### Banner
-The banner was changed toward permanent visibility across Home, Quiz and Results, with restore/retry behavior when the app becomes visible again.
-
-Testing initially showed inconsistent banner loading after reopening. The user later observed that when the phone's internet connection became stronger, reopening the app caused ads to appear normally.
-
-**Status: WORKING ACCEPTABLY under good network conditions — leave the current implementation alone for now.**
-
-## 8. Important network observation
-Ad availability is strongly affected by internet conditions.
-
-V2 should therefore be designed as an internet-dependent app. It should require usable connectivity, but not assume that a user must have high-speed internet.
-
-Temporary connection loss should be handled gracefully.
-
-## 9. Google Play preparation
-Android package ID:
-
-`com.richard.dailyquizchallenge`
-
-Release signing infrastructure has been created and tested. Signed release APK/AAB builds have previously been produced and tested.
-
-Google Play Console registration is not the immediate focus while the product is being upgraded.
-
-# 10. NEW V2 DIRECTION — Internet-powered quiz platform
-
-The app is moving from a static 400-question bank to a dynamic system that can provide fresh, meaningful questions.
-
-### General Knowledge
-User selects General Knowledge. The system obtains/generates fresh questions from reliable information sources and/or a controlled question service.
-
-Requirements:
-- meaningful questions
-- varied questions
-- difficulty control
-- plausible wrong answers
-- duplicate prevention
-- recently seen questions avoided
-
-### Bible
-Flow:
-`Bible → Book → Chapter → Quiz`
-
-Example:
-`Mark → Chapter 4 → Generate Quiz`
-
-Questions should be based specifically on the selected book/chapter.
-
-Bible translation/copyright requirements must be respected.
-
-### Africa & Nigeria
-Possible areas:
-- Nigeria
-- Africa
-- Current Affairs
-- History
-- Geography
-
-Current-affairs questions should use fresh internet information and reputable sources, with validation before questions are delivered.
-
-### Science
-Flow:
-`Science → Biology / Chemistry / Physics → Quiz`
-
-Future science topics can be added later.
-
-## 11. V2 question-quality requirements
-Every delivered question should pass validation:
+## 10. V2 question requirements
+Every question should have:
 - exactly one correct answer
 - three distinct wrong answers
-- no duplicate answer options
+- no duplicate options
 - plausible/relevant distractors
-- no duplicate questions inside a quiz
+- no duplicate questions within a quiz
 - recently seen questions excluded where possible
 - ambiguous/low-quality questions rejected
 - correctness checked
@@ -187,112 +230,39 @@ Every delivered question should pass validation:
 
 Question IDs/hashes and user history should support duplicate prevention.
 
-## 12. V2 backend architecture
-The Android app should not perform uncontrolled internet searching directly.
+Category directions:
+- Bible → Book → Chapter → Quiz
+- Science → Biology / Chemistry / Physics
+- Africa & Nigeria → Nigeria, Africa, Current Affairs, History, Geography
+- General Knowledge → varied fresh questions
 
-Recommended structure:
+Bible translation/copyright requirements must be respected.
 
-```text
-Android App
-    ↓
-Secure Quiz Backend / API
-    ├── question retrieval/generation
-    ├── validation
-    ├── duplicate detection
-    ├── current-affairs sourcing
-    └── user-specific question history
-```
-
-Sensitive API keys remain server-side.
-
-## 13. User accounts
-V2 should support:
-- Google sign-in
-- Email + password
-
-Preferred direction:
-- Firebase Authentication
-- Cloud Firestore
-
-Store:
-- quiz history
-- scores
-- best scores
-- streaks
-- categories played
-- science subjects
-- Bible books/chapters completed
-- recently seen questions
-- achievements/future statistics
-
-## 14. Internet requirement
-V2 needs internet for:
-- authentication
-- cloud progress
-- dynamic questions
-- current affairs
-- question validation/generation
-- duplicate prevention
-- AdMob
+## 11. Internet requirement
+V2 requires internet for authentication, cloud progress, dynamic questions, current affairs, validation/generation, duplicate prevention and AdMob.
 
 Basic flow:
-
 ```text
-Open App
-  ↓
-Check connectivity
-  ↓
-Internet available?
-  ├─ No → friendly connection-required screen
-  └─ Yes
-       ↓
-     Sign in
-       ↓
-  Choose category
-       ↓
-  Configure quiz
-       ↓
-  Prepare fresh questions
-       ↓
-      Quiz
+Open App → Check connectivity → Sign in → Choose category → Configure quiz → Prepare fresh questions → Quiz → Secure answer submission → Trusted scoring → Results/progress
 ```
 
-## 15. V2 advertising strategy
-### Banner
-Keep the banner visible throughout appropriate app sections, including Home, category selection, Quiz and Results.
+Temporary connection loss should be handled gracefully.
 
-### Category/quiz-start transition
-The user wants an ad opportunity when a category is selected, especially for Bible, Africa & Nigeria/Current Affairs, General Knowledge and Science.
-
-This should be implemented at an appropriate natural transition and should be preloaded where possible. The core quiz should not be made inaccessible merely because an ad failed to load.
-
-### Interstitial
-Show after quiz completion at a natural transition when available.
-
-### Rewarded
-Keep the successful existing flow:
-`Watch Ad for +20 Bonus Points → rewarded ad → +20 bonus`
-
-The user explicitly opts in to this reward.
-
-## 16. V2 UI/graphics
-The user wants a sharp, modern, polished, energetic mobile UI.
-
-Planned screens:
-- modern Home
-- category cards
+## 12. V2 UI direction
+Planned polished mobile screens:
+- Home
+- Auth
+- Category selection
 - Bible book/chapter selection
 - Science subject selection
-- polished Quiz screen
-- Results screen
+- Quiz
+- Results
 - Account/Profile
 - progress/history
-- modern animations and visual feedback
 
-## 17. Recommended V2 architecture
-The current app is heavily centered in `App.tsx`. V2 should be modular.
+The UI should be sharp, modern, polished and energetic.
 
-Suggested direction:
+Suggested source architecture:
 ```text
 src/
 ├── app/
@@ -316,96 +286,94 @@ src/
 └── utils/
 ```
 
-Exact structure should be finalized after repository inspection.
+## 13. V2 advertising strategy
+- Banner: appropriate persistent sections including Home, category selection, Quiz and Results.
+- Category/quiz-start: natural ad opportunity when available; quiz must not become inaccessible if the ad fails.
+- Interstitial: natural transition after quiz completion when available.
+- Rewarded: preserve `Watch Ad for +20 Bonus Points → rewarded ad → +20 bonus`.
 
-## 18. V2 development stages
-1. Preserve current working app and create V2 development branch.
+## 14. Development stages
+1. Preserve current working app and V2 development workflow.
 2. Refactor architecture.
-3. Create/configure Firebase.
-4. Add Google and email/password authentication.
-5. Configure Firestore.
-6. Establish secure question backend/API.
-7. Build General Knowledge dynamic questions.
-8. Build Bible book/chapter questions.
-9. Build Africa/Nigeria/current-affairs questions.
-10. Build Science Biology/Chemistry/Physics.
-11. Integrate network handling.
-12. Redesign UI/graphics.
-13. Integrate/verify AdMob flow.
-14. Test good/weak/lost/restored internet.
-15. Test duplicate prevention and question quality.
-16. Test account/progress persistence.
-17. Build release APK/AAB.
-18. Complete Play Store preparation and submission when ready.
+3. Firebase setup. **DONE**
+4. Authentication providers. **DONE**
+5. Firestore setup. **DONE**
+6. Restrictive Firestore Rules. **DONE**
+7. Separate question content from protected answer keys. **DONE**
+8. Test Firestore security boundary. **DONE — all 8 tests passed**
+9. Decide/implement trusted backend within Spark/no-budget constraint. **NEXT**
+10. Connect V2 app to Firebase Authentication.
+11. Implement authenticated question retrieval.
+12. Implement secure answer submission/backend scoring.
+13. Add user history and duplicate prevention.
+14. Build General Knowledge dynamic questions.
+15. Build Bible book/chapter questions.
+16. Build Africa/Nigeria/current-affairs questions.
+17. Build Science Biology/Chemistry/Physics.
+18. Add network handling.
+19. Redesign UI.
+20. Verify AdMob integration.
+21. Test good/weak/lost/restored internet.
+22. Test question quality and duplicate prevention.
+23. Test account persistence and backend-controlled scores.
+24. Build release APK/AAB.
+25. Complete Play Store preparation/submission when ready.
 
-## 19. Current GitHub development status
-AdMob preload/lifecycle work:
-- branch: `fix/admob-preload-lifecycle`
-- latest tested commit: `a5dad65ea4628a216d041833b7db8dd804243c7c`
-- PR #1: not merged
+## 15. Current milestone
+### ACHIEVED
+- Existing app and cloud build pipeline established.
+- AdMob integrated and preload/lifecycle improvements tested.
+- Release signing infrastructure established.
+- V2 direction and category requirements defined.
+- Firebase project created.
+- Email/Password and Google authentication enabled.
+- Firestore created in `africa-south1` on Production mode.
+- Questions, categories, users and quiz-results structures created.
+- Protected `answer_keys` collection established.
+- `correctAnswer` and `explanation` removed from client-readable questions and moved to `answer_keys`.
+- Restrictive Firestore Security Rules published.
+- All 8 Rules Playground tests passed.
+- Secure backend-controlled scoring architecture decided.
 
-Keep the current working version available as a fallback while V2 is developed.
+### CURRENT
+**V2 trusted-backend architecture stage.**
 
-## 20. Continuity rules
+The Firestore question-data security boundary is complete and verified. The existing app remains the working baseline.
+
+### NEXT IMMEDIATE STEPS
+1. Decide the trusted backend approach that fits Firebase Spark/no-budget development.
+2. Design the backend request/response contract for question generation and secure answer submission.
+3. Connect V2 to Firebase Authentication.
+4. Build modular V2 architecture on the development branch.
+5. Implement authenticated question retrieval.
+6. Implement secure answer submission and backend scoring using protected `answer_keys`.
+7. Add user history/duplicate prevention.
+8. Build/test each stage through GitHub Actions/cloud.
+
+## 16. Continuity rules
 1. Do not start the app over.
 2. Preserve the existing repository and cloud build pipeline.
 3. Keep development phone + cloud based.
 4. Never invent private IDs, passwords, secrets, build results or configuration values.
-5. Never commit signing passwords, keystore Base64 data, private AdMob credentials or other secrets.
-6. Keep Android package ID `com.richard.dailyquizchallenge`.
+5. Never commit signing passwords, keystore Base64 data, private AdMob credentials or Firebase private credentials.
+6. Keep package ID `com.richard.dailyquizchallenge`.
 7. Keep AppDeploy project ID `daily-quiz-challenge-zd50r1`.
 8. Do not unnecessarily change the working rewarded-ad implementation.
 9. Make major changes in stages and verify each cloud build.
-10. Keep the current working version as a fallback.
+10. Keep the working version as a fallback.
 11. Update this document after major milestones.
-12. Verify current Google, AdMob and Firebase requirements before production implementation.
-13. Do not assume the static 400-question V1 bank is sufficient.
+12. Verify current platform requirements before production implementation.
+13. Do not assume the V1 static 400-question bank is sufficient.
 14. Do not make the user repeat information already recorded here.
+15. Keep Firebase development within the zero-budget constraint.
+16. Do not give the client write authority over authoritative scores, points, streaks or quiz results.
+17. Keep `answer_keys` inaccessible to the client.
+18. Do not allow users to modify their Firebase Auth UID.
 
-## 21. Current milestone
-
-### ACHIEVED
-- React/Vite Daily Quiz & Challenge app created.
-- Capacitor Android packaging established.
-- Android debug APK successfully built in the cloud.
-- APK installed and tested on the user's Android phone.
-- Android package ID established.
-- AdMob account approved.
-- Banner, interstitial and rewarded ad units created.
-- AdMob integrated.
-- Real AdMob ads confirmed showing.
-- AdMob preload/lifecycle improvements implemented.
-- Rewarded ad preload/retry behavior successfully tested and is now working as desired.
-- Interstitial behavior substantially improved.
-- Banner behavior improved and tested across app sections.
-- Release keystore and GitHub signing secrets established.
-- Signed release APK/AAB infrastructure completed and tested.
-- V2 internet-powered quiz concept defined.
-- V2 category/subcategory requirements defined.
-- Firebase Authentication + Firestore identified as the preferred account/data direction.
-- V2 question-quality and duplicate-prevention requirements defined.
-- V2 UI redesign requirements defined.
-
-### CURRENT
-**V2 planning and architecture stage.**
-
-The existing app is being preserved as the working baseline.
-
-### NEXT IMMEDIATE STEPS
-1. Put this updated `project.md` into the GitHub repository.
-2. Create/prepare a V2 development branch without destroying the current working version.
-3. Create the Firebase project.
-4. Configure Google and email/password authentication.
-5. Configure Firestore.
-6. Design the secure question backend/API.
-7. Begin modular V2 app architecture.
-8. Build and test each major stage through GitHub Actions/cloud.
-
-## 22. Project vision
-Daily Quiz & Challenge should become an internet-powered quiz platform that provides fresh, meaningful, high-quality questions instead of repeatedly serving a small static bank.
+## 17. Project vision
+Daily Quiz & Challenge should become an internet-powered quiz platform providing fresh, meaningful, high-quality questions without requiring a new APK every time content changes.
 
 Target experience:
-
 ```text
 Sign in
   ↓
@@ -413,11 +381,13 @@ Choose challenge
   ↓
 Choose category/topic/book/chapter
   ↓
-Internet-powered question preparation
-  ↓
 Fresh validated questions
   ↓
 10-question quiz
+  ↓
+Secure answer submission
+  ↓
+Trusted backend calculates result/points/streak
   ↓
 Result + interstitial opportunity
   ↓
@@ -427,5 +397,3 @@ Progress saved to account
   ↓
 Next quiz with duplicate prevention
 ```
-
-The long-term goal is a polished quiz application that can continuously improve its question content without requiring a new APK every time the content changes.
