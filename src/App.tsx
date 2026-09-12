@@ -88,20 +88,48 @@ const all = cats.map((c, i) => ({ ...c, questions: makeQuestions(c.facts, i) }))
 const BANNER_ID = 'ca-app-pub-8496227439538798/2899800506';
 const INTERSTITIAL_ID = 'ca-app-pub-8496227439538798/8159866041';
 const REWARDED_ID = 'ca-app-pub-8496227439538798/9137905794';
+const APP_OPEN_ID = 'ca-app-pub-8496227439538798/2455637861';
+const REWARDED_INTERSTITIAL_ID = 'ca-app-pub-8496227439538798/6852855908';
 
-// ===== AdMob lifecycle state =====
+// ===== Strong AdMob lifecycle state =====
+// Fullscreen ads have limited freshness. We never trust an old boolean after the ad has expired.
+const INTERSTITIAL_MAX_AGE_MS = 55 * 60 * 1000;
+const REWARDED_MAX_AGE_MS = 55 * 60 * 1000;
+const REWARDED_INTERSTITIAL_MAX_AGE_MS = 55 * 60 * 1000;
+const APP_OPEN_MAX_AGE_MS = 3.5 * 60 * 60 * 1000;
+const APP_OPEN_MIN_SHOW_GAP_MS = 15 * 60 * 1000;
+
 let adMobInitPromise: Promise<void> | null = null;
 let interstitialLoadPromise: Promise<boolean> | null = null;
 let rewardedLoadPromise: Promise<boolean> | null = null;
+let rewardedInterstitialLoadPromise: Promise<boolean> | null = null;
+let appOpenLoadPromise: Promise<boolean> | null = null;
 let interstitialReady = false;
 let rewardedReady = false;
+let rewardedInterstitialReady = false;
+let appOpenReady = false;
+let interstitialLoadedAt = 0;
+let rewardedLoadedAt = 0;
+let rewardedInterstitialLoadedAt = 0;
+let appOpenLoadedAt = 0;
+let lastAppOpenShownAt = 0;
 let interstitialRetryTimer: ReturnType<typeof setTimeout> | null = null;
 let rewardedRetryTimer: ReturnType<typeof setTimeout> | null = null;
+let rewardedInterstitialRetryTimer: ReturnType<typeof setTimeout> | null = null;
+let appOpenRetryTimer: ReturnType<typeof setTimeout> | null = null;
 let interstitialRetryDelay = 2000;
 let rewardedRetryDelay = 2000;
+let rewardedInterstitialRetryDelay = 2000;
+let appOpenRetryDelay = 3000;
 let bannerShown = false;
+let bannerRetryTimer: ReturnType<typeof setTimeout> | null = null;
+let appOpenShowing = false;
 
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+function isFresh(ready: boolean, loadedAt: number, maxAge: number): boolean {
+  return ready && loadedAt > 0 && Date.now() - loadedAt < maxAge;
+}
 
 async function initAdMob(): Promise<void> {
   if (!Capacitor.isNativePlatform()) return;
@@ -117,6 +145,14 @@ async function initAdMob(): Promise<void> {
   await adMobInitPromise;
 }
 
+function scheduleBannerRetry() {
+  if (bannerRetryTimer) return;
+  bannerRetryTimer = setTimeout(() => {
+    bannerRetryTimer = null;
+    void showPermanentBanner();
+  }, 10000);
+}
+
 async function showPermanentBanner(): Promise<void> {
   if (!Capacitor.isNativePlatform()) return;
   try {
@@ -126,7 +162,9 @@ async function showPermanentBanner(): Promise<void> {
         await AdMob.resumeBanner();
         console.log('[AdMob] Banner resumed');
         return;
-      } catch {}
+      } catch {
+        bannerShown = false;
+      }
     }
 
     const options: BannerAdOptions = {
@@ -138,22 +176,21 @@ async function showPermanentBanner(): Promise<void> {
     };
     await AdMob.showBanner(options);
     bannerShown = true;
-    console.log('[AdMob] Permanent banner shown');
+    console.log('[AdMob] Banner READY/SHOWN');
   } catch (e) {
     bannerShown = false;
     console.error('[AdMob] Banner failed', e);
-    // A banner failure should not stop fullscreen ads. Try the banner again later.
-    setTimeout(() => void showPermanentBanner(), 5000);
+    scheduleBannerRetry();
   }
 }
 
 function scheduleInterstitialRetry() {
   if (interstitialRetryTimer) return;
   const delay = interstitialRetryDelay;
-  interstitialRetryDelay = Math.min(interstitialRetryDelay * 2, 30000);
+  interstitialRetryDelay = Math.min(interstitialRetryDelay * 2, 60000);
   interstitialRetryTimer = setTimeout(() => {
     interstitialRetryTimer = null;
-    void preloadInterstitial();
+    void preloadInterstitial(true);
   }, delay);
   console.log(`[AdMob] Interstitial retry scheduled in ${delay}ms`);
 }
@@ -161,29 +198,55 @@ function scheduleInterstitialRetry() {
 function scheduleRewardedRetry() {
   if (rewardedRetryTimer) return;
   const delay = rewardedRetryDelay;
-  rewardedRetryDelay = Math.min(rewardedRetryDelay * 2, 30000);
+  rewardedRetryDelay = Math.min(rewardedRetryDelay * 2, 60000);
   rewardedRetryTimer = setTimeout(() => {
     rewardedRetryTimer = null;
-    void preloadRewarded();
+    void preloadRewarded(true);
   }, delay);
   console.log(`[AdMob] Rewarded retry scheduled in ${delay}ms`);
 }
 
-async function preloadInterstitial(): Promise<boolean> {
+function scheduleRewardedInterstitialRetry() {
+  if (rewardedInterstitialRetryTimer) return;
+  const delay = rewardedInterstitialRetryDelay;
+  rewardedInterstitialRetryDelay = Math.min(rewardedInterstitialRetryDelay * 2, 60000);
+  rewardedInterstitialRetryTimer = setTimeout(() => {
+    rewardedInterstitialRetryTimer = null;
+    void preloadRewardedInterstitial(true);
+  }, delay);
+  console.log(`[AdMob] Rewarded Interstitial retry scheduled in ${delay}ms`);
+}
+
+function scheduleAppOpenRetry() {
+  if (appOpenRetryTimer) return;
+  const delay = appOpenRetryDelay;
+  appOpenRetryDelay = Math.min(appOpenRetryDelay * 2, 60000);
+  appOpenRetryTimer = setTimeout(() => {
+    appOpenRetryTimer = null;
+    void preloadAppOpen(true);
+  }, delay);
+  console.log(`[AdMob] App Open retry scheduled in ${delay}ms`);
+}
+
+async function preloadInterstitial(force = false): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) return false;
-  if (interstitialReady) return true;
+  if (!force && isFresh(interstitialReady, interstitialLoadedAt, INTERSTITIAL_MAX_AGE_MS)) return true;
   if (interstitialLoadPromise) return interstitialLoadPromise;
 
+  interstitialReady = false;
+  interstitialLoadedAt = 0;
   interstitialLoadPromise = (async () => {
     try {
       await initAdMob();
       await AdMob.prepareInterstitial({ adId: INTERSTITIAL_ID, isTesting: false });
       interstitialReady = true;
+      interstitialLoadedAt = Date.now();
       interstitialRetryDelay = 2000;
       console.log('[AdMob] Interstitial READY');
       return true;
     } catch (e) {
       interstitialReady = false;
+      interstitialLoadedAt = 0;
       console.error('[AdMob] Interstitial preload failed', e);
       scheduleInterstitialRetry();
       return false;
@@ -197,52 +260,59 @@ async function preloadInterstitial(): Promise<boolean> {
 
 async function waitForInterstitial(timeoutMs = 8000): Promise<boolean> {
   const deadline = Date.now() + timeoutMs;
-  while (!interstitialReady && Date.now() < deadline) {
-    const loaded = await preloadInterstitial();
-    if (loaded && interstitialReady) return true;
+  while (Date.now() < deadline) {
+    if (isFresh(interstitialReady, interstitialLoadedAt, INTERSTITIAL_MAX_AGE_MS)) return true;
+    await preloadInterstitial();
+    if (isFresh(interstitialReady, interstitialLoadedAt, INTERSTITIAL_MAX_AGE_MS)) return true;
     await wait(Math.min(1000, Math.max(250, deadline - Date.now())));
   }
-  return interstitialReady;
+  return false;
 }
 
 async function showInterstitial(): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) return false;
   try {
     await initAdMob();
-    if (!interstitialReady) {
-      console.log('[AdMob] Interstitial not ready; waiting for preload');
-      if (!(await waitForInterstitial())) return false;
+    if (!(await waitForInterstitial())) {
+      console.log('[AdMob] Interstitial unavailable; continuing without ad');
+      return false;
     }
 
     await AdMob.showInterstitial();
     interstitialReady = false;
+    interstitialLoadedAt = 0;
     interstitialRetryDelay = 2000;
-    console.log('[AdMob] Interstitial shown; immediately preloading replacement');
-    void preloadInterstitial();
+    console.log('[AdMob] Interstitial shown; preloading replacement');
+    void preloadInterstitial(true);
     return true;
   } catch (e) {
     interstitialReady = false;
+    interstitialLoadedAt = 0;
     console.error('[AdMob] Interstitial show failed', e);
     scheduleInterstitialRetry();
     return false;
   }
 }
 
-async function preloadRewarded(): Promise<boolean> {
+async function preloadRewarded(force = false): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) return false;
-  if (rewardedReady) return true;
+  if (!force && isFresh(rewardedReady, rewardedLoadedAt, REWARDED_MAX_AGE_MS)) return true;
   if (rewardedLoadPromise) return rewardedLoadPromise;
 
+  rewardedReady = false;
+  rewardedLoadedAt = 0;
   rewardedLoadPromise = (async () => {
     try {
       await initAdMob();
       await AdMob.prepareRewardVideoAd({ adId: REWARDED_ID, isTesting: false });
       rewardedReady = true;
+      rewardedLoadedAt = Date.now();
       rewardedRetryDelay = 2000;
       console.log('[AdMob] Rewarded READY');
       return true;
     } catch (e) {
       rewardedReady = false;
+      rewardedLoadedAt = 0;
       console.error('[AdMob] Rewarded preload failed', e);
       scheduleRewardedRetry();
       return false;
@@ -256,35 +326,185 @@ async function preloadRewarded(): Promise<boolean> {
 
 async function waitForRewarded(timeoutMs = 10000): Promise<boolean> {
   const deadline = Date.now() + timeoutMs;
-  while (!rewardedReady && Date.now() < deadline) {
-    const loaded = await preloadRewarded();
-    if (loaded && rewardedReady) return true;
+  while (Date.now() < deadline) {
+    if (isFresh(rewardedReady, rewardedLoadedAt, REWARDED_MAX_AGE_MS)) return true;
+    await preloadRewarded();
+    if (isFresh(rewardedReady, rewardedLoadedAt, REWARDED_MAX_AGE_MS)) return true;
     await wait(Math.min(1000, Math.max(250, deadline - Date.now())));
   }
-  return rewardedReady;
+  return false;
 }
 
 async function showRewarded(): Promise<boolean> {
   if (!Capacitor.isNativePlatform()) return false;
   try {
     await initAdMob();
-    if (!rewardedReady) {
-      console.log('[AdMob] Rewarded not ready; waiting for preload');
-      if (!(await waitForRewarded())) return false;
+    if (!(await waitForRewarded())) {
+      console.log('[AdMob] Rewarded unavailable');
+      return false;
     }
 
     const reward = await AdMob.showRewardVideoAd();
     rewardedReady = false;
+    rewardedLoadedAt = 0;
     rewardedRetryDelay = 2000;
-    console.log('[AdMob] Rewarded finished; immediately preloading replacement');
-    void preloadRewarded();
+    console.log('[AdMob] Rewarded finished; preloading replacement');
+    void preloadRewarded(true);
     return Number(reward?.amount || 0) > 0;
   } catch (e) {
     rewardedReady = false;
+    rewardedLoadedAt = 0;
     console.error('[AdMob] Rewarded show failed', e);
     scheduleRewardedRetry();
     return false;
   }
+}
+
+async function preloadRewardedInterstitial(force = false): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return false;
+  if (!force && isFresh(rewardedInterstitialReady, rewardedInterstitialLoadedAt, REWARDED_INTERSTITIAL_MAX_AGE_MS)) return true;
+  if (rewardedInterstitialLoadPromise) return rewardedInterstitialLoadPromise;
+
+  rewardedInterstitialReady = false;
+  rewardedInterstitialLoadedAt = 0;
+  rewardedInterstitialLoadPromise = (async () => {
+    try {
+      await initAdMob();
+      await AdMob.prepareRewardInterstitialAd({ adId: REWARDED_INTERSTITIAL_ID, isTesting: false });
+      rewardedInterstitialReady = true;
+      rewardedInterstitialLoadedAt = Date.now();
+      rewardedInterstitialRetryDelay = 2000;
+      console.log('[AdMob] Rewarded Interstitial READY');
+      return true;
+    } catch (e) {
+      rewardedInterstitialReady = false;
+      rewardedInterstitialLoadedAt = 0;
+      console.error('[AdMob] Rewarded Interstitial preload failed', e);
+      scheduleRewardedInterstitialRetry();
+      return false;
+    } finally {
+      rewardedInterstitialLoadPromise = null;
+    }
+  })();
+
+  return rewardedInterstitialLoadPromise;
+}
+
+async function waitForRewardedInterstitial(timeoutMs = 10000): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (isFresh(rewardedInterstitialReady, rewardedInterstitialLoadedAt, REWARDED_INTERSTITIAL_MAX_AGE_MS)) return true;
+    await preloadRewardedInterstitial();
+    if (isFresh(rewardedInterstitialReady, rewardedInterstitialLoadedAt, REWARDED_INTERSTITIAL_MAX_AGE_MS)) return true;
+    await wait(Math.min(1000, Math.max(250, deadline - Date.now())));
+  }
+  return false;
+}
+
+// Kept as a separate opt-in reward path for V1.1. The caller must clearly tell the user
+// that an ad will be shown and what benefit is offered; the ad itself may also provide a skip option.
+async function showRewardedInterstitial(): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return false;
+  try {
+    await initAdMob();
+    if (!(await waitForRewardedInterstitial())) {
+      console.log('[AdMob] Rewarded Interstitial unavailable');
+      return false;
+    }
+
+    const reward = await AdMob.showRewardInterstitialAd();
+    rewardedInterstitialReady = false;
+    rewardedInterstitialLoadedAt = 0;
+    rewardedInterstitialRetryDelay = 2000;
+    console.log('[AdMob] Rewarded Interstitial finished; preloading replacement');
+    void preloadRewardedInterstitial(true);
+    return Number(reward?.amount || 0) > 0;
+  } catch (e) {
+    rewardedInterstitialReady = false;
+    rewardedInterstitialLoadedAt = 0;
+    console.error('[AdMob] Rewarded Interstitial show failed', e);
+    scheduleRewardedInterstitialRetry();
+    return false;
+  }
+}
+
+async function preloadAppOpen(force = false): Promise<boolean> {
+  if (!Capacitor.isNativePlatform()) return false;
+  if (!force && isFresh(appOpenReady, appOpenLoadedAt, APP_OPEN_MAX_AGE_MS)) return true;
+  if (appOpenLoadPromise) return appOpenLoadPromise;
+
+  appOpenReady = false;
+  appOpenLoadedAt = 0;
+  appOpenLoadPromise = (async () => {
+    try {
+      await initAdMob();
+      await AdMob.loadAppOpen({ adId: APP_OPEN_ID });
+      appOpenReady = true;
+      appOpenLoadedAt = Date.now();
+      appOpenRetryDelay = 3000;
+      console.log('[AdMob] App Open READY');
+      return true;
+    } catch (e) {
+      appOpenReady = false;
+      appOpenLoadedAt = 0;
+      console.error('[AdMob] App Open preload failed', e);
+      scheduleAppOpenRetry();
+      return false;
+    } finally {
+      appOpenLoadPromise = null;
+    }
+  })();
+
+  return appOpenLoadPromise;
+}
+
+async function showAppOpenIfAppropriate(): Promise<boolean> {
+  if (!Capacitor.isNativePlatform() || appOpenShowing) return false;
+  if (Date.now() - lastAppOpenShownAt < APP_OPEN_MIN_SHOW_GAP_MS) return false;
+
+  try {
+    await initAdMob();
+    if (!(await preloadAppOpen())) return false;
+    if (!isFresh(appOpenReady, appOpenLoadedAt, APP_OPEN_MAX_AGE_MS)) {
+      void preloadAppOpen(true);
+      return false;
+    }
+
+    const loaded = await AdMob.isAppOpenLoaded({ adId: APP_OPEN_ID });
+    if (!loaded.value) {
+      appOpenReady = false;
+      appOpenLoadedAt = 0;
+      void preloadAppOpen(true);
+      return false;
+    }
+
+    appOpenShowing = true;
+    await AdMob.showAppOpen({ adId: APP_OPEN_ID });
+    lastAppOpenShownAt = Date.now();
+    appOpenReady = false;
+    appOpenLoadedAt = 0;
+    console.log('[AdMob] App Open shown; preloading replacement');
+    void preloadAppOpen(true);
+    return true;
+  } catch (e) {
+    appOpenReady = false;
+    appOpenLoadedAt = 0;
+    console.error('[AdMob] App Open show failed', e);
+    scheduleAppOpenRetry();
+    return false;
+  } finally {
+    appOpenShowing = false;
+  }
+}
+
+function recoverAdsOnForeground() {
+  void initAdMob().then(() => {
+    void showPermanentBanner();
+    void preloadInterstitial();
+    void preloadRewarded();
+    void preloadRewardedInterstitial();
+    void preloadAppOpen();
+  }).catch(() => undefined);
 }
 
 function App() {
@@ -300,9 +520,10 @@ function App() {
   const [rewardClaimed, setRewardClaimed] = useState(false);
   const [rewardLoading, setRewardLoading] = useState(false);
   const interstitialShown = useRef(false);
+  const initialForegroundHandled = useRef(false);
   const bank = useMemo(() => all[cat].questions, [cat]);
 
-  // Global ad lifecycle: fullscreen ads preload for the whole app, and the banner stays mounted on every screen.
+  // Global ad lifecycle: preload every supported format, recover on foreground, and keep the banner alive.
   useEffect(() => {
     let cancelled = false;
 
@@ -313,8 +534,19 @@ function App() {
         void showPermanentBanner();
         void preloadInterstitial();
         void preloadRewarded();
+        void preloadRewardedInterstitial();
+        void preloadAppOpen();
+
+        // App Open is intentionally not allowed to block startup. If the first load completes quickly,
+        // show it once on the initial foreground; later foregrounds use the same controlled freshness rules.
+        if (!initialForegroundHandled.current) {
+          initialForegroundHandled.current = true;
+          setTimeout(() => {
+            if (!cancelled) void showAppOpenIfAppropriate();
+          }, 1200);
+        }
       } catch {
-        // Individual ad functions handle their own retries.
+        // Individual ad functions schedule their own retries.
       }
     };
 
@@ -322,7 +554,10 @@ function App() {
 
     const handleVisible = () => {
       if (document.visibilityState !== 'visible' || cancelled) return;
-      void startAds();
+      recoverAdsOnForeground();
+      setTimeout(() => {
+        if (!cancelled) void showAppOpenIfAppropriate();
+      }, 500);
     };
 
     document.addEventListener('visibilitychange', handleVisible);
@@ -335,7 +570,7 @@ function App() {
     };
   }, []);
 
-  // Show the preloaded interstitial at the result transition. The preload itself is app-wide.
+  // Show the preloaded interstitial at the result transition. The ad is never allowed to block the quiz result.
   useEffect(() => {
     if (screen === 'result' && !interstitialShown.current) {
       interstitialShown.current = true;
@@ -505,7 +740,7 @@ function App() {
       )}
 
       <footer>
-        Daily Quiz & Challenge · Version 1 · {bank.length} questions in this category · Ads help keep the quiz free.
+        Daily Quiz & Challenge · Version 1.1 · {bank.length} questions in this category · Ads help keep the quiz free.
       </footer>
     </div>
   );
