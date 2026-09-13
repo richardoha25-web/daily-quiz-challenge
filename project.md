@@ -1,33 +1,33 @@
 # Daily Quiz & Challenge — Project Continuity Record
 
 **Last updated:** 13 September 2026  
-**Project stage:** V1.1 improvement phase — question-engine/intermediary architecture designed; Cloudflare account setup not yet completed. V2 Firebase backend work remains intentionally paused.
+**Project stage:** V1.1 improvement phase — Current Affairs has been added and tested successfully. Cloudflare intermediary Worker is created and running. AdMob manager separation remains to be wired/verified. V2 Firebase backend remains intentionally paused.
 
 ## 1. Project identity
 - App: Daily Quiz & Challenge
 - AppDeploy project ID: `daily-quiz-challenge-zd50r1`
 - Stack: React + Vite + Capacitor 8.4.2
 - Android package ID: `com.richard.dailyquizchallenge`
-- Development is phone/cloud based; no PC/laptop.
 - GitHub: `richardoha25-web/daily-quiz-challenge`
 - Developer/brand: Richard Studios
+- Development is phone/cloud based; no PC/laptop.
 
 ## 2. Branch strategy — IMPORTANT
 ### V1 / V1.1
 - Active branch: `main`
-- V1.1 work is developed on `main` unless a separate V1 branch is explicitly created.
+- Continue V1.1 work on `main` unless a separate V1 branch is explicitly created.
 
 ### V2
 - V2 branch: `v2-development`
-- Keep V2 untouched while V1.1 is being developed unless explicitly requested.
+- Keep V2 untouched during V1.1 work unless explicitly requested.
 - Do not merge V1.1 changes into V2 merely to synchronize branches.
 
 ### Historical AdMob branch
 - `fix/admob-preload-lifecycle`
-- Preserve it; its earlier lifecycle implementation is not considered sufficient for the final V1.1 goal.
+- Preserve it; its earlier lifecycle implementation is not considered the final V1.1 implementation.
 
 ## 3. V1 baseline
-V1 remains the working fallback baseline.
+V1 remains the working fallback baseline:
 - 10 questions per quiz
 - 15 seconds per question
 - 100 base points
@@ -35,27 +35,49 @@ V1 remains the working fallback baseline.
 - best-score/trophy display
 - Original categories: General Knowledge, Bible, Africa & Nigeria, Science
 
-The old question system is a small static/template-based bank and is NOT a true 400-question curated bank. Repetition and weak difficulty variety are known problems.
+The old question system is a small static/template-based bank, not a true 400-question curated bank. Repetition and weak difficulty variety are known problems.
 
-## 4. V1.1 objective
+## 4. V1.1 objectives
 V1.1 is a substantial improvement of V1 while V2 is paused. It must not depend on Firebase.
 
-Main goals:
-1. Reliable AdMob lifecycle and recovery.
+Goals:
+1. Reliable AdMob lifecycle/recovery.
 2. App Open ads.
 3. Rewarded Interstitial ads.
 4. Better Banner, Interstitial and Rewarded handling.
 5. Explicit Android versioning and safe release updates.
-6. Large high-quality question system.
+6. Large, high-quality question system.
 7. Easy/Medium/Hard difficulty.
 8. Duplicate and recent-question prevention.
 9. Internet-powered question replenishment with offline fallback.
 10. Five categories including Current Affairs.
 11. Better quiz/feedback/results/streak UI.
-12. Signed V1.1 build and update testing.
+12. Properly signed V1.1 build and update testing.
 
-## 5. AdMob status
-### AdMob IDs
+## 5. Current Affairs — IMPLEMENTED AND TESTED
+A new file exists on `main`:
+- `src/currentAffairs.ts`
+- Checkpoint blob SHA: `bf21ec5ed788177da91d5e1bf161e83afa99d983`
+
+It currently contains **30 fact pairs**, which the existing `makeQuestions()` system expands into **120 playable questions** (4 template variants per fact).
+
+Current Affairs was added to `src/App.tsx` as the `Current Affairs` category with icon `📰`.
+
+The user installed and tested the current V1.1 interface and confirmed that the Current Affairs category, questions and interface are working as planned.
+
+**Quality note:** the current 120-question set is a prototype/template-expanded bank, not 120 individually authored MCQs. It must later be upgraded to a genuinely high-quality bank with direct question wording, difficulty metadata, explanations and source metadata.
+
+## 6. Latest App.tsx checkpoint
+Current Affairs integration was committed to `main` in commit:
+`f05d9d92fd2860e8faf36693c5fdf351ed22d1ed`
+
+App.tsx checkpoint blob SHA:
+`2da7adb586a912fb5667c4a131ef5e67d98c9261`
+
+Do not assume this App.tsx contains the final separate AdMob manager architecture; verify before making claims about it.
+
+## 7. AdMob status
+### Production IDs
 - App ID: `ca-app-pub-8496227439538798~7943409473`
 - Banner: `ca-app-pub-8496227439538798/2899800506`
 - Interstitial: `ca-app-pub-8496227439538798/8159866041`
@@ -63,26 +85,18 @@ Main goals:
 - App Open: `ca-app-pub-8496227439538798/2455637861`
 - Rewarded Interstitial: `ca-app-pub-8496227439538798/6852855908`
 
-Never store account passwords, payment credentials, signing passwords or other secrets here.
+Never store account passwords, payment credentials, signing passwords or provider secrets here.
 
-### Current AdMob implementation status
-The current `main` App.tsx contains a strong preload/retry/lifecycle implementation with:
-- freshness timestamps and maximum ages
-- duplicate-load prevention
-- retry/backoff
-- banner retry
-- preload/wait/show flows
-- replacement preloads
-- foreground recovery
-- app-open minimum show gap
-- rewarded +20 points flow
-- rewarded-interstitial preloading
+### Current implementation status
+The current `main` App.tsx contains inline AdMob lifecycle/preload/retry logic including freshness tracking, duplicate-load prevention, retry/backoff, banner retry, preload/wait/show flows, replacement preloads, foreground recovery, App Open minimum-show-gap logic, rewarded +20 points and Rewarded Interstitial preloading.
 
-A separate `src/adMob.ts` was created historically but is not the active integrated implementation; do not assume it is integrated unless verified.
+A separate `src/adMob.ts` exists historically, but it is **not confirmed as the active integrated manager**. Before calling the manager “separated,” verify that App.tsx imports and uses it and that the old inline manager is removed or intentionally delegated.
 
 Ad availability can never be guaranteed because fill, inventory, network, account status and policy/frequency controls affect impressions.
 
-## 6. Android versioning and signing
+Use Google's test ads during development/testing where appropriate; avoid repeated production-ad testing that could create invalid traffic.
+
+## 8. Android versioning and update rules
 Package ID must remain `com.richard.dailyquizchallenge`.
 
 Planned versions:
@@ -90,7 +104,7 @@ Planned versions:
 - V1.1 → `versionName 1.1.0`, `versionCode 2`
 - V1.2 → `versionName 1.2.0`, `versionCode 3`
 
-The old package-conflict problem was caused by APKs signed with different debug certificates. VersionCode alone cannot solve a signing-certificate mismatch.
+The previous “package conflicts with the other” problem is primarily associated with APKs signed by different certificates, such as debug versus release. VersionCode alone cannot fix a signing-certificate mismatch.
 
 ### Permanent release-signing rules
 - Use the existing permanent production release key.
@@ -99,9 +113,19 @@ The old package-conflict problem was caused by APKs signed with different debug 
 - Website APKs must be release-signed.
 - Never expose or record signing passwords or keystore contents.
 
-The release workflow uses GitHub Secret `KEYSTORE_BASE64`, alias `dailyquiz`, temporary JKS conversion and artifact verification.
+**Testing distinction:** the V1.1 APK previously installed/tested during the Current Affairs checkpoint was a **DEBUG APK**, not the final signed release APK. The final update-install test must use the properly signed V1.1 release APK.
 
-## 7. Android CI
+## 9. Android release workflow — VERIFIED / DO NOT TOUCH UNNECESSARILY
+Actual file:
+`.github/workflows/android-release.yml`
+
+Verified checkpoint blob SHA:
+`38f83541d6017ee2e23ee89844dededa687d54aa`
+
+The workflow currently builds the web app, adds/syncs Android, forces V1.1 `versionCode 2` and `versionName "1.1.0"`, injects the AdMob App ID, uses Java 21, restores the permanent release keystore from `KEYSTORE_BASE64`, verifies alias `dailyquiz`, configures release signing, builds a signed release APK and AAB, verifies signatures, uploads artifacts, and cleans temporary signing files.
+
+**Important checkpoint:** this workflow was inspected after the user noticed it had been touched previously. The recent Current Affairs work did **not** intentionally modify it. Leave it alone unless a specific release-build problem requires a change.
+
 Expected active workflows:
 - `.github/workflows/android-debug.yml`
 - `.github/workflows/android-release.yml`
@@ -110,10 +134,8 @@ Obsolete workflows removed:
 - `.github/workflows/generate-keystore.yml`
 - `.github/workflows/keystore-to-base64.yml`
 
-Never recreate the removed hard-coded keystore credential.
-
-## 8. V1.1 question system — DECIDED
-### Five categories
+## 10. V1.1 question model — DECIDED
+### Categories
 1. General Knowledge — `general`
 2. Science — `science`
 3. Bible — `bible`
@@ -125,7 +147,7 @@ Never recreate the removed hard-coded keystore credential.
 - `medium`
 - `hard`
 
-A normal 10-question quiz should aim for a controlled mixture, approximately 3 Easy / 4 Medium / 3 Hard where inventory permits. Exact balancing can vary by category and available questions.
+Normal 10-question quizzes should aim for approximately 3 Easy / 4 Medium / 3 Hard where inventory permits.
 
 ### Standard question structure
 ```text
@@ -145,7 +167,7 @@ updatedAt
 
 Exactly four options are required: one correct answer and three distinct plausible wrong answers.
 
-## 9. Question-engine architecture — DECIDED
+## 11. Question-engine architecture — DECIDED
 ```text
                  DAILY QUIZ V1.1
                        |
@@ -179,30 +201,29 @@ Exactly four options are required: one correct answer and three distinct plausib
                      QUIZ
 ```
 
-Exact workflow:
+Selection workflow:
 1. Check internet.
 2. Check local/cache pool.
-3. If enough suitable questions exist, use them.
+3. Use suitable cached questions when sufficient.
 4. If insufficient and online, fetch a batch from the appropriate source.
 5. Normalize and validate.
-6. Reject duplicates from the current quiz, recent history, and existing question pool.
-7. Save valid unique questions permanently.
+6. Reject duplicates from the current quiz, recent history and existing pool.
+7. Save valid unique questions.
 8. Combine local + cached + fresh questions.
 9. Filter category and difficulty.
 10. Remove recent questions where possible.
 11. If exact difficulty is insufficient, fall back to the nearest available difficulty after exhausting exact matches.
 12. Shuffle and select 10.
 13. Record used IDs in recent history.
-14. On API failure, retry with controlled backoff and then use local/cache.
+14. Retry network/API failures with controlled backoff, then use local/cache.
 15. Never wait indefinitely for the network.
 
-## 10. Storage architecture — DECIDED
-Use a hybrid client-side storage model:
+## 12. Storage architecture — DECIDED
+Hybrid client-side storage:
 - `localStorage` for lightweight settings, streak data and recent-question references.
 - IndexedDB for the growing question database/cache.
 
-IndexedDB database:
-`DailyQuizDB`
+IndexedDB database: `DailyQuizDB`
 
 Stores:
 1. `questions`
@@ -210,111 +231,93 @@ Stores:
 3. `sync_metadata`
 4. `settings`
 
-There is **no artificial question-count cap**. Unique valid questions may accumulate until the device's practical storage capacity is reached. Storage exhaustion must be handled gracefully.
-
-Duplicate copies must still be rejected.
+No artificial question-count cap. Unique valid questions may accumulate until practical device storage is reached. Storage exhaustion must be handled gracefully. Duplicate copies must still be rejected.
 
 No Android external-storage permission is required for this design.
 
-## 11. Offline/internet behavior — DECIDED
+## 13. Offline / internet behavior — DECIDED
 Internet is important but must not become a single point of failure.
 
-When the app is offline:
+Offline behavior:
 - show a small notice such as **“No internet connection”**;
-- still allow quizzes using the local/cache pool;
+- allow quizzes using the local/cache pool;
 - do not block startup indefinitely;
-- use internet to replenish the question pool when available.
+- replenish the pool when internet becomes available.
 
 Current Affairs has stricter freshness handling than evergreen categories.
 
-## 12. Internet question sources — RESEARCH MILESTONE
+## 14. Internet question sources — RESEARCH STATUS
 ### Open Trivia DB
-Evaluated as a candidate for General Knowledge and Science.
-- Public JSON API
-- No API key
-- Up to 50 questions per call
-- Category/difficulty/type filters
-- Session tokens available for repeat avoidance
-- Rate limit applies
-- HTML/special-character decoding is required
-- Licensing/attribution requirements must be respected
-
-Use it directly from the app only where appropriate; it does not require a secret key.
+Candidate for General Knowledge and Science:
+- public JSON API;
+- no API key;
+- up to 50 questions per call;
+- category/difficulty/type filters;
+- session tokens available;
+- rate limits apply;
+- HTML/special-character decoding required;
+- licensing/attribution requirements must be respected.
 
 ### Current Affairs
-A news provider requiring a private API key should be accessed through the secure intermediary rather than directly from the APK.
+A news provider requiring a private API key should be accessed through the secure intermediary, never directly from the APK.
 
-NewsData.io has been evaluated as a possible Current Affairs provider. Its current published free tier and commercial-use terms should be rechecked before implementation. It is not yet permanently locked in as the provider.
+NewsData.io was evaluated as a possible provider. Its current free-tier and commercial-use terms must be rechecked before final implementation; it is not permanently locked in.
 
-Other news providers were considered and rejected/not preferred where their free tiers have non-commercial, development-only, restrictive or otherwise unsuitable terms.
+## 15. Cloudflare intermediary — CREATED AND RUNNING
+A Cloudflare Worker has already been created for V1.1.
 
-## 13. Secure intermediary service — DECIDED
-For providers requiring private API keys, use a very small **Cloudflare Worker**.
+Worker name:
+`daily-quiz-intermidiary`
 
-Architecture:
-```text
-Daily Quiz V1.1
-      |
-      | HTTPS
-      v
-Cloudflare Worker
-      |
-      | private secret
-      v
-External provider
-      |
-      v
-Normalized quiz data
-      |
-      v
-Daily Quiz app
-      |
-      v
-IndexedDB
+Worker URL:
+`https://daily-quiz-intermidiary.richardo25.workers.dev`
+
+Root response:
+`Daily Quiz & Challenge intermediary is running.`
+
+Health endpoint:
+`GET /api/health`
+
+Expected response:
+```json
+{"ok":true,"service":"daily-quiz-intermediary","version":"1.0"}
 ```
 
-The Worker is a secure bridge, not the quiz engine or question database.
+Current Worker implementation is intentionally minimal: it provides the health endpoint and root response. It is **not yet the full question/news intermediary**.
 
-### Why Cloudflare Workers
-- Designed for small HTTPS/serverless endpoints.
-- Workers Free currently provides 100,000 requests/day.
-- Free plan allows 50 external subrequests per invocation.
-- Cloudflare supports encrypted Worker secrets for API keys/tokens.
-- Suitable for a small phone/cloud-managed intermediary.
-- No Firebase/V2 billing dependency is required for this V1.1 component.
+Current checkpoint Worker code:
+```js
+export default {
+  async fetch(request) {
+    const url = new URL(request.url);
 
-### Account status
-A Cloudflare account is required before the Worker can be created.
-The user has reached the Cloudflare sign-up page but **has not yet completed account creation**.
+    if (url.pathname === "/api/health") {
+      return new Response('{"ok":true,"service":"daily-quiz-intermediary","version":"1.0"}', {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+    }
 
-Recommended sign-in method: **Continue with Google**, because it is simple for the user's phone-based workflow and avoids tying Cloudflare login to GitHub's primary-email configuration. GitHub sign-in remains possible and can still be connected for deployment later.
+    return new Response("Daily Quiz & Challenge intermediary is running.");
+  }
+};
+```
 
-**Important:** do not create the Worker until the account is successfully created and the next step is explicitly confirmed.
+The Worker is a secure bridge for providers requiring private API keys, not the quiz engine or permanent question database. Never put provider API keys in the APK or this project record.
 
-## 14. Worker API contract — DESIGNED, NOT IMPLEMENTED
-Public endpoints planned:
+## 16. Planned Worker API contract — DESIGNED, NOT FULLY IMPLEMENTED
+Planned endpoints:
 ```text
 GET /api/health
 GET /api/questions
 GET /api/current-affairs
 ```
 
-### `/api/health`
-Connectivity/diagnostic endpoint.
-
-Expected success shape:
-```json
-{
-  "ok": true,
-  "service": "daily-quiz-intermediary",
-  "version": "1.0"
-}
-```
-
-### `/api/questions`
-Example:
+Examples:
 ```text
 /api/questions?category=africa_nigeria&difficulty=medium&limit=20
+/api/current-affairs?limit=20
 ```
 
 Allowed categories:
@@ -329,17 +332,9 @@ Allowed difficulties:
 - `medium`
 - `hard`
 
-Initial maximum request batch: `20`.
+Initial maximum batch size: `20`.
 
-### `/api/current-affairs`
-Example:
-```text
-/api/current-affairs?limit=20
-```
-
-The Worker obtains recent source material, normalizes it to the standard question format and supplies freshness metadata where available.
-
-### Standard response
+Planned response:
 ```json
 {
   "ok": true,
@@ -360,36 +355,23 @@ The Worker obtains recent source material, normalizes it to the standard questio
 }
 ```
 
-### Error contract
 Planned errors:
-- `INVALID_REQUEST` → HTTP 400
-- `RATE_LIMITED` → HTTP 429
-- `PROVIDER_UNAVAILABLE` → HTTP 503
-- `PROVIDER_TIMEOUT` → HTTP 504
-- `NO_QUESTIONS` → HTTP 404
-- `SERVER_ERROR` → HTTP 500
+- `INVALID_REQUEST` → 400
+- `RATE_LIMITED` → 429
+- `PROVIDER_UNAVAILABLE` → 503
+- `PROVIDER_TIMEOUT` → 504
+- `NO_QUESTIONS` → 404
+- `SERVER_ERROR` → 500
 
-Provider-specific raw errors should not be exposed unnecessarily to the app.
-
-### Worker security principles
-- Provider API keys live only in Cloudflare encrypted secrets.
-- Never embed provider secrets in the Android APK.
-- Validate endpoint parameters and batch limits.
-- Use rate limiting/abuse protection.
-- Use provider timeouts.
-- Never allow the Worker to become an indefinite blocking point for the quiz.
-- The public Worker URL itself is not treated as a secret; security comes from server-side credentials, validation, rate limiting and provider protection.
-
-## 15. Question duplicate/freshness rules
-Three levels of duplicate protection:
+## 17. Duplicate and freshness rules
+Three protection levels:
 1. Worker response filtering.
 2. IndexedDB question-pool comparison.
 3. Quiz-selection filtering against current quiz and recent history.
 
-Current Affairs should include publication/freshness metadata and must not be treated like permanent evergreen questions.
+Current Affairs must include publication/freshness metadata and must not be treated like permanent evergreen questions.
 
-## 16. V1.1 quiz-experience improvements
-Planned improvements:
+## 18. V1.1 UX improvements — PLANNED
 - clearer category cards
 - progress indicator
 - timer presentation
@@ -403,46 +385,24 @@ Planned improvements:
 - polished completion flow
 - natural fullscreen ad placements
 
-## 17. Firebase / V2 status — PAUSED, NOT ABANDONED
-V2 remains planned around:
-**Firebase Auth + Firestore + Firebase Cloud Functions**.
+## 19. Firebase / V2 status — PAUSED, NOT ABANDONED
+V2 remains planned around **Firebase Auth + Firestore + Firebase Cloud Functions**.
 
-Decision: **Blaze + Cloud Functions + Firestore** when a workable billing method is available.
+Planned approach: Blaze + Cloud Functions + Firestore when a workable billing method is available.
 
-V2 is paused because the available Nigerian Verve card was not accepted for Google Cloud Billing. A legitimate Google Cloud reseller/billing route is being investigated.
+V2 is paused because the available Nigerian Verve card was not accepted for Google Cloud Billing. A legitimate billing/reseller route is being investigated.
 
-Never give third parties Google passwords, Firebase passwords, OTPs, recovery codes, card PINs or other secrets. Legitimate access must use appropriate Google IAM/billing permissions.
-
-## 18. Firebase foundation already completed
-- Public-facing project name: `project-269333544747`
-- Support email: `richardoha25@gmail.com`
-- Firestore `(default)` database
-- Location: `africa-south1` (Johannesburg)
-- Production mode
-- Blaze billing not yet active
+Firebase foundation already completed:
+- project: `project-269333544747`
+- support email: `richardoha25@gmail.com`
+- Firestore default database
+- location: `africa-south1` (Johannesburg)
+- production mode
 - Email/Password Auth enabled
 - Google Auth enabled
+- collections including `questions`, `answer_keys`, `quiz_results`, `users`, `categories`
 
-Existing top-level collections:
-- `questions`
-- `answer_keys`
-- `quiz_results`
-- `users`
-- `categories`
-
-`question_001` was migrated with question content/options/category/difficulty/active/random-key/timestamp data, while `answer_keys/question_001` stores the correct answer and explanation.
-
-## 19. Firestore security — DONE AND VERIFIED
-Published rules maintain the intended security boundary:
-- authenticated users can read `questions`
-- authenticated users can read `categories`
-- clients cannot read `answer_keys`
-- clients cannot write questions/categories/answer_keys/users/quiz_results
-- users can read only their own user document
-- users can read their own result records when the result's `userId` matches
-- default deny rule remains in place
-
-All 8 Rules Playground tests passed. **Security milestone: PASSED.**
+Firestore security rules were published and verified: all 8 Rules Playground tests passed. Clients cannot read `answer_keys` or write authoritative question/answer/result data; authoritative quiz-result writes remain intended for trusted backend functions.
 
 ## 20. V2 backend architecture — DECIDED, IMPLEMENTATION PAUSED
 ```text
@@ -458,199 +418,45 @@ Trusted Firebase Cloud Functions
     └── writes authoritative Firestore records
 ```
 
-Planned operations:
-- `/quiz/start`
-- `/quiz/answer`
-- `/quiz/finish`
+Planned operations include `/quiz/start`, `/quiz/answer` and `/quiz/finish`.
 
 The client must never be trusted to submit authoritative score, points, streak or quiz-result values.
 
-## 21. V2 planned data structures — designed, not yet created
-### Question history
+## 21. Immediate next steps — V1.1
+1. Keep `main` as the active V1.1 branch.
+2. Do not modify `v2-development`.
+3. Do not unnecessarily modify `.github/workflows/android-release.yml`.
+4. Verify the separate `src/adMob.ts` manager and wire it into App.tsx if that architecture is still desired.
+5. Preserve the strongest AdMob lifecycle behavior while integrating the manager cleanly.
+6. Improve Current Affairs from the current 30-fact/120-template prototype into individually authored, sourced, difficulty-tagged questions.
+7. Implement Cloudflare `/api/questions` and `/api/current-affairs` when the provider choice and security design are ready.
+8. Integrate the question engine, IndexedDB cache, duplicate prevention and freshness logic.
+9. Run a full V1.1 functional test.
+10. Run the Android release workflow and use the **signed release APK**, not a debug APK, for the final update-install test.
+11. Verify that a V1.0 release can update to V1.1 without the previous certificate/package-conflict problem.
+12. Only after V1.1 is stable, return to V2 Firebase work.
+
+## 22. Current state checkpoint
 ```text
-users/{uid}/question_history/{questionId}
-  categoryId
-  firstSeenAt
-  lastSeenAt
-  timesSeen
+V1.0 baseline
+     ↓
+V1.1 on main
+     ↓
+Current Affairs added ✅
+     ↓
+Current Affairs interface/questions tested ✅
+     ↓
+Cloudflare Worker created and running ✅
+     ↓
+Android release workflow verified and intentionally left untouched ✅
+     ↓
+AdMob manager separation ⚠️ verify/wire
+     ↓
+Question engine + IndexedDB + remote replenishment 🔜
+     ↓
+Signed V1.1 APK/AAB + update test 🔜
+     ↓
+V2 Firebase backend (paused)
 ```
 
-A question is considered seen when assigned to a quiz session.
-
-### Quiz sessions
-```text
-quiz_sessions/{sessionId}
-  userId
-  categoryId
-  questionIds
-  selectionMode
-  status
-  startedAt
-  expiresAt
-  completedAt
-  resultId
-```
-
-Suggested values:
-- selectionMode: `unseen_first`
-- status: `active`, `completed`, `expired`, `abandoned`
-
-## 22. V2 question-selection design
-Questions have a stable integer `randomKey`.
-
-Planned flow:
-```text
-Start quiz
- → authenticated user + category + config
- → backend generates random start integer
- → query active questions around randomKey
- → collect candidates
- → check user history
- → discard already-seen where possible
- → continue/wrap if insufficient
- → shuffle
- → select 10
- → create session
- → record assigned questions in history
-```
-
-Avoid downloading the entire question bank.
-
-## 23. V2 source status
-The V2 source still contains the V1-style React app and existing AdMob implementation. Firebase SDK/backend calls have not yet been integrated into the Android app source.
-
-V2 Firebase work so far is primarily Console/data/security preparation. The existence of Auth/Firestore does not mean the Android app is already connected to Firebase.
-
-The repository intentionally has no checked-in generated `android/` directory; Android is generated during CI.
-
-## 24. Current milestone tracker
-### COMPLETED
-- V1 working baseline preserved.
-- Cloud Android build pipeline established.
-- Permanent release-signing infrastructure established.
-- Old debug signing/update conflict understood.
-- AdMob Banner/Interstitial/Rewarded units established.
-- Strong AdMob preload/retry implementation exists on `main`.
-- Firebase Auth/Firestore foundation prepared for V2.
-- Firestore security boundary verified with all 8 tests.
-- V2 trusted backend architecture selected.
-- V1.1 question-engine architecture designed.
-- Five-category model selected, including Current Affairs.
-- IndexedDB + localStorage hybrid storage selected.
-- Unlimited question accumulation policy selected, subject to actual device storage.
-- Offline fallback + small no-internet notice selected.
-- Cloudflare Worker selected as the secure intermediary architecture.
-- Worker endpoint/error/security contract designed.
-
-### CURRENT
-**V1.1 improvement phase on `main`.**
-
-Current immediate task:
-1. Create/sign into the Cloudflare account.
-2. Do NOT create the Worker yet.
-3. After account creation, inspect the dashboard and proceed one step at a time.
-
-### NEXT AFTER CLOUDFLARE ACCOUNT
-1. Create the Worker only after explicit confirmation.
-2. Establish the minimal Worker project structure.
-3. Add health endpoint.
-4. Add secure secret configuration when a provider key is actually available.
-5. Implement Current Affairs provider integration.
-6. Test Worker independently.
-7. Connect the V1.1 question engine to the Worker.
-8. Implement/expand the local question bank and IndexedDB layer.
-9. Complete AdMob V1.1 lifecycle improvements.
-10. Complete UI improvements.
-11. Build signed V1.1 APK.
-12. Test update from the existing release-signed V1 without uninstalling.
-
-## 25. V1.1 testing requirements
-### AdMob
-Test first install, cold start, warm resume, long return, strong/weak/lost/restored internet, preload success/failure, interstitial, rewarded, rewarded interstitial, banner recovery and App Open behavior.
-
-### APK update
-Test:
-- V1 release → V1.1 release
-- same package ID
-- same permanent signing key
-- higher versionCode
-- installation as an update without package/signature conflict
-
-### Questions
-Test:
-- no duplicate within a quiz
-- recent-question suppression
-- difficulty balance
-- exactly one correct option
-- three distinct wrong options
-- no duplicate options
-- online failure fallback
-- malformed online-question rejection
-- permanent caching of unique questions
-- Current Affairs freshness handling
-
-## 26. Continuity, safety and GitHub rules
-1. Do not start the project over.
-2. Preserve the existing repository and cloud build pipeline.
-3. Keep development phone + cloud based.
-4. Never invent IDs, passwords, secrets, build results or configuration values.
-5. Never commit signing passwords, keystore Base64 data, Firebase private credentials or payment credentials.
-6. Keep package ID `com.richard.dailyquizchallenge`.
-7. Keep AppDeploy project ID `daily-quiz-challenge-zd50r1`.
-8. Keep V2 `v2-development` untouched during V1.1 unless explicitly requested.
-9. Make major changes in stages and verify each cloud build.
-10. Keep the working version as a fallback.
-11. Do not put secret API keys in the client APK.
-12. Keep V2 `answer_keys` inaccessible to the client.
-13. Do not allow client write authority over authoritative V2 scores, points, streaks or quiz results.
-14. Preserve the permanent release signing key.
-15. Do not generate a new production keystore to solve an update problem.
-16. Do not hand over Google account credentials to resellers or other third parties.
-17. After every major milestone, explicitly tell the user that the milestone is complete.
-18. After every major milestone, update this `project.md` before moving into the next major stage.
-19. Before any GitHub write, obtain explicit user approval; never silently create, modify, delete or merge repository content.
-20. Before V1.1 implementation changes, clearly state which branch is being changed (`main`) and confirm V2 remains untouched.
-
-## 27. Milestone reminder protocol — USER REQUEST
-The user wants proactive milestone reminders during development.
-
-After completing a meaningful milestone, the assistant should say clearly:
-> **Milestone completed:** [milestone name]
->
-> `project.md` should now be updated so we have a reliable checkpoint.
-
-Examples:
-- Cloudflare account setup completed
-- Worker created
-- Worker health endpoint tested
-- Provider integration completed
-- IndexedDB question engine completed
-- AdMob V1.1 lifecycle completed
-- Signed V1.1 APK built
-- V1 → V1.1 update test passed
-
-Do not wait until the entire V1.1 project is finished to update the continuity record.
-
-## 28. Project vision
-Daily Quiz & Challenge should ultimately become an internet-powered quiz platform with fresh, meaningful, high-quality questions, secure backend scoring, duplicate prevention and reliable monetization without requiring a new APK whenever question content changes.
-
-Near-term path:
-```text
-Current working V1
-      ↓
-V1.1: stronger ads + versioning + better questions + better gameplay
-      ↓
-Secure intermediary + growing local question pool
-      ↓
-Stable public V1.1
-      ↓
-Resolve Google Cloud billing/reseller path
-      ↓
-Resume V2
-      ↓
-Firebase Auth + Cloud Functions + Firestore
-      ↓
-Secure dynamic quiz platform
-```
-
-**Current checkpoint:** The V1.1 architecture is now designed. We are at the Cloudflare account-setup step. No Cloudflare Worker has been created yet, and no V2 work should be touched.
+**Critical reminder:** The last installed V1.1 test artifact was DEBUG. The release workflow is the authoritative path for the final signed V1.1 update test.
