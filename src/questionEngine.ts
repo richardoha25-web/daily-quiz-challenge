@@ -16,7 +16,7 @@ export type QuizQuestion = {
 type LocalQuestion = { q: string; a: string; o: string[] };
 
 const DB_NAME = 'DailyQuizDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const QUESTION_STORE = 'questions';
 const HISTORY_STORE = 'recent_history';
 const WORKER_URL = 'https://daily-quiz-intermidiary.richardoha25.workers.dev';
@@ -30,32 +30,6 @@ const categoryKey = (name: string) => {
   return 'current_affairs';
 };
 
-const makeLocalId = (category: string, question: LocalQuestion) => {
-  const raw = `${category}|${question.q}|${question.a}`;
-  let hash = 2166136261;
-  for (let i = 0; i < raw.length; i++) {
-    hash ^= raw.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  return `local-${(hash >>> 0).toString(16)}`;
-};
-
-const normalizeLocal = (category: string, q: LocalQuestion, index: number): QuizQuestion => {
-  const now = new Date().toISOString();
-  return {
-    id: makeLocalId(category, q),
-    category,
-    difficulty: index % 3 === 0 ? 'easy' : index % 3 === 1 ? 'medium' : 'hard',
-    question: q.q,
-    options: [...q.o],
-    correctAnswer: q.a,
-    source: 'Daily Quiz & Challenge local bank',
-    isRemote: false,
-    createdAt: now,
-    updatedAt: now,
-  };
-};
-
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     if (typeof indexedDB === 'undefined') {
@@ -65,6 +39,7 @@ function openDb(): Promise<IDBDatabase> {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = () => {
       const db = request.result;
+      const oldVersion = request.transaction?.db.version ? request.transaction.db.version : 0;
       if (!db.objectStoreNames.contains(QUESTION_STORE)) {
         const store = db.createObjectStore(QUESTION_STORE, { keyPath: 'id' });
         store.createIndex('category', 'category', { unique: false });
@@ -75,6 +50,10 @@ function openDb(): Promise<IDBDatabase> {
         const store = db.createObjectStore(HISTORY_STORE, { keyPath: 'id', autoIncrement: true });
         store.createIndex('questionId', 'questionId', { unique: false });
         store.createIndex('usedAt', 'usedAt', { unique: false });
+      }
+      if (oldVersion < 2) {
+        db.transaction?.objectStore(QUESTION_STORE).clear();
+        db.transaction?.objectStore(HISTORY_STORE).clear();
       }
     };
     request.onsuccess = () => resolve(request.result);
@@ -187,39 +166,35 @@ const selectMixed = (pool: QuizQuestion[], recent: Set<string>, count = 10) => {
   return shuffle(selected).slice(0, count);
 };
 
-export async function getQuizQuestions(categoryName: string, localBank: LocalQuestion[], count = 10): Promise<QuizQuestion[]> {
+export async function getQuizQuestions(categoryName: string, _localBank: LocalQuestion[] = [], count = 10): Promise<QuizQuestion[]> {
   const category = categoryKey(categoryName);
-  const local = localBank.map((q, i) => normalizeLocal(category, q, i));
-
-  try { await saveQuestions(local); } catch { /* local bank remains available in memory */ }
 
   let cached: QuizQuestion[] = [];
   try { cached = await readQuestions(category); } catch { cached = []; }
 
-  if (category === 'science') {
-    const difficulties = ['easy', 'medium', 'hard'] as const;
-    const missing = difficulties.filter((d) => cached.filter((q) => q.difficulty === d).length < 5);
-    for (const difficulty of missing) {
-      try {
-        const fresh = await fetchRemote(category, difficulty, 20);
-        if (fresh.length) {
-          try { await saveQuestions(fresh); } catch {}
-          cached = [...cached, ...fresh];
-        }
-      } catch { /* controlled fallback to cache/local */ }
+  if (category !== 'science') {
+    throw new Error(`NO_ONLINE_SOURCE:${category}`);
+  }
+
+  const difficulties = ['easy', 'medium', 'hard'] as const;
+  const missing = difficulties.filter((d) => cached.filter((q) => q.difficulty === d && q.isRemote).length < 5);
+  for (const difficulty of missing) {
+    const fresh = await fetchRemote(category, difficulty, 20);
+    if (fresh.length) {
+      await saveQuestions(fresh);
+      cached = [...cached, ...fresh];
     }
   }
 
-  const deduped = Array.from(new Map([...cached, ...local].map((q) => [q.id, q])).values());
+  const deduped = Array.from(new Map(cached.map((q) => [q.id, q])).values());
   const recent = await readRecentIds(category).catch(() => new Set<string>());
   const selected = selectMixed(deduped, recent, count);
 
   if (selected.length < count) {
-    const fallback = shuffle(deduped.filter((q) => !selected.some((s) => s.id === q.id)));
-    selected.push(...fallback.slice(0, count - selected.length));
+    throw new Error(`NOT_ENOUGH_QUESTIONS:${category}`);
   }
 
   const finalQuestions = selected.slice(0, count);
-  try { await recordHistory(category, finalQuestions); } catch {}
+  await recordHistory(category, finalQuestions);
   return finalQuestions;
 }
