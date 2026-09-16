@@ -116,9 +116,25 @@ async function recordHistory(category: string, questions: QuizQuestion[]) {
 async function fetchRemote(category: string, difficulty: 'easy' | 'medium' | 'hard', limit = 20): Promise<QuizQuestion[]> {
   const url = `${WORKER_URL}/api/questions?category=${encodeURIComponent(category)}&difficulty=${difficulty}&limit=${limit}`;
   const response = await fetch(url, { headers: { Accept: 'application/json' } });
-  if (!response.ok) throw new Error(`Question API returned ${response.status}`);
-  const data = await response.json();
-  if (!data?.ok || !Array.isArray(data.questions)) return [];
+  const contentType = response.headers.get('content-type') || 'unknown';
+  const body = await response.text();
+  const preview = body.slice(0, 180).replace(/\s+/g, ' ').trim();
+
+  if (!response.ok) {
+    throw new Error(`Question API returned ${response.status} (${contentType})${preview ? `: ${preview}` : ''}`);
+  }
+
+  let data: any;
+  try {
+    data = JSON.parse(body);
+  } catch {
+    throw new Error(`Question API returned non-JSON (${response.status}, ${contentType})${preview ? `: ${preview}` : ''}`);
+  }
+
+  if (!data?.ok || !Array.isArray(data.questions)) {
+    throw new Error('Question API returned an invalid response format.');
+  }
+
   return data.questions.filter((q: any) =>
     q && typeof q.id === 'string' && typeof q.question === 'string' &&
     Array.isArray(q.options) && q.options.length === 4 &&
