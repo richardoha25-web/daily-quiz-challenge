@@ -1,11 +1,15 @@
 const OPEN_TRIVIA_URL = "https://opentdb.com/api.php";
 
-function json(data, status = 200) {
+function json(data, status = 200, request) {
+const origin = request?.headers.get("Origin") || "*";
 return new Response(JSON.stringify(data), {
 status,
 headers: {
 "Content-Type": "application/json",
-"Cache-Control": "no-store"
+"Cache-Control": "no-store",
+"Access-Control-Allow-Origin": origin,
+"Access-Control-Allow-Methods": "GET, OPTIONS",
+"Access-Control-Allow-Headers": "Content-Type"
 }
 });
 }
@@ -50,12 +54,25 @@ export default {
 async fetch(request) {
 const url = new URL(request.url);
 
+if (request.method === "OPTIONS") {
+const origin = request.headers.get("Origin") || "*";
+return new Response(null, {
+status: 204,
+headers: {
+"Access-Control-Allow-Origin": origin,
+"Access-Control-Allow-Methods": "GET, OPTIONS",
+"Access-Control-Allow-Headers": "Content-Type",
+"Access-Control-Max-Age": "86400"
+}
+});
+}
+
 if (url.pathname === "/api/health") {  
   return json({  
     ok: true,  
     service: "daily-quiz-intermediary",  
     version: "1.0"  
-  });  
+  }, 200, request);  
 }  
 
 if (url.pathname === "/api/questions") {  
@@ -81,7 +98,7 @@ if (url.pathname === "/api/questions") {
       ok: false,  
       error: "INVALID_REQUEST",  
       message: "Invalid category."  
-    }, 400);  
+    }, 400, request);  
   }  
 
   if (!difficulties.includes(difficulty)) {  
@@ -89,7 +106,7 @@ if (url.pathname === "/api/questions") {
       ok: false,  
       error: "INVALID_REQUEST",  
       message: "Invalid difficulty."  
-    }, 400);  
+    }, 400, request);  
   }  
 
   let limit = 10;  
@@ -103,7 +120,7 @@ if (url.pathname === "/api/questions") {
       ok: false,  
       error: "INVALID_REQUEST",  
       message: "Limit must be between 1 and 20."  
-    }, 400);  
+    }, 400, request);  
   }  
 
   // Science → Open Trivia DB Science & Nature  
@@ -127,7 +144,7 @@ if (url.pathname === "/api/questions") {
         ok: false,  
         error: "PROVIDER_TIMEOUT",  
         message: "Science question provider timed out."  
-      }, 504);  
+      }, 504, request);  
     }  
 
     if (!response.ok) {  
@@ -135,7 +152,7 @@ if (url.pathname === "/api/questions") {
         ok: false,  
         error: "PROVIDER_UNAVAILABLE",  
         message: "Science question provider is unavailable."  
-      }, 503);  
+      }, 503, request);  
     }  
 
     let data;  
@@ -147,7 +164,7 @@ if (url.pathname === "/api/questions") {
         ok: false,  
         error: "PROVIDER_UNAVAILABLE",  
         message: "Invalid response from question provider."  
-      }, 503);  
+      }, 503, request);  
     }  
 
     if (data.response_code === 5) {  
@@ -155,7 +172,7 @@ if (url.pathname === "/api/questions") {
         ok: false,  
         error: "RATE_LIMITED",  
         message: "Question provider rate limit reached."  
-      }, 429);  
+      }, 429, request);  
     }  
 
     if (data.response_code === 1) {  
@@ -163,7 +180,7 @@ if (url.pathname === "/api/questions") {
         ok: false,  
         error: "NO_QUESTIONS",  
         message: "Not enough science questions are available."  
-      }, 404);  
+      }, 404, request);  
     }  
 
     if (data.response_code !== 0 || !Array.isArray(data.results)) {  
@@ -171,7 +188,7 @@ if (url.pathname === "/api/questions") {
         ok: false,  
         error: "PROVIDER_UNAVAILABLE",  
         message: "Question provider returned an unexpected response."  
-      }, 503);  
+      }, 503, request);  
     }  
 
     const questions = [];  
@@ -236,7 +253,7 @@ if (url.pathname === "/api/questions") {
         ok: false,  
         error: "NO_QUESTIONS",  
         message: "No valid science questions were returned."  
-      }, 404);  
+      }, 404, request);  
     }  
 
     return json({  
@@ -246,7 +263,7 @@ if (url.pathname === "/api/questions") {
       limit: limit,  
       source: "Open Trivia DB",  
       questions: questions  
-    });  
+    }, 200, request);  
   }  
 
   // Other categories are not connected to an external provider yet.  
@@ -256,11 +273,12 @@ if (url.pathname === "/api/questions") {
     difficulty: difficulty,  
     limit: limit,  
     questions: []  
-  });  
+  }, 200, request);  
 }  
 
 return new Response(  
-  "Daily Quiz & Challenge intermediary is running."  
+  "Daily Quiz & Challenge intermediary is running.",
+  { headers: { "Access-Control-Allow-Origin": request.headers.get("Origin") || "*" } }
 );
 
 }
