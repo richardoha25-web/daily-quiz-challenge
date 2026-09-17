@@ -1,7 +1,7 @@
 # Daily Quiz & Challenge — Project Continuity Record
 
 **Last updated:** 17 September 2026  
-**Stage:** V1.1 improvement phase. Science online question integration is working at API level; the app question engine is connected; old static question-bank fallback has been removed; latest Debug build #48 succeeded. V2 remains paused.
+**Stage:** V1.1 improvement/testing phase. Science is now working end-to-end in the Android Debug build through the online question system. Cloudflare Worker deployment and API tests are complete. Next focus: reliability testing, cache/offline testing, ads testing, then adding the remaining online categories. V2 remains paused.
 
 ## 1. Project identity
 - App: Daily Quiz & Challenge
@@ -38,132 +38,20 @@ The original local question banks had repetition and weak difficulty variety. **
 11. Better quiz/results/streak UI.
 12. Signed V1.1 APK/AAB and update testing.
 
-## 4. Important recent commits
-### Question engine
-`ec9d96e9eed9e5084db65331d6a6ab25d961d79c`
-
-Implemented `src/questionEngine.ts` with:
-- `DailyQuizDB` IndexedDB cache
-- remote fetching through the Worker
+## 4. Question engine
+`src/questionEngine.ts` is implemented with:
+- `DailyQuizDB` IndexedDB cache, version 2
+- remote fetching through the Cloudflare Worker
 - returned-question validation/normalization
 - category/difficulty filtering
 - recent-question history
 - ID-based deduplication
 - no silent local-bank fallback
-- Science as the only currently supported online category
+- Science as the currently supported online category
 
-### App integration
-`1ba48ce11b534410ac15aad6684fbe9a110274ad`
+The app imports `getQuizQuestions()` from the question engine and starts quizzes through it. The old static question-bank fallback is not restored.
 
-`src/App.tsx` now imports `getQuizQuestions()` and starts quizzes through the question engine. It no longer relies on the old static banks.
-
-### Static Current Affairs removal
-`abab570a84a221440df1653949b22a3f444efa`
-
-Message: `Remove obsolete local current affairs question bank`
-
-`src/currentAffairs.ts` is no longer present on `main`. Current Affairs remains a planned **online** category.
-
-### Worker source-of-truth and CORS
-`4d8da6cf46eba5abd340d7d7fe8db9fa7e6f6f00`
-
-Added `worker/index.js` to `main` as the Worker source-of-truth.
-
-`b199c69b9d64f59256da223dd9524f12605ea4bb`
-
-Added CORS handling and `OPTIONS` support to `worker/index.js` for browser/WebView access.
-
-### Wrangler configuration
-`7c20c6d441b69fe6175670582d12b80b836d0edd`
-
-Added `wrangler.toml` to explicitly deploy:
-- Worker name: `daily-quiz-intermidiary`
-- Entry point: `worker/index.js`
-- Compatibility date: `2026-09-17`
-
-Cloudflare is now connected to GitHub repository `richardoha25-web/daily-quiz-challenge`, branch `main`. The GitHub-connected build has not yet appeared in Cloudflare; the live Worker is still the previous manually deployed version until Cloudflare detects a new `main` commit.
-
-## 5. Current Affairs history
-A prototype Current Affairs bank was previously added as `src/currentAffairs.ts` with 30 fact pairs expanded into 120 playable questions. A Debug APK was installed and the category/interface were confirmed working.
-
-The prototype was intentionally removed because V1.1 is moving to online sourcing rather than keeping the old static bank as fallback.
-
-## 6. AdMob
-Production IDs:
-- App ID: `ca-app-pub-8496227439538798~7943409473`
-- Banner: `ca-app-pub-8496227439538798/2899800506`
-- Interstitial: `ca-app-pub-8496227439538798/8159866041`
-- Rewarded: `ca-app-pub-8496227439538798/9137905794`
-- App Open: `ca-app-pub-8496227439538798/2455637861`
-- Rewarded Interstitial: `ca-app-pub-8496227439538798/6852855908`
-
-Current `src/App.tsx` contains inline AdMob initialization, preload/retry, freshness checks, foreground recovery, banner recovery, interstitial/rewarded flows, App Open logic, and +20 rewarded bonus handling.
-
-A separate `src/adMob.ts` exists historically, but it is not confirmed as the active manager. Verify imports before refactoring it.
-
-Ad availability is not guaranteed; fill, inventory, network, account and frequency/policy controls can affect availability. Use test ads during development where appropriate.
-
-## 7. Android versioning/signing
-Package ID must remain `com.richard.dailyquizchallenge`.
-
-Planned versions:
-- V1.0 → `1.0.0`, versionCode `1`
-- V1.1 → `1.1.0`, versionCode `2`
-- V1.2 → `1.2.0`, versionCode `3`
-
-The previous Android **package conflict** problem is primarily a signing-certificate mismatch (for example Debug vs Release). VersionCode alone does not fix that.
-
-Release rules:
-- Keep using the permanent production release key.
-- Never generate a replacement production keystore.
-- Public updates must use a higher versionCode.
-- Website APKs must be release-signed.
-- Never store signing passwords/keystore contents in this file.
-
-## 8. Release workflow
-`.github/workflows/android-release.yml`
-
-Verified checkpoint SHA:
-`38f83541d6017ee2e23ee89844dededa687d54aa`
-
-It builds V1.1 as `versionCode 2` / `versionName 1.1.0`, injects AdMob App ID, uses Java 21, restores the permanent key from `KEYSTORE_BASE64`, signs APK/AAB, verifies signatures and uploads artifacts.
-
-Obsolete workflows removed:
-- `.github/workflows/generate-keystore.yml`
-- `.github/workflows/keystore-to-base64.yml`
-
-Do not change the release workflow unnecessarily.
-
-## 9. Latest Debug builds
-### Run #47
-- Run ID: `35046417110`
-- Commit: `1ba48ce11b534410ac15aad6684fbe9a110274ad`
-- Result: success
-- Artifact ID: `10427725440`
-
-### Run #48 — CURRENT
-- Run ID: `35046427453`
-- Commit: `abab570a84a221440df1653949b22a3f444efa`
-- Trigger: automatic push
-- Result: **success**
-- Artifact ID: `10427078139`
-
-**Use run #48 for current Debug testing. Do not manually run the workflow again just because #47 and #48 finished close together.**
-
-## 10. Question model
-Categories:
-- General Knowledge → `general`
-- Science → `science`
-- Bible → `bible`
-- Africa & Nigeria → `africa_nigeria`
-- Current Affairs → `current_affairs`
-
-Difficulties:
-- `easy`
-- `medium`
-- `hard`
-
-Target 10-question mix where inventory permits: 3 Easy / 4 Medium / 3 Hard.
+Target 10-question mix where inventory permits: **3 Easy / 4 Medium / 3 Hard**.
 
 Standard question fields:
 ```text
@@ -173,7 +61,7 @@ explanation?, source, sourceId?, isRemote, createdAt, updatedAt
 
 Exactly four options are required.
 
-## 11. Actual question-engine architecture
+## 5. Actual question-engine architecture
 ```text
 Android App
     ↓
@@ -205,9 +93,7 @@ Current flow:
 8. Shuffle and record selected IDs.
 9. Return 10 questions to the app.
 
-Current limitation: **only Science has an online provider.** General Knowledge, Bible, Africa & Nigeria and Current Affairs are not yet provider-connected.
-
-## 12. IndexedDB — actual state
+## 6. IndexedDB — actual state
 Database: `DailyQuizDB`  
 Version: `2`
 
@@ -219,32 +105,13 @@ Implemented stores:
 
 DB version 2 clears the old question/history stores so stale static-bank data does not contaminate V1.1 testing.
 
-Planned but **not yet implemented**:
+Planned but not yet implemented:
 - `sync_metadata`
 - `settings`
 
 The app still uses `localStorage` for lightweight streak/best-score data.
 
-## 13. Offline/cache status
-The cache foundation exists, but full offline/retry behavior is **not finished**.
-
-Current Science behavior:
-- cached Science questions can be used;
-- small difficulty buckets trigger a Worker fetch;
-- if fewer than 10 usable questions remain, the engine throws `NOT_ENOUGH_QUESTIONS:science`;
-- there is no static-bank fallback.
-
-Future work: controlled retry/backoff, clearer connection messaging, reliable cache use and no indefinite network waiting.
-
-## 14. Open Trivia DB / Science
-Open Trivia DB is the first provider integration target.
-- public JSON API
-- no API key
-- Science & Nature category ID: `17`
-- multiple-choice questions provide one correct + three incorrect answers
-- URL/HTML decoding and provider errors/rate limits must be handled
-
-## 15. Cloudflare intermediary
+## 7. Cloudflare intermediary
 Worker name:
 `daily-quiz-intermidiary`
 
@@ -253,62 +120,109 @@ Worker name:
 
 **Important:** hostname is `richardoha25`, not `richardo25`.
 
-Root response:
+`wrangler.toml` is configured with:
+- Worker name: `daily-quiz-intermidiary`
+- Entry point: `worker/index.js`
+- Compatibility date: `2026-09-17`
+
+Cloudflare is connected to GitHub repository `richardoha25-web/daily-quiz-challenge`, branch `main`, with Wrangler deployment.
+
+## 8. Worker/API status — VERIFIED
+Root response works:
 `Daily Quiz & Challenge intermediary is running.`
 
 Health endpoint:
 `GET /api/health`
 
-The Worker has a previous live deployment. The GitHub-connected CORS/config changes are pending their first Cloudflare build/deployment.
+Verified response:
+```json
+{
+  "ok": true,
+  "service": "daily-quiz-intermediary",
+  "version": "1.0"
+}
+```
 
-## 16. `/api/questions` — Science API TESTED
-Tested request:
+Science endpoint has been successfully tested for **Easy, Medium and Hard**. Example:
 ```text
 /api/questions?category=science&difficulty=medium&limit=20
 ```
 
-Successful tests:
-1. Valid Science/Medium/20 → real Science JSON returned.
-2. Invalid category `banana` → `INVALID_REQUEST`, HTTP 400.
-3. Invalid difficulty `impossible` → `INVALID_REQUEST`, HTTP 400.
-4. Limit `50` → `INVALID_REQUEST`, HTTP 400.
+The valid response contained real Science questions with four options, correct answers, source metadata, remote IDs and timestamps.
 
-The valid response was confirmed to contain real questions with four options, correct answers, source metadata, `isRemote: true`, IDs and timestamps.
+Validation tests previously passed:
+- invalid category → `INVALID_REQUEST`, HTTP 400
+- invalid difficulty → `INVALID_REQUEST`, HTTP 400
+- invalid limit above 20 → `INVALID_REQUEST`, HTTP 400
 
-This means the **previously deployed Worker/API side was working**. The next deployment test is to confirm the new GitHub-managed CORS version is live.
+CORS support and `OPTIONS` handling are present in the Worker for browser/WebView access.
 
-## 17. Planned Worker API
-```text
-GET /api/health
-GET /api/questions
-GET /api/current-affairs
-```
+## 9. Open Trivia DB / Science
+Open Trivia DB is the first provider integration.
+- public JSON API
+- no API key
+- Science & Nature category ID: `17`
+- multiple-choice questions provide one correct + three incorrect answers
+- Worker requests URL-encoded responses
+- Worker validates the provider response and maps provider errors
 
-Allowed categories:
-`general`, `science`, `bible`, `africa_nigeria`, `current_affairs`
-
-Allowed difficulties:
-`easy`, `medium`, `hard`
-
-Initial maximum batch size: `20`.
-
-Planned error mapping:
+Current Worker error mapping includes:
 - `INVALID_REQUEST` → 400
 - `RATE_LIMITED` → 429
 - `PROVIDER_UNAVAILABLE` → 503
 - `PROVIDER_TIMEOUT` → 504
 - `NO_QUESTIONS` → 404
-- `SERVER_ERROR` → 500
 
-## 18. Duplicate/freshness rules
-1. Validate/filter provider responses.
-2. Deduplicate the IndexedDB pool by question ID.
-3. Avoid recent-history IDs when enough alternatives exist.
-4. Avoid duplicate IDs within the current quiz.
-5. Current Affairs must eventually carry publication/freshness metadata and cannot be treated as permanent evergreen content.
+A transient `503 PROVIDER_UNAVAILABLE` was observed once during Android testing. Without any code change afterward, the same Debug #55 app successfully loaded and played Science questions, so the incident appears to have been temporary/provider-side or network-related. It should still be monitored during reliability testing.
 
-## 19. Current UI status
-Already present:
+## 10. Android Debug build — CURRENT
+### Debug run #55 — CURRENT TEST BUILD
+- Run ID: `35165301190`
+- Commit: `7cb664aa204000429ea8adaa782bd8d6dfee4d1e`
+- Result: **success**
+- Artifact ID: `10474812061`
+- Artifact name: `daily-quiz-debug-apk`
+- APK path: `android/app/build/outputs/apk/debug/app-debug.apk`
+
+Build workflow was inspected before testing and confirmed to perform:
+- npm install
+- `npm run build`
+- Vite production build
+- Capacitor Android setup/sync
+- AdMob App ID injection
+- Java 21 setup
+- `./gradlew assembleDebug`
+- APK artifact upload
+
+Build logs showed `@capacitor-community/admob@8.1.0`, successful Capacitor sync, AdMob App ID injection and `BUILD SUCCESSFUL`.
+
+**Important:** Debug #55 is a Debug APK, not the final production-signed release. Do not use it as the public website APK.
+
+## 11. Android Debug #55 — REAL PHONE TEST STATUS
+Debug #55 has now been installed/tested on the Android phone and the Science quiz is working end-to-end.
+
+Observed in screenshots/live use:
+- Science category opens successfully.
+- Online questions load into the quiz.
+- 10-question quiz flow works.
+- 15-second countdown timer works.
+- Question counter/progress works.
+- Four answer choices display correctly.
+- Correct/wrong answer feedback works.
+- Score updates correctly (example observed score: 40).
+- Streak display works.
+- V1.1 UI is running correctly.
+- The app successfully received real Science questions from the online system.
+
+This confirms the practical path:
+```text
+Debug #55 → questionEngine → Cloudflare Worker → Science provider → quiz UI
+```
+
+Do **not** uninstall the existing app merely for routine testing. The known Android package-conflict issue is related primarily to signing certificates when Debug and Release builds are mixed.
+
+## 12. Current UI status
+Already present and working in the current Debug build:
 - five category cards
 - online-status wording
 - progress counter/bar
@@ -317,73 +231,240 @@ Already present:
 - score
 - streak/best score
 - results screen
-- rewarded +20 bonus
+- rewarded +20 bonus flow
 - Play Again / Choose Another Category
 
 Planned/improvable:
 - user-facing difficulty selection/display
-- stronger typography
+- stronger typography and spacing polish
 - explanations
 - richer results screen
 - stronger streak presentation
 - polished completion flow
 - natural fullscreen ad placements
 
-## 20. Firebase / V2 — PAUSED, NOT ABANDONED
+## 13. AdMob
+Production IDs:
+- App ID: `ca-app-pub-8496227439538798~7943409473`
+- Banner: `ca-app-pub-8496227439538798/2899800506`
+- Interstitial: `ca-app-pub-8496227439538798/8159866041`
+- Rewarded: `ca-app-pub-8496227439538798/9137905794`
+- App Open: `ca-app-pub-8496227439538798/2455637861`
+- Rewarded Interstitial: `ca-app-pub-8496227439538798/6852855908`
+
+Current `src/App.tsx` contains inline AdMob initialization, preload/retry, freshness checks, foreground recovery, banner recovery, interstitial/rewarded flows, App Open logic, and +20 rewarded bonus handling.
+
+Ad availability is not guaranteed; fill, inventory, network, account and frequency/policy controls can affect availability. Use test ads during development where appropriate.
+
+**Next AdMob testing:** after the core Science quiz is confirmed stable, test Banner, Interstitial, Rewarded +20, App Open and Rewarded Interstitial behavior separately. Do not treat an ad not filling as an automatic app-code failure.
+
+## 14. Android versioning/signing
+Package ID must remain `com.richard.dailyquizchallenge`.
+
+Planned versions:
+- V1.0 → `1.0.0`, versionCode `1`
+- V1.1 → `1.1.0`, versionCode `2`
+- V1.2 → `1.2.0`, versionCode `3`
+
+Previous Android package conflict is primarily a signing-certificate mismatch (for example Debug vs Release). VersionCode alone does not fix that.
+
+Release rules:
+- Keep using the permanent production release key.
+- Never generate a replacement production keystore.
+- Public updates must use a higher versionCode.
+- Website APKs must be release-signed.
+- Never store signing passwords/keystore contents in this file.
+
+## 15. Release workflow
+`.github/workflows/android-release.yml`
+
+Verified checkpoint SHA:
+`38f83541d6017ee2e23ee89844dededa687d54aa`
+
+It builds V1.1 as `versionCode 2` / `versionName 1.1.0`, injects AdMob App ID, uses Java 21, restores the permanent key from `KEYSTORE_BASE64`, signs APK/AAB, verifies signatures and uploads artifacts.
+
+Obsolete workflows removed:
+- `.github/workflows/generate-keystore.yml`
+- `.github/workflows/keystore-to-base64.yml`
+
+Do not change the release workflow unnecessarily.
+
+## 16. Category/provider plan
+Current categories:
+- General Knowledge → `general`
+- Science → `science` — **ONLINE PROVIDER WORKING**
+- Bible → `bible` — provider not connected yet
+- Africa & Nigeria → `africa_nigeria` — provider not connected yet
+- Current Affairs → `current_affairs` — provider not connected yet
+
+The next major development phase is to add the remaining providers one at a time, testing each provider at the Worker level before integrating it into the app.
+
+### Provider order
+1. **General Knowledge** — add provider/source, validate Easy/Medium/Hard, test 20-question batches, then test Android.
+2. **Bible** — add an appropriate reliable/licensed source, validate question quality and answer correctness, then test Android.
+3. **Africa & Nigeria** — add a reliable source with Nigeria/Africa coverage, validate difficulty and freshness where needed, then test Android.
+4. **Current Affairs** — use an online source with publication/freshness metadata; do not treat current-affairs questions as permanent evergreen content.
+
+For each new category:
+```text
+Provider → Worker endpoint → browser/API tests → questionEngine → Android test → cache/recent-history test
+```
+
+Do not connect all categories at once. One provider/category at a time keeps failures easy to isolate.
+
+## 17. Offline/cache status
+The cache foundation exists, but full offline/retry behavior is **not finished**.
+
+Current Science behavior:
+- cached Science questions can be used;
+- small difficulty buckets trigger a Worker fetch;
+- if fewer than 10 usable questions remain, the engine throws `NOT_ENOUGH_QUESTIONS:science`;
+- there is no static-bank fallback.
+
+Future work:
+- controlled retry/backoff
+- clearer connection messaging
+- reliable cache-first behavior when sufficient cached questions exist
+- no indefinite network waiting
+- explicit handling of temporary provider failures
+
+## 18. Duplicate/freshness rules
+1. Validate/filter provider responses.
+2. Deduplicate the IndexedDB pool by question ID.
+3. Avoid recent-history IDs when enough alternatives exist.
+4. Avoid duplicate IDs within the current quiz.
+5. Current Affairs must carry publication/freshness metadata.
+6. Current Affairs must be refreshed online rather than relying indefinitely on old cached material.
+
+## 19. Current Affairs history
+A prototype Current Affairs bank was previously created from 30 fact pairs and expanded into 120 playable questions. A Debug APK confirmed the category/interface worked.
+
+The prototype was intentionally removed from `main` because V1.1 is moving to online sourcing rather than keeping the old static bank as fallback.
+
+## 20. Important recent commits/checkpoints
+### Question engine
+`ec9d96e9eed9e5084db65331d6a6ab25d961d79c`
+
+### App integration
+`1ba48ce11b534410ac15aad6684fbe9a110274ad`
+
+### Static Current Affairs removal
+`abab570a84a221440df1653949b22a3f444efa`
+
+### Worker source-of-truth
+`4d8da6cf46eba5abd340d7d7fe8db9fa7e6f6f00`
+
+### Worker CORS
+`b199c69b9d64f59256da223dd9524f12605ea4bb`
+
+### Wrangler configuration
+`7c20c6d441b69fe6175670582d12b80b836d0edd`
+
+### Cloudflare Git deployment trigger checkpoint
+`7cb664aa204000429ea8adaa782bd8d6dfee4d1e`
+
+### Release workflow checkpoint
+`38f83541d6017ee2e23ee89844dededa687d54aa`
+
+## 21. Firebase / V2 — PAUSED, NOT ABANDONED
 V2 architecture:
 **Firebase Authentication + Firestore + Firebase Cloud Functions**.
 
 Firebase project: `project-269333544747`  
-Firestore location: `africa-south1` (Johannesburg)  
-Support email: `richardoha25@gmail.com`
+Firestore location: `africa-south1` (Johannesburg)
 
 Auth:
 - Email/Password enabled
 - Google enabled
 
-Firestore collections created include:
-- `questions`
-- `answer_keys`
-- `quiz_results`
-- `users`
-- `categories`
+V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 
-Firestore security rules were published and 8 Rules Playground tests passed. The intended model protects answer keys and authoritative result/question writes from direct client access; trusted backend functions will handle authoritative result writes.
+## 22. Exact next steps — V1.1 roadmap
+### Phase A — finish core Science testing
+1. Finish the current Debug #55 Science quiz.
+2. Run several additional Science quizzes with good internet.
+3. Test Easy, Medium and Hard inventory through the app.
+4. Check that each quiz contains 10 questions.
+5. Check for duplicate questions/options within a quiz.
+6. Run multiple quizzes and verify recent-question avoidance.
+7. Test the cache by first loading Science online, then temporarily disabling internet and starting another quiz.
+8. Test temporary network/provider failure and confirm the app gives a clear recoverable error rather than hanging.
 
-V2 billing is currently blocked by the available Nigerian Verve card not being accepted for Google Cloud Billing. Do not modify V2 during V1.1 work.
+### Phase B — test V1.1 ads
+9. Test Banner persistence/recovery.
+10. Test Interstitial on results.
+11. Test Rewarded +20 bonus.
+12. Test App Open behavior after foreground/background transitions.
+13. Test Rewarded Interstitial if/when its intended UI flow is enabled.
+14. Record any ad-specific failures separately from question-provider failures.
 
-## 21. Exact next steps
-1. Complete the Cloudflare GitHub-connected deployment of the Worker CORS/config changes.
-2. Verify `/api/health` and `/api/questions?category=science&difficulty=medium&limit=20` after deployment.
-3. Install/test **Debug run #48**, artifact `10427078139`, with the live Worker.
-4. With internet enabled, select **Science** and confirm 10 real online questions appear.
-5. Confirm the app is no longer using the deleted static question bank.
-6. After a successful online quiz, disable internet and test cached Science questions.
-7. Run multiple Science quizzes and check recent-question/duplicate prevention.
-8. Fix any app-side question-engine issues found; do not restore the old local fallback.
-9. Add General Knowledge provider.
-10. Add Bible provider.
-11. Add Africa & Nigeria provider.
-12. Add Current Affairs online provider.
-13. Finish offline/retry behavior and user-facing difficulty selection.
-14. Build signed V1.1 APK/AAB with the existing permanent release key.
-15. Test the signed V1.1 update against the previous properly release-signed V1 build.
-16. Only after signed release verification, replace the old APK on the Richard Studios website.
+### Phase C — add remaining online categories
+15. Add General Knowledge provider.
+16. Deploy and test General Knowledge Worker endpoint for Easy/Medium/Hard.
+17. Test General Knowledge in Debug Android.
+18. Add Bible provider.
+19. Deploy/test Bible Worker endpoint and Android flow.
+20. Add Africa & Nigeria provider.
+21. Deploy/test Africa & Nigeria Worker endpoint and Android flow.
+22. Add Current Affairs provider with publication/freshness metadata.
+23. Deploy/test Current Affairs endpoint and Android flow.
 
-## 22. Rules for future chats
+### Phase D — polish reliability and UX
+24. Finish controlled retry/backoff.
+25. Improve offline/cache messaging.
+26. Add user-facing difficulty selection/display if required by the final design.
+27. Improve explanations/results/streak presentation.
+28. Verify all five categories reject invalid/empty provider data safely.
+
+### Phase E — production release
+29. Build signed V1.1 APK/AAB using the existing permanent release key.
+30. Verify APK/AAB signatures.
+31. Test the signed V1.1 APK installing/updating from the previous properly release-signed V1 build.
+32. Confirm versionCode `2` / versionName `1.1.0`.
+33. Only after signed-release verification, replace the old APK on the Richard Studios website.
+34. Retest website download/install/update path.
+
+## 23. Rules for future chats
 - **Do not touch `v2-development` during V1.1 work.**
 - **Do not restore deleted static question-bank fallback.**
-- **Do not claim all five categories are online. Only Science is currently connected.**
+- **Do not claim all five categories are online. Only Science is currently connected and verified.**
 - **Do not claim full offline support is finished.**
 - **Use `richardoha25`, not `richardo25`, in the Worker hostname.**
 - **Do not generate a new production keystore.**
 - **Do not store secrets/passwords in this file.**
 - **Identify the exact commit/run before testing a new APK.**
 - **Use Debug builds for development testing; use the signed Release build for final update-install testing.**
+- **Inspect relevant files before making changes whenever the cause is uncertain.**
+- **Make provider/category changes one at a time and test the Worker before rebuilding Android.**
 
-## 23. Current checkpoint
-**Completed:** Cloudflare GitHub repository connection; Worker source-of-truth; CORS changes; Wrangler configuration; Worker validation; Science/OpenTDB API integration and browser tests; question-engine foundation; IndexedDB v2 cache/history; removal of old local-bank fallback; removal of obsolete local Current Affairs bank; App integration; Debug build #48.
+## 24. Current checkpoint — 17 September 2026
+**Completed:**
+- V1.1 question-engine foundation
+- IndexedDB v2 cache/history
+- removal of obsolete static question-bank fallback
+- removal of obsolete static Current Affairs bank
+- App integration with question engine
+- Cloudflare Worker source-of-truth
+- CORS/OPTIONS support
+- Wrangler configuration
+- Cloudflare GitHub-connected deployment
+- `/api/health` live verification
+- Science/Open Trivia DB API verification for Easy/Medium/Hard
+- invalid-request API validation tests
+- successful Debug #55 build
+- successful Debug #55 Android installation/testing
+- successful real Science quiz through the online system
+- timer, progression, answer feedback, scoring and streak behavior confirmed
 
-**Pending:** Cloudflare GitHub-connected deployment of the CORS/config changes → verify live Worker → Android Science test → cache/offline test → recent-question test → expand providers → finish UX/offline behavior → signed V1.1 release → website APK update.
+**Current focus:**
+- complete Science reliability/cache/offline testing
+- test AdMob flows
+- add General Knowledge provider
+- add Bible provider
+- add Africa & Nigeria provider
+- add Current Affairs provider
+- finish UX/retry/offline behavior
+- signed V1.1 release/update testing
+- website APK replacement only after signed-release verification
 
 **Paused:** V2 Firebase/Cloud Functions implementation.
