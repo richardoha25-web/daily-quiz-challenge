@@ -1,6 +1,6 @@
 # Daily Quiz & Challenge — Project Continuity Record
 
-**Last updated:** 16 September 2026  
+**Last updated:** 17 September 2026  
 **Stage:** V1.1 improvement phase. Science online question integration is working at API level; the app question engine is connected; old static question-bank fallback has been removed; latest Debug build #48 succeeded. V2 remains paused.
 
 ## 1. Project identity
@@ -63,6 +63,25 @@ Implemented `src/questionEngine.ts` with:
 Message: `Remove obsolete local current affairs question bank`
 
 `src/currentAffairs.ts` is no longer present on `main`. Current Affairs remains a planned **online** category.
+
+### Worker source-of-truth and CORS
+`4d8da6cf46eba5abd340d7d7fe8db9fa7e6f6f00`
+
+Added `worker/index.js` to `main` as the Worker source-of-truth.
+
+`b199c69b9d64f59256da223dd9524f12605ea4bb`
+
+Added CORS handling and `OPTIONS` support to `worker/index.js` for browser/WebView access.
+
+### Wrangler configuration
+`7c20c6d441b69fe6175670582d12b80b836d0edd`
+
+Added `wrangler.toml` to explicitly deploy:
+- Worker name: `daily-quiz-intermidiary`
+- Entry point: `worker/index.js`
+- Compatibility date: `2026-09-17`
+
+Cloudflare is now connected to GitHub repository `richardoha25-web/daily-quiz-challenge`, branch `main`. The GitHub-connected build has not yet appeared in Cloudflare; the live Worker is still the previous manually deployed version until Cloudflare detects a new `main` commit.
 
 ## 5. Current Affairs history
 A prototype Current Affairs bank was previously added as `src/currentAffairs.ts` with 30 fact pairs expanded into 120 playable questions. A Debug APK was installed and the category/interface were confirmed working.
@@ -240,7 +259,7 @@ Root response:
 Health endpoint:
 `GET /api/health`
 
-The Worker is deployed.
+The Worker has a previous live deployment. The GitHub-connected CORS/config changes are pending their first Cloudflare build/deployment.
 
 ## 16. `/api/questions` — Science API TESTED
 Tested request:
@@ -256,7 +275,7 @@ Successful tests:
 
 The valid response was confirmed to contain real questions with four options, correct answers, source metadata, `isRemote: true`, IDs and timestamps.
 
-This means the **Worker/API side is working**. The next test is the Android app consuming it.
+This means the **previously deployed Worker/API side was working**. The next deployment test is to confirm the new GitHub-managed CORS version is live.
 
 ## 17. Planned Worker API
 ```text
@@ -334,20 +353,22 @@ Firestore security rules were published and 8 Rules Playground tests passed. The
 V2 billing is currently blocked by the available Nigerian Verve card not being accepted for Google Cloud Billing. Do not modify V2 during V1.1 work.
 
 ## 21. Exact next steps
-1. Install/test **Debug run #48**, artifact `10427078139`.
-2. With internet enabled, select **Science** and confirm 10 real online questions appear.
-3. Confirm the app is no longer using the deleted static question bank.
-4. After a successful online quiz, disable internet and test cached Science questions.
-5. Run multiple Science quizzes and check recent-question/duplicate prevention.
-6. Fix any app-side question-engine issues found; do not restore the old local fallback.
-7. Add General Knowledge provider.
-8. Add Bible provider.
-9. Add Africa & Nigeria provider.
-10. Add Current Affairs online provider.
-11. Finish offline/retry behavior and user-facing difficulty selection.
-12. Build signed V1.1 APK/AAB with the existing permanent release key.
-13. Test the signed V1.1 update against the previous properly release-signed V1 build.
-14. Only after signed release verification, replace the old APK on the Richard Studios website.
+1. Complete the Cloudflare GitHub-connected deployment of the Worker CORS/config changes.
+2. Verify `/api/health` and `/api/questions?category=science&difficulty=medium&limit=20` after deployment.
+3. Install/test **Debug run #48**, artifact `10427078139`, with the live Worker.
+4. With internet enabled, select **Science** and confirm 10 real online questions appear.
+5. Confirm the app is no longer using the deleted static question bank.
+6. After a successful online quiz, disable internet and test cached Science questions.
+7. Run multiple Science quizzes and check recent-question/duplicate prevention.
+8. Fix any app-side question-engine issues found; do not restore the old local fallback.
+9. Add General Knowledge provider.
+10. Add Bible provider.
+11. Add Africa & Nigeria provider.
+12. Add Current Affairs online provider.
+13. Finish offline/retry behavior and user-facing difficulty selection.
+14. Build signed V1.1 APK/AAB with the existing permanent release key.
+15. Test the signed V1.1 update against the previous properly release-signed V1 build.
+16. Only after signed release verification, replace the old APK on the Richard Studios website.
 
 ## 22. Rules for future chats
 - **Do not touch `v2-development` during V1.1 work.**
@@ -361,8 +382,8 @@ V2 billing is currently blocked by the available Nigerian Verve card not being a
 - **Use Debug builds for development testing; use the signed Release build for final update-install testing.**
 
 ## 23. Current checkpoint
-**Completed:** Cloudflare Worker deployment; Worker validation; Science/OpenTDB API integration and browser tests; question-engine foundation; IndexedDB v2 cache/history; removal of old local-bank fallback; removal of obsolete local Current Affairs bank; App integration; Debug build #48.
+**Completed:** Cloudflare GitHub repository connection; Worker source-of-truth; CORS changes; Wrangler configuration; Worker validation; Science/OpenTDB API integration and browser tests; question-engine foundation; IndexedDB v2 cache/history; removal of old local-bank fallback; removal of obsolete local Current Affairs bank; App integration; Debug build #48.
 
-**Next:** Android Science test → cache/offline test → recent-question test → expand providers → finish UX/offline behavior → signed V1.1 release → website APK update.
+**Pending:** Cloudflare GitHub-connected deployment of the CORS/config changes → verify live Worker → Android Science test → cache/offline test → recent-question test → expand providers → finish UX/offline behavior → signed V1.1 release → website APK update.
 
 **Paused:** V2 Firebase/Cloud Functions implementation.
