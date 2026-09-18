@@ -1,7 +1,7 @@
 # Daily Quiz & Challenge — Project Continuity Record
 
 **Last updated:** 18 September 2026  
-**Stage:** V1.1.3 signed-release validation milestone. Science has an online question path, AdMob is centralized, and the signed Release-to-Release update path has now been successfully tested. Next focus: systematic V1.1.3 functional/ad testing, followed by a major quiz UI/UX redesign. V2 remains paused.
+**Stage:** V1.1.3 phone validation PASSED. Science online question delivery, fresh-question behavior, AdMob lifecycle/refresh flows, quiz gameplay, and the signed Release-to-Release update path have all been successfully tested on the phone. Next focus: major quiz UI/UX redesign, then remaining online categories/providers. V2 remains paused.
 
 ## Long-term product vision
 Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz system for real users**, not just a small one-off quiz app. The goal is a reliable platform with fresh online questions, strong anti-repetition logic, multiple categories, meaningful difficulty, polished gameplay, useful explanations/results, dependable monetization, and a professional UI/UX that people enjoy returning to. Development should favor a stable foundation and incremental verification so future features can grow without bringing back the old static-question problems.
@@ -15,7 +15,9 @@ Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz sy
 - Signed APK/AAB build and signature verification completed successfully.
 - GitHub emitted only Node.js 20 deprecation and future Ubuntu 26 migration warnings; neither prevented the build.
 
-**Immediate next step:** test the installed V1.1.3 release on the phone: startup/update persistence, Science question fetching, duplicate/recent-history prevention, internet-required behavior, and all AdMob flows. Record failures before changing code.
+**V1.1.3 validation result:** the installed signed release was tested on the phone and the planned functional/ad checks passed. Science repeatedly retrieves fresh online questions, the quiz flow works, ads display and refresh/recover as intended, and the app remains usable through repeated testing. No blocking failure was observed in the completed validation pass.
+
+**Immediate next step:** preserve this known-good checkpoint and begin the planned major quiz UI/UX redesign. Do not make unnecessary changes to the working question/ad architecture before the redesign work is scoped.
 
 **Next major product task:** a substantial quiz UI/UX redesign. The current UI is functional but is **not the desired final experience**; do not treat it as final.
 
@@ -272,7 +274,7 @@ Production IDs:
 
 Ad availability is not guaranteed; fill, inventory, network, account and frequency/policy controls can affect availability. Use test ads during development where appropriate.
 
-**Next AdMob testing:** after the core Science quiz is confirmed stable, test Banner, Interstitial, Rewarded +20, App Open and Rewarded Interstitial behavior separately. Do not treat an ad not filling as an automatic app-code failure.
+**AdMob validation result:** Banner, Interstitial, Rewarded +20, App Open and the configured Rewarded Interstitial flow were tested during the V1.1.3 phone validation. Ads were observed working correctly, including the expected refresh/recovery behavior. This is now a completed validation checkpoint; continue monitoring during future builds rather than reopening the architecture without evidence of a regression.
 
 ## 14. Android versioning/signing
 Package ID must remain `com.richard.dailyquizchallenge`.
@@ -467,18 +469,20 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 - Signed Android Release APK/AAB build #5 succeeded and signatures were verified in the workflow.
 - **V1.1.3 signed APK successfully updated over the signed 19 August release without uninstalling.**
 - Previous package-conflict update problem is resolved for the tested Release-to-Release path.
+- **V1.1.3 phone validation is now PASSED:** repeated Science quizzes successfully fetch fresh online questions and the quiz remains functional through the tested runs.
+- **AdMob validation is now PASSED for the tested release:** ads display and update/refresh/recover as intended across the tested flows.
+- No blocking functional or ad failure was observed during the completed validation pass.
 
 **Current milestone:**
-- **V1.1.3 phone validation is now active.** The release update path is proven; functional and ad reliability testing is next.
-- The current UI is functional but **not considered the final desired UI**. A major quiz UI/UX redesign is planned after the initial V1.1.3 reliability test pass.
+- **V1.1.3 is a known-good tested checkpoint.** Core online Science delivery, quiz gameplay, recent/fresh question behavior, AdMob flows, and Release-to-Release updating have all been practically validated on the Android phone.
+- The current UI is functional but **not the final desired experience**. The next major development task is a substantial quiz UI/UX redesign.
 
-**Immediate next test sequence:**
-1. Open the installed V1.1.3 release and confirm normal startup.
-2. Test Science online question retrieval.
-3. Run multiple quizzes and verify 10-question flow and duplicate/recent-history prevention.
-4. Test internet-off/error/recovery behavior.
-5. Test Banner, Interstitial, Rewarded +20, App Open and Rewarded Interstitial behavior.
-6. Record observations before changing code.
+**Immediate next development sequence:**
+1. Preserve the current V1.1.3 working checkpoint.
+2. Design the new quiz UI/UX before changing core logic.
+3. Implement the redesign incrementally on `main`, keeping `v2-development` untouched.
+4. Run regression testing after each meaningful UI change, especially quiz flow and AdMob behavior.
+5. After the UI pass, continue the remaining online categories one provider at a time: General Knowledge, Bible, Africa & Nigeria, then Current Affairs.
 
 **Long-term goal:**
 Build Daily Quiz & Challenge into a great, durable quiz platform that people can repeatedly use and trust. The long-term system should grow into multiple high-quality categories, fresh/current content where appropriate, strong difficulty and anti-repetition systems, polished gameplay/results, dependable monetization, and a professional UI/UX.
