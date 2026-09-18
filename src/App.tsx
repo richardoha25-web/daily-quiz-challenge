@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Capacitor } from '@capacitor/core';
-import { AdMob, BannerAdOptions, BannerAdSize, BannerAdPosition } from '@capacitor-community/admob';
+import {
+  initAds,
+  showBanner,
+  preloadInterstitial,
+  preloadRewarded,
+  preloadRewardedInterstitial,
+  preloadAppOpen,
+  showAppOpenIfAppropriate,
+  showInterstitial,
+  showRewarded,
+} from './adMob';
 import { getQuizQuestions } from './questionEngine';
 
 type Q = { q: string; a: string; o: string[] };
@@ -102,8 +111,8 @@ function App() {
 
   return <div className="app">
     <header><div className="brand">⚡ DAILY QUIZ</div><div className="stats"><span>🔥 {streak}</span><span>🏆 {best}</span></div></header>
-    {screen === 'home' && <main><section className="hero"><div className="pill">DAILY CHALLENGE</div><h1>Test your mind.<br /><em>Beat your score.</em></h1><p>10 questions · 15 seconds each · 100 points</p></section><h2>Choose a category</h2><div className="grid">{all.map((c, i) => <button className="cat" key={c.key} onClick={() => void start(i)}><span>{c.icon}</span><div><b>{c.name}</b><small>{c.name === 'Science' ? 'Online questions' : 'Online source coming next'}</small></div><strong>›</strong></button>)}</div><div className="info"><b>🌐 Online quiz system</b><span>Questions are fetched online and saved securely in your local question cache for future quizzes.</span></div></main>}
-    {screen === 'quiz' && <main><div className="quiztop"><button onClick={reset}>← Exit</button><span>{questions.length ? `${idx + 1} / 10` : '— / 10'}</span><b>🔥 {streak}</b></div><div className="progress"><i style={{ width: `${questions.length ? ((idx + 1) / 10) * 100 : 0}%` }} /></div>{loading ? <section className="question"><div className="qcat">{all[cat].icon} {all[cat].name}</div><h1>Getting your quiz online…</h1><p>Checking the online question source and your saved question cache.</p></section> : error ? <section className="question"><div className="qcat">{all[cat].icon} {all[cat].name}</div><h1>Quiz unavailable</h1><p>{error}</p><button className="secondary" onClick={() => void start(cat)}>Try Again</button></section> : <><div className="timer">{time}s</div><section className="question"><div className="qcat">{all[cat].icon} {all[cat].name}</div><h1>{questions[idx]?.q}</h1><div className="answers">{questions[idx]?.o.map((o) => <button key={o} disabled={!!picked} className={picked ? (o === questions[idx].a ? 'correct' : o === picked ? 'wrong' : '') : ''} onClick={() => answer(o)}>{o}</button>)}</div></section></>}</main>}
+    {screen === 'home' && <main><section className="hero"><div className="pill">DAILY CHALLENGE</div><h1>Test your mind.<br /><em>Beat your score.</em></h1><p>10 questions · 15 seconds each · 100 points</p></section><h2>Choose a category</h2><div className="grid">{all.map((c, i) => <button className="cat" key={c.key} onClick={() => void start(i)}><span>{c.icon}</span><div><b>{c.name}</b><small>{c.name === 'Science' ? 'Online questions' : 'Online source coming next'}</small></div><strong>›</strong></button>)}</div><div className="info"><b>🌐 Online quiz system</b><span>Questions are fetched online. Only recent-question history is kept on this device to reduce repeats.</span></div></main>}
+    {screen === 'quiz' && <main><div className="quiztop"><button onClick={reset}>← Exit</button><span>{questions.length ? `${idx + 1} / 10` : '— / 10'}</span><b>🔥 {streak}</b></div><div className="progress"><i style={{ width: `${questions.length ? ((idx + 1) / 10) * 100 : 0}%` }} /></div>{loading ? <section className="question"><div className="qcat">{all[cat].icon} {all[cat].name}</div><h1>Getting your quiz online…</h1><p>Fetching fresh questions from the online question source.</p></section> : error ? <section className="question"><div className="qcat">{all[cat].icon} {all[cat].name}</div><h1>Quiz unavailable</h1><p>{error}</p><button className="secondary" onClick={() => void start(cat)}>Try Again</button></section> : <><div className="timer">{time}s</div><section className="question"><div className="qcat">{all[cat].icon} {all[cat].name}</div><h1>{questions[idx]?.q}</h1><div className="answers">{questions[idx]?.o.map((o) => <button key={o} disabled={!!picked} className={picked ? (o === questions[idx].a ? 'correct' : o === picked ? 'wrong' : '') : ''} onClick={() => answer(o)}>{o}</button>)}</div></section></>}</main>}
     {screen === 'result' && <main className="result"><div className="resulticon">{score >= 80 ? '🏆' : score >= 50 ? '⭐' : '💪'}</div><div className="pill">QUIZ COMPLETE</div><h1>{score} / 100</h1><p>{score >= 80 ? 'Excellent work!' : score >= 50 ? 'Good job!' : 'Keep practicing!'}</p><div className="resultstats"><div><b>{Math.floor(score / 10)}</b><span>Correct</span></div><div><b>10</b><span>Questions</span></div><div><b>🔥 {streak}</b><span>Streak</span></div></div>{!rewardClaimed && <button className="primary" onClick={claimReward} disabled={rewardLoading}>{rewardLoading ? '⏳ Loading Ad...' : '🎬 Watch Ad for +20 Bonus Points'}</button>}{rewardClaimed && <p style={{ color: '#4ade80' }}>✅ Bonus claimed! +20 points</p>}<button className="primary" onClick={() => void start(cat)}>Play Again</button><button className="secondary" onClick={reset}>Choose Another Category</button></main>}
     <footer>Daily Quiz & Challenge · Version 1.1 · Online question engine · Ads help keep the quiz free.</footer>
   </div>;
