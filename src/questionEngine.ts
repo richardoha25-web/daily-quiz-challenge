@@ -165,20 +165,23 @@ const shuffle = <T,>(items: T[]) => {
 };
 
 const selectMixed = (pool: QuizQuestion[], recent: Set<string>, count = 10) => {
+  // Never fall back to the full pool here. Recent questions are intentionally
+  // excluded so an online replenishment is required when the fresh cache is
+  // exhausted.
   const fresh = pool.filter((q) => !recent.has(q.id));
-  const source = fresh.length >= count ? fresh : pool;
   const wanted: Record<QuizQuestion['difficulty'], number> = { easy: 3, medium: 4, hard: 3 };
   const selected: QuizQuestion[] = [];
 
   (['easy', 'medium', 'hard'] as const).forEach((difficulty) => {
-    const candidates = shuffle(source.filter((q) => q.difficulty === difficulty));
+    const candidates = shuffle(fresh.filter((q) => q.difficulty === difficulty));
     selected.push(...candidates.slice(0, wanted[difficulty]));
   });
 
   if (selected.length < count) {
     const used = new Set(selected.map((q) => q.id));
-    selected.push(...shuffle(source.filter((q) => !used.has(q.id))).slice(0, count - selected.length));
+    selected.push(...shuffle(fresh.filter((q) => !used.has(q.id))).slice(0, count - selected.length));
   }
+
   return shuffle(selected).slice(0, count);
 };
 
@@ -193,21 +196,47 @@ export async function getQuizQuestions(categoryName: string, _localBank: LocalQu
   }
 
   const difficulties = ['easy', 'medium', 'hard'] as const;
-  const missing = difficulties.filter((d) => cached.filter((q) => q.difficulty === d && q.isRemote).length < 5);
-  for (const difficulty of missing) {
-    const fresh = await fetchRemote(category, difficulty, 20);
-    if (fresh.length) {
-      await saveQuestions(fresh);
-      cached = [...cached, ...fresh];
+  const wanted: Record<QuizQuestion['difficulty'], number> = { easy: 3, medium: 4, hard: 3 };
+
+  const dedupe = (questions: QuizQuestion[]) =>
+    Array.from(new Map(questions.map((q) => [q.id, q])).values());
+
+  const recent = await readRecentIds(category).catch(() => new Set<string>());
+
+  // Replenish based on questions that are actually fresh, not merely cached.
+  // This is the key distinction that prevents the app from getting stuck on
+  // previously answered questions.
+  let deduped = dedupe(cached);
+  let fresh = deduped.filter((q) => !recent.has(q.id));
+
+  const online = typeof navigator === 'undefined' || navigator.onLine !== false;
+
+  if (fresh.length < count && online) {
+    for (const difficulty of difficulties) {
+      const freshForDifficulty = fresh.filter((q) => q.difficulty === difficulty).length;
+      if (freshForDifficulty >= wanted[difficulty]) continue;
+
+      try {
+        const incoming = await fetchRemote(category, difficulty, 20);
+        if (incoming.length) {
+          await saveQuestions(incoming);
+          cached = [...cached, ...incoming];
+          deduped = dedupe(cached);
+          fresh = deduped.filter((q) => !recent.has(q.id));
+        }
+      } catch {
+        // Keep usable cached questions if the provider temporarily fails.
+        // We only fail below if there still are not enough fresh questions.
+      }
     }
   }
 
-  const deduped = Array.from(new Map(cached.map((q) => [q.id, q])).values());
-  const recent = await readRecentIds(category).catch(() => new Set<string>());
   const selected = selectMixed(deduped, recent, count);
 
   if (selected.length < count) {
-    throw new Error(`NOT_ENOUGH_QUESTIONS:${category}`);
+    throw new Error(online
+      ? `NOT_ENOUGH_FRESH_QUESTIONS:${category}`
+      : `NOT_ENOUGH_CACHED_QUESTIONS:${category}`);
   }
 
   const finalQuestions = selected.slice(0, count);
