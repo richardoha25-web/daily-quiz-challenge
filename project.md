@@ -1,7 +1,23 @@
 # Daily Quiz & Challenge — Project Continuity Record
 
-**Last updated:** 17 September 2026  
-**Stage:** V1.1 improvement/testing phase. Science is now working end-to-end in the Android Debug build through the online question system. Cloudflare Worker deployment and API tests are complete. Next focus: reliability testing, cache/offline testing, ads testing, then adding the remaining online categories. V2 remains paused.
+**Last updated:** 18 September 2026  
+**Stage:** V1.1.3 signed-release validation milestone. Science has an online question path, AdMob is centralized, and the signed Release-to-Release update path has now been successfully tested. Next focus: systematic V1.1.3 functional/ad testing, followed by a major quiz UI/UX redesign. V2 remains paused.
+
+## Long-term product vision
+Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz system for real users**, not just a small one-off quiz app. The goal is a reliable platform with fresh online questions, strong anti-repetition logic, multiple categories, meaningful difficulty, polished gameplay, useful explanations/results, dependable monetization, and a professional UI/UX that people enjoy returning to. Development should favor a stable foundation and incremental verification so future features can grow without bringing back the old static-question problems.
+
+## Current milestone — V1.1.3
+- `package.json` version: `1.1.3`.
+- Android release: `versionName 1.1.3`, `versionCode 3`.
+- Existing permanent production signing key and package ID were preserved.
+- **Release-to-Release update test PASSED:** V1.1.3 installed directly over the signed 19 August release APK without uninstalling.
+- Release artifact: `daily-quiz-release` from Android Release APK and AAB #5; SHA-256: `a5b4069b863238863d5505c5f6b95a2968bb17d1abcc41f881e96457211fbdc6`.
+- Signed APK/AAB build and signature verification completed successfully.
+- GitHub emitted only Node.js 20 deprecation and future Ubuntu 26 migration warnings; neither prevented the build.
+
+**Immediate next step:** test the installed V1.1.3 release on the phone: startup/update persistence, Science question fetching, duplicate/recent-history prevention, internet-required behavior, and all AdMob flows. Record failures before changing code.
+
+**Next major product task:** a substantial quiz UI/UX redesign. The current UI is functional but is **not the desired final experience**; do not treat it as final.
 
 ## 1. Project identity
 - App: Daily Quiz & Challenge
@@ -71,9 +87,9 @@ Cloudflare Worker ← Open Trivia DB (Science)
     ↓
 Validate / Normalize / Deduplicate
     ↓
-IndexedDB question cache
+Read recent-history IDs
     ↓
-Filter category + difficulty
+Filter recent/current-quiz duplicates
     ↓
 Remove recent questions
     ↓
@@ -83,27 +99,27 @@ Quiz
 ```
 
 Current flow:
-1. Read cached questions for the selected category.
+1. Require internet for online retrieval.
 2. Reject unsupported categories instead of silently using old local banks.
-3. For Science, fetch missing Easy/Medium/Hard inventory from the Worker.
-4. Validate returned questions and save them to IndexedDB.
-5. Deduplicate by question ID.
-6. Read recent history.
+3. For Science, fetch fresh Easy/Medium/Hard questions from the Worker.
+4. Validate and normalize returned questions.
+5. Read recent-history IDs and exclude them when alternatives exist.
+6. Avoid duplicate IDs within the current quiz.
 7. Select approximately 3/4/3 difficulty mix where inventory permits.
-8. Shuffle and record selected IDs.
+8. Shuffle and record only selected IDs.
 9. Return 10 questions to the app.
 
 ## 6. IndexedDB — actual state
 Database: `DailyQuizDB`  
-Version: `2`
+Version: `3`
 
 Implemented stores:
-1. `questions`
-2. `recent_history`
+1. `questions` — obsolete; removed from active V1.1 storage
+2. `recent_history` — active
 
-`questions` is keyed by `id` and has category/difficulty indexes. `recent_history` records question ID, category and usage time.
+`recent_history` records selected question IDs, category and usage time. Full question objects are no longer stored as the active V1.1 cache.
 
-DB version 2 clears the old question/history stores so stale static-bank data does not contaminate V1.1 testing.
+DB version 3 removes the obsolete `questions` object store from older installations while preserving recent-history data where possible.
 
 Planned but not yet implemented:
 - `sync_metadata`
@@ -252,7 +268,7 @@ Production IDs:
 - App Open: `ca-app-pub-8496227439538798/2455637861`
 - Rewarded Interstitial: `ca-app-pub-8496227439538798/6852855908`
 
-Current `src/App.tsx` contains inline AdMob initialization, preload/retry, freshness checks, foreground recovery, banner recovery, interstitial/rewarded flows, App Open logic, and +20 rewarded bonus handling.
+**Current architecture:** `src/adMob.ts` is the single AdMob manager. The obsolete inline AdMob implementation was removed from `src/App.tsx` so there are not two competing ad managers. `App.tsx` now calls the centralized manager for initialization, preloading, recovery, banner/interstitial/rewarded/App Open flows, and +20 handling.
 
 Ad availability is not guaranteed; fill, inventory, network, account and frequency/policy controls can affect availability. Use test ads during development where appropriate.
 
@@ -261,10 +277,12 @@ Ad availability is not guaranteed; fill, inventory, network, account and frequen
 ## 14. Android versioning/signing
 Package ID must remain `com.richard.dailyquizchallenge`.
 
-Planned versions:
+Release/version history:
 - V1.0 → `1.0.0`, versionCode `1`
-- V1.1 → `1.1.0`, versionCode `2`
-- V1.2 → `1.2.0`, versionCode `3`
+- Previous V1.1 release → `1.1.0`, versionCode `2`
+- **Current V1.1.3 → `1.1.3`, versionCode `3`**
+
+Future releases must use a higher versionCode while preserving the same production signing key and package ID.
 
 Previous Android package conflict is primarily a signing-certificate mismatch (for example Debug vs Release). VersionCode alone does not fix that.
 
@@ -278,10 +296,10 @@ Release rules:
 ## 15. Release workflow
 `.github/workflows/android-release.yml`
 
-Verified checkpoint SHA:
-`38f83541d6017ee2e23ee89844dededa687d54aa`
+Current verified workflow blob SHA:
+`aebcd837f7640705b15d281d0873d5f0bfa8fe4a`
 
-It builds V1.1 as `versionCode 2` / `versionName 1.1.0`, injects AdMob App ID, uses Java 21, restores the permanent key from `KEYSTORE_BASE64`, signs APK/AAB, verifies signatures and uploads artifacts.
+It builds the current release as `versionCode 3` / `versionName 1.1.3`, injects AdMob App ID, uses Java 21, restores the permanent key from `KEYSTORE_BASE64`, signs APK/AAB, verifies signatures and uploads artifacts.
 
 Obsolete workflows removed:
 - `.github/workflows/generate-keystore.yml`
@@ -437,34 +455,32 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 - **Inspect relevant files before making changes whenever the cause is uncertain.**
 - **Make provider/category changes one at a time and test the Worker before rebuilding Android.**
 
-## 24. Current checkpoint — 17 September 2026
-**Completed:**
-- V1.1 question-engine foundation
-- IndexedDB v2 cache/history
-- removal of obsolete static question-bank fallback
-- removal of obsolete static Current Affairs bank
-- App integration with question engine
-- Cloudflare Worker source-of-truth
-- CORS/OPTIONS support
-- Wrangler configuration
-- Cloudflare GitHub-connected deployment
-- `/api/health` live verification
-- Science/Open Trivia DB API verification for Easy/Medium/Hard
-- invalid-request API validation tests
-- successful Debug #55 build
-- successful Debug #55 Android installation/testing
-- successful real Science quiz through the online system
-- timer, progression, answer feedback, scoring and streak behavior confirmed
+## 24. Current checkpoint — 18 September 2026
 
-**Current focus:**
-- complete Science reliability/cache/offline testing
-- test AdMob flows
-- add General Knowledge provider
-- add Bible provider
-- add Africa & Nigeria provider
-- add Current Affairs provider
-- finish UX/retry/offline behavior
-- signed V1.1 release/update testing
-- website APK replacement only after signed-release verification
+**Completed:**
+- V1.1 question-engine redesign: no full-question local cache; recent-history IDs only.
+- Obsolete static question-bank fallback remains removed.
+- Cloudflare Worker/API and Science/Open Trivia DB flow verified.
+- Centralized AdMob manager established in `src/adMob.ts`; duplicate inline App.tsx manager removed.
+- `package.json` aligned to version `1.1.3`.
+- Release workflow aligned to `versionName 1.1.3` / `versionCode 3`.
+- Signed Android Release APK/AAB build #5 succeeded and signatures were verified in the workflow.
+- **V1.1.3 signed APK successfully updated over the signed 19 August release without uninstalling.**
+- Previous package-conflict update problem is resolved for the tested Release-to-Release path.
+
+**Current milestone:**
+- **V1.1.3 phone validation is now active.** The release update path is proven; functional and ad reliability testing is next.
+- The current UI is functional but **not considered the final desired UI**. A major quiz UI/UX redesign is planned after the initial V1.1.3 reliability test pass.
+
+**Immediate next test sequence:**
+1. Open the installed V1.1.3 release and confirm normal startup.
+2. Test Science online question retrieval.
+3. Run multiple quizzes and verify 10-question flow and duplicate/recent-history prevention.
+4. Test internet-off/error/recovery behavior.
+5. Test Banner, Interstitial, Rewarded +20, App Open and Rewarded Interstitial behavior.
+6. Record observations before changing code.
+
+**Long-term goal:**
+Build Daily Quiz & Challenge into a great, durable quiz platform that people can repeatedly use and trust. The long-term system should grow into multiple high-quality categories, fresh/current content where appropriate, strong difficulty and anti-repetition systems, polished gameplay/results, dependable monetization, and a professional UI/UX.
 
 **Paused:** V2 Firebase/Cloud Functions implementation.
