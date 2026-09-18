@@ -23,37 +23,6 @@ const all: Cat[] = [
   { name: 'Current Affairs', icon: '📰', key: 'current_affairs' },
 ];
 
-const BANNER_ID = 'ca-app-pub-8496227439538798/2899800506';
-const INTERSTITIAL_ID = 'ca-app-pub-8496227439538798/8159866041';
-const REWARDED_ID = 'ca-app-pub-8496227439538798/9137905794';
-const APP_OPEN_ID = 'ca-app-pub-8496227439538798/2455637861';
-const REWARDED_INTERSTITIAL_ID = 'ca-app-pub-8496227439538798/6852855908';
-const AD_MAX_AGE = 55 * 60 * 1000;
-const APP_OPEN_MAX_AGE = 3.5 * 60 * 60 * 1000;
-const APP_OPEN_GAP = 15 * 60 * 1000;
-let adMobInitPromise: Promise<void> | null = null;
-let interstitialReady = false, rewardedReady = false, rewardedInterstitialReady = false, appOpenReady = false;
-let interstitialAt = 0, rewardedAt = 0, rewardedInterstitialAt = 0, appOpenAt = 0, lastAppOpenShownAt = 0;
-let bannerShown = false, appOpenShowing = false;
-const fresh = (ready: boolean, at: number, maxAge = AD_MAX_AGE) => ready && at > 0 && Date.now() - at < maxAge;
-
-async function initAdMob() {
-  if (!Capacitor.isNativePlatform()) return;
-  if (!adMobInitPromise) adMobInitPromise = AdMob.initialize().catch((e) => { adMobInitPromise = null; throw e; });
-  await adMobInitPromise;
-}
-async function showBanner() {
-  if (!Capacitor.isNativePlatform()) return;
-  try { await initAdMob(); if (bannerShown) { try { await AdMob.resumeBanner(); return; } catch { bannerShown = false; } } await AdMob.showBanner({ adId: BANNER_ID, adSize: BannerAdSize.ADAPTIVE_BANNER, position: BannerAdPosition.BOTTOM_CENTER, margin: 0, isTesting: false } as BannerAdOptions); bannerShown = true; } catch { setTimeout(() => void showBanner(), 10000); }
-}
-async function preloadInterstitial() { if (!Capacitor.isNativePlatform() || fresh(interstitialReady, interstitialAt)) return fresh(interstitialReady, interstitialAt); try { await initAdMob(); await AdMob.prepareInterstitial({ adId: INTERSTITIAL_ID, isTesting: false }); interstitialReady = true; interstitialAt = Date.now(); return true; } catch { interstitialReady = false; interstitialAt = 0; return false; } }
-async function showInterstitial() { if (!Capacitor.isNativePlatform()) return false; try { await initAdMob(); if (!(await preloadInterstitial())) return false; await AdMob.showInterstitial(); interstitialReady = false; interstitialAt = 0; void preloadInterstitial(); return true; } catch { interstitialReady = false; interstitialAt = 0; return false; } }
-async function preloadRewarded() { if (!Capacitor.isNativePlatform() || fresh(rewardedReady, rewardedAt)) return fresh(rewardedReady, rewardedAt); try { await initAdMob(); await AdMob.prepareRewardVideoAd({ adId: REWARDED_ID, isTesting: false }); rewardedReady = true; rewardedAt = Date.now(); return true; } catch { rewardedReady = false; rewardedAt = 0; return false; } }
-async function showRewarded() { if (!Capacitor.isNativePlatform()) return false; try { await initAdMob(); if (!(await preloadRewarded())) return false; const reward = await AdMob.showRewardVideoAd(); rewardedReady = false; rewardedAt = 0; void preloadRewarded(); return Number(reward?.amount || 0) > 0; } catch { rewardedReady = false; rewardedAt = 0; return false; } }
-async function preloadRewardedInterstitial() { if (!Capacitor.isNativePlatform() || fresh(rewardedInterstitialReady, rewardedInterstitialAt)) return fresh(rewardedInterstitialReady, rewardedInterstitialAt); try { await initAdMob(); await AdMob.prepareRewardInterstitialAd({ adId: REWARDED_INTERSTITIAL_ID, isTesting: false }); rewardedInterstitialReady = true; rewardedInterstitialAt = Date.now(); return true; } catch { rewardedInterstitialReady = false; rewardedInterstitialAt = 0; return false; } }
-async function preloadAppOpen() { if (!Capacitor.isNativePlatform() || fresh(appOpenReady, appOpenAt, APP_OPEN_MAX_AGE)) return fresh(appOpenReady, appOpenAt, APP_OPEN_MAX_AGE); try { await initAdMob(); await AdMob.loadAppOpen({ adId: APP_OPEN_ID }); appOpenReady = true; appOpenAt = Date.now(); return true; } catch { appOpenReady = false; appOpenAt = 0; return false; } }
-async function showAppOpenIfAppropriate() { if (!Capacitor.isNativePlatform() || appOpenShowing || Date.now() - lastAppOpenShownAt < APP_OPEN_GAP) return false; try { await initAdMob(); if (!(await preloadAppOpen())) return false; const loaded = await AdMob.isAppOpenLoaded({ adId: APP_OPEN_ID }); if (!loaded.value) return false; appOpenShowing = true; await AdMob.showAppOpen({ adId: APP_OPEN_ID }); lastAppOpenShownAt = Date.now(); appOpenReady = false; appOpenAt = 0; void preloadAppOpen(); return true; } catch { return false; } finally { appOpenShowing = false; } }
-
 function App() {
   const [screen, setScreen] = useState<'home' | 'quiz' | 'result'>('home');
   const [cat, setCat] = useState(3);
