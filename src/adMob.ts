@@ -22,7 +22,7 @@ let lastAppOpen = 0;
 let bannerShown = false;
 let appOpenShowing = false;
 let retryTimers: Record<string, ReturnType<typeof setTimeout> | null> = { i: null, r: null, ri: null, ao: null, b: null };
-let retryDelay: Record<string, number> = { i: 2000, r: 2000, ri: 2000, ao: 3000 };
+let retryDelay: Record<string, number> = { i: 2000, r: 2000, ri: 2000, ao: 3000, b: 10000 };
 
 const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
 const fresh = (ready: boolean, at: number, age: number) => ready && at > 0 && Date.now() - at < age;
