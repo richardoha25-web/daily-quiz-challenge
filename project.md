@@ -1,7 +1,7 @@
 # Daily Quiz & Challenge — Project Continuity Record
 
-**Last updated:** 18 September 2026  
-**Stage:** V1.1.3 phone validation PASSED. Science online question delivery, fresh-question behavior, AdMob lifecycle/refresh flows, quiz gameplay, and the signed Release-to-Release update path have all been successfully tested on the phone. Next focus: major quiz UI/UX redesign, then remaining online categories/providers. V2 remains paused.
+**Last updated:** 19 September 2026  
+**Stage:** V1.1.3 phone validation PASSED. Science online question delivery, fresh-question behavior, AdMob lifecycle/refresh flows, quiz gameplay, and the signed Release-to-Release update path have all been successfully tested on the phone. **Current focus: add and test the remaining online categories/providers. UI/UX redesign planning is now documented separately in `ui-ux-project.md`; implementation comes after the category work. V2 remains paused.**
 
 ## Long-term product vision
 Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz system for real users**, not just a small one-off quiz app. The goal is a reliable platform with fresh online questions, strong anti-repetition logic, multiple categories, meaningful difficulty, polished gameplay, useful explanations/results, dependable monetization, and a professional UI/UX that people enjoy returning to. Development should favor a stable foundation and incremental verification so future features can grow without bringing back the old static-question problems.
@@ -17,9 +17,9 @@ Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz sy
 
 **V1.1.3 validation result:** the installed signed release was tested on the phone and the planned functional/ad checks passed. Science repeatedly retrieves fresh online questions, the quiz flow works, ads display and refresh/recover as intended, and the app remains usable through repeated testing. No blocking failure was observed in the completed validation pass.
 
-**Immediate next step:** preserve this known-good checkpoint and begin the planned major quiz UI/UX redesign. Do not make unnecessary changes to the working question/ad architecture before the redesign work is scoped.
+**Immediate next step:** preserve this known-good checkpoint and add/test the remaining online categories one at a time. Do not make unnecessary changes to the working question/ad architecture while category work is underway.
 
-**Next major product task:** a substantial quiz UI/UX redesign. The current UI is functional but is **not the desired final experience**; do not treat it as final.
+**UI/UX planning update:** a dedicated `ui-ux-project.md` has been created as the blueprint for the future redesign. It is intentionally separate from this file so this project record stays concise. The current UI remains functional but is **not the desired final experience**.
 
 ## 1. Project identity
 - App: Daily Quiz & Challenge
@@ -479,10 +479,11 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 
 **Immediate next development sequence:**
 1. Preserve the current V1.1.3 working checkpoint.
-2. Design the new quiz UI/UX before changing core logic.
-3. Implement the redesign incrementally on `main`, keeping `v2-development` untouched.
-4. Run regression testing after each meaningful UI change, especially quiz flow and AdMob behavior.
-5. After the UI pass, continue the remaining online categories one provider at a time: General Knowledge, Bible, Africa & Nigeria, then Current Affairs.
+2. Add and test General Knowledge online.
+3. Add and test Bible online.
+4. Add and test Africa & Nigeria online.
+5. Add and test Current Affairs online.
+6. After the remaining categories are working and tested, switch to `ui-ux-project.md` and begin the planned UI/UX design phase.
 
 **Long-term goal:**
 Build Daily Quiz & Challenge into a great, durable quiz platform that people can repeatedly use and trust. The long-term system should grow into multiple high-quality categories, fresh/current content where appropriate, strong difficulty and anti-repetition systems, polished gameplay/results, dependable monetization, and a professional UI/UX.
