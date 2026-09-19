@@ -230,7 +230,7 @@ export async function getQuizQuestions(
 ): Promise<QuizQuestion[]> {
   const category = categoryKey(categoryName);
 
-  if (category !== 'science') {
+  if (category !== 'science' && category !== 'general') {
     throw new Error('NO_ONLINE_SOURCE:' + category);
   }
 
