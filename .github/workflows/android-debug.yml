@@ -12,17 +12,14 @@ jobs:
         with:
           node-version: 22
       - run: npm install
-      - run: npm run build
+      - run: VITE_ADMOB_TEST_MODE=true npm run build
       - run: npx cap add android
       - run: npx cap sync android
       - name: Inject AdMob App ID
         run: |
-          # 1. Add the App ID string resource
           if ! grep -q "admob_app_id" android/app/src/main/res/values/strings.xml; then
             sed -i 's|</resources>|<string name="admob_app_id">ca-app-pub-8496227439538798~7943409473</string>\n</resources>|' android/app/src/main/res/values/strings.xml
           fi
-
-          # 2. Add the meta-data tag inside <application>
           python3 << 'EOF'
           import re
           path = "android/app/src/main/AndroidManifest.xml"
@@ -41,8 +38,6 @@ jobs:
               with open(path, "w") as f:
                   f.write(content)
               print("AdMob App ID injected successfully")
-          else:
-              print("AdMob App ID already present")
           EOF
       - uses: actions/setup-java@v4
         with:
