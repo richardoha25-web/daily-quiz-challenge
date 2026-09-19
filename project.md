@@ -1,14 +1,14 @@
 # Daily Quiz & Challenge — Project Continuity Record
 
 **Last updated:** 19 September 2026  
-**Stage:** V1.1.4 AdMob Reliability Pass is now implemented on main and is awaiting Android Debug APK validation. Science and General Knowledge remain the last fully validated online quiz categories. **Current focus: validate the new startup/App Open lifecycle and screen-aware banner placement, then continue Africa & Nigeria, Current Affairs, and Bible architecture. V2 remains paused.**
+**Stage:** V1.1.4 AdMob Reliability Pass is implemented and **Android Debug validation PASSED**. Science and General Knowledge remain the fully validated online quiz categories. **Current focus: proceed to Africa & Nigeria provider/source research, then Current Affairs and Bible architecture. V2 remains paused.**
 
 ## Long-term product vision
 Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz system for real users**, not just a small one-off quiz app. The goal is a reliable platform with fresh online questions, strong anti-repetition logic, multiple categories, meaningful difficulty, polished gameplay, useful explanations/results, dependable monetization, and a professional UI/UX that people enjoy returning to. Development should favor a stable foundation and incremental verification so future features can grow without bringing back the old static-question problems.
 
 ## Current milestone — V1.1.4 AdMob Reliability Pass
-- `package.json` version: `1.1.3`.
-- Android release: `versionName 1.1.3`, `versionCode 3`.
+- `package.json` version: `1.1.4`.
+- Android release target: `versionName 1.1.4`, `versionCode 4`.
 - Existing permanent production signing key and package ID were preserved.
 - **Release-to-Release update test PASSED:** V1.1.3 installed directly over the signed 19 August release APK without uninstalling.
 - Release artifact: `daily-quiz-release` from Android Release APK and AAB #5; SHA-256: `a5b4069b863238863d5505c5f6b95a2968bb17d1abcc41f881e96457211fbdc6`.
@@ -17,7 +17,9 @@ Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz sy
 
 **V1.1.3 validation result:** the installed signed release was tested on the phone and the planned functional/ad checks passed. Science repeatedly retrieves fresh online questions, the quiz flow works, ads display and refresh/recover as intended, and the app remains usable through repeated testing. No blocking failure was observed in the completed validation pass.
 
-**Immediate next step:** install the new Android Debug APK from GitHub Actions and validate the startup loading screen, App Open behavior, Home bottom banner, Quiz top banner, Results bottom banner, and existing interstitial/rewarded flows. After this reliability pass is verified, continue provider research/integration for Africa & Nigeria.
+**V1.1.4 Android Debug validation result:** the latest Debug APK was installed and tested on the Android phone. The startup/loading experience, test App Open behavior, Home bottom banner, Quiz top banner, Results bottom banner, interstitial, and rewarded +20 flow behaved as expected. Banner placement remained usable and did not block quiz content. Development is using AdMob test ads, so this validates the implementation/lifecycle rather than guaranteeing production ad fill or identical real-ad availability.
+
+**Immediate next step:** begin provider/source research for Africa & Nigeria. Do not switch to production AdMob IDs merely for development testing; production availability can vary with fill, network, inventory and account/frequency controls.
 
 **UI/UX planning update:** a dedicated `ui-ux-project.md` has been created as the blueprint for the future redesign. It is intentionally separate from this file so this project record stays concise. The current UI remains functional but is **not the desired final experience**.
 
@@ -197,13 +199,14 @@ Current Worker error mapping includes:
 A transient `503 PROVIDER_UNAVAILABLE` was observed once during Android testing. Without any code change afterward, the same Debug #55 app successfully loaded and played Science questions, so the incident appears to have been temporary/provider-side or network-related. It should still be monitored during reliability testing.
 
 ## 10. Android Debug build — CURRENT
-### Latest Debug run #70
-- Run ID: `35419455391`
-- Commit: `0f3d88e49e0bc5890f60476602f340a411e262e3`
+### Latest Debug run #81
+- Run ID: `35451028401`
+- Commit: `d724e831b1e66e33397a7244a18f302a2f45f49f`
 - Result: **success**
-- Artifact ID: `10577430716`
 - Artifact name: `daily-quiz-debug-apk`
-- SHA-256: `9303376834bff893e774ab2d8f7c3c6289a6ddb9b9ddb4de2a41bb746629b02e`
+- Purpose: final clean Debug build from the current `main` HEAD for V1.1.4 AdMob validation.
+
+Run #81 includes the V1.1.4 startup/App Open lifecycle, screen-aware banner placement, test-ad mode and the CI concurrency safeguard that cancels superseded Debug builds.
 
 Build workflow was inspected before testing and confirmed to perform:
 - npm install
@@ -220,7 +223,7 @@ Build logs showed `@capacitor-community/admob@8.1.0`, successful Capacitor sync,
 **Important:** Debug builds are development APKs, not the final production-signed release. Do not use it as the public website APK.
 
 ## 11. Android Debug — REAL PHONE TEST STATUS
-Latest Debug run #70 has been installed/tested on the Android phone. Science and General Knowledge are now confirmed working end-to-end.
+Latest Debug run #81 has been installed/tested on the Android phone. Science and General Knowledge remain confirmed working end-to-end. The V1.1.4 AdMob reliability changes have now also passed the planned phone validation.
 
 Observed in screenshots/live use:
 - Science category opens successfully.
@@ -277,7 +280,7 @@ Production IDs:
 
 Ad availability is not guaranteed; fill, inventory, network, account and frequency/policy controls can affect availability. Use test ads during development where appropriate.
 
-**Previous AdMob validation:** Banner, Interstitial, Rewarded +20, App Open and the configured Rewarded Interstitial flow passed the V1.1.3 phone validation. **V1.1.4 reliability changes are not yet Android-validated; the next APK test is specifically for the new startup/App Open and banner-placement behavior.**
+**V1.1.4 Android validation PASSED:** test ads confirmed the startup/loading flow, returning-launch App Open handling, Home bottom banner, Quiz top banner, Results bottom banner, interstitial and Rewarded +20 behavior. The test environment does not guarantee production ad fill or identical real-ad availability; production ads can vary with inventory, network, account/frequency controls and other serving conditions.
 
 ## 14. Android versioning/signing
 Package ID must remain `com.richard.dailyquizchallenge`.
@@ -534,16 +537,16 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 28. Verify offline Bible reading.
 29. Verify recent-question avoidance across all online categories.
 30. Verify timer/scoring/streak behavior.
-31. Validate V1.1.4 AdMob startup/loading/App Open and screen-aware banner placement on Android.
-32. Verify all AdMob flows after the reliability pass.
-32. Run full regression testing.
+31. V1.1.4 AdMob startup/loading/App Open and screen-aware banner placement validation — **PASSED on Debug/test ads**.
+32. Verify AdMob flows again during final Release/regression testing with appropriate production/test-device safeguards.
+33. Run full regression testing.
 
 ### Phase E — Production release
-33. Increase Android versionCode above 3.
-34. Build signed Release APK/AAB using the permanent production key.
-35. Verify signatures.
-36. Test signed Release installation/update over the previous release without uninstalling.
-37. Update the Richard Studios website only after release validation passes.
-38. Retest the public download/install/update path.
+34. Increase Android versionCode above 4 for the next production release.
+35. Build signed Release APK/AAB using the permanent production key.
+36. Verify signatures.
+37. Test signed Release installation/update over the previous release without uninstalling.
+38. Update the Richard Studios website only after release validation passes.
+39. Retest the public download/install/update path.
 
 
