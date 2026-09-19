@@ -1,12 +1,12 @@
 # Daily Quiz & Challenge — Project Continuity Record
 
 **Last updated:** 19 September 2026  
-**Stage:** V1.1.3 is the last fully validated signed-release checkpoint. Science and General Knowledge are now integrated through the Cloudflare Worker and both have passed Android testing. **Current focus: research/define Africa & Nigeria, Current Affairs, and the new offline Bible architecture; then redesign the UI/UX around the complete product. V2 remains paused.**
+**Stage:** V1.1.4 AdMob Reliability Pass is now implemented on main and is awaiting Android Debug APK validation. Science and General Knowledge remain the last fully validated online quiz categories. **Current focus: validate the new startup/App Open lifecycle and screen-aware banner placement, then continue Africa & Nigeria, Current Affairs, and Bible architecture. V2 remains paused.**
 
 ## Long-term product vision
 Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz system for real users**, not just a small one-off quiz app. The goal is a reliable platform with fresh online questions, strong anti-repetition logic, multiple categories, meaningful difficulty, polished gameplay, useful explanations/results, dependable monetization, and a professional UI/UX that people enjoy returning to. Development should favor a stable foundation and incremental verification so future features can grow without bringing back the old static-question problems.
 
-## Current milestone — V1.1.3
+## Current milestone — V1.1.4 AdMob Reliability Pass
 - `package.json` version: `1.1.3`.
 - Android release: `versionName 1.1.3`, `versionCode 3`.
 - Existing permanent production signing key and package ID were preserved.
@@ -17,7 +17,7 @@ Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz sy
 
 **V1.1.3 validation result:** the installed signed release was tested on the phone and the planned functional/ad checks passed. Science repeatedly retrieves fresh online questions, the quiz flow works, ads display and refresh/recover as intended, and the app remains usable through repeated testing. No blocking failure was observed in the completed validation pass.
 
-**Immediate next step:** preserve the V1.1.3 signed-release checkpoint and test the newly integrated General Knowledge path in Android. Do not make unnecessary changes to the working Science/AdMob architecture while category work is underway.
+**Immediate next step:** install the new Android Debug APK from GitHub Actions and validate the startup loading screen, App Open behavior, Home bottom banner, Quiz top banner, Results bottom banner, and existing interstitial/rewarded flows. After this reliability pass is verified, continue provider research/integration for Africa & Nigeria.
 
 **UI/UX planning update:** a dedicated `ui-ux-project.md` has been created as the blueprint for the future redesign. It is intentionally separate from this file so this project record stays concise. The current UI remains functional but is **not the desired final experience**.
 
@@ -273,11 +273,11 @@ Production IDs:
 - App Open: `ca-app-pub-8496227439538798/2455637861`
 - Rewarded Interstitial: `ca-app-pub-8496227439538798/6852855908`
 
-**Current architecture:** `src/adMob.ts` is the single AdMob manager. The obsolete inline AdMob implementation was removed from `src/App.tsx` so there are not two competing ad managers. `App.tsx` now calls the centralized manager for initialization, preloading, recovery, banner/interstitial/rewarded/App Open flows, and +20 handling.
+**Current architecture:** `src/adMob.ts` is the single AdMob manager. `App.tsx` uses it for initialization, preloading, recovery, banner/interstitial/rewarded/App Open flows, and +20 handling. V1.1.4 adds a startup loading gate, returning-launch App Open handling from that loading state, persistent App Open load timestamps, screen-aware banner positioning (Quiz top; Home/Results bottom), and an explicit Debug-build test-ad mode.
 
 Ad availability is not guaranteed; fill, inventory, network, account and frequency/policy controls can affect availability. Use test ads during development where appropriate.
 
-**AdMob validation result:** Banner, Interstitial, Rewarded +20, App Open and the configured Rewarded Interstitial flow were tested during the V1.1.3 phone validation. Ads were observed working correctly, including the expected refresh/recovery behavior. This is now a completed validation checkpoint; continue monitoring during future builds rather than reopening the architecture without evidence of a regression.
+**Previous AdMob validation:** Banner, Interstitial, Rewarded +20, App Open and the configured Rewarded Interstitial flow passed the V1.1.3 phone validation. **V1.1.4 reliability changes are not yet Android-validated; the next APK test is specifically for the new startup/App Open and banner-placement behavior.**
 
 ## 14. Android versioning/signing
 Package ID must remain `com.richard.dailyquizchallenge`.
@@ -285,7 +285,8 @@ Package ID must remain `com.richard.dailyquizchallenge`.
 Release/version history:
 - V1.0 → `1.0.0`, versionCode `1`
 - Previous V1.1 release → `1.1.0`, versionCode `2`
-- **Current V1.1.3 → `1.1.3`, versionCode `3`**
+- **Current V1.1.4 → `1.1.4`, versionCode `4` (release workflow prepared; signed release still pending validation)**
+- **Previous V1.1.3 → `1.1.3`, versionCode `3`**
 
 Future releases must use a higher versionCode while preserving the same production signing key and package ID.
 
@@ -533,7 +534,8 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 28. Verify offline Bible reading.
 29. Verify recent-question avoidance across all online categories.
 30. Verify timer/scoring/streak behavior.
-31. Verify all AdMob flows.
+31. Validate V1.1.4 AdMob startup/loading/App Open and screen-aware banner placement on Android.
+32. Verify all AdMob flows after the reliability pass.
 32. Run full regression testing.
 
 ### Phase E — Production release
