@@ -1,7 +1,7 @@
 # Daily Quiz & Challenge — Project Continuity Record
 
 **Last updated:** 19 September 2026  
-**Stage:** V1.1.3 is the last fully validated signed-release checkpoint. Science is production-tested end-to-end. General Knowledge is now integrated through the Cloudflare Worker and its Easy/Medium/Hard Worker tests have passed, but Android validation is still pending. **Current focus: test General Knowledge in Android, then add the remaining online categories/providers one at a time. UI/UX redesign planning is documented separately in `ui-ux-project.md`; implementation comes after category/provider work. V2 remains paused.**
+**Stage:** V1.1.3 is the last fully validated signed-release checkpoint. Science and General Knowledge are now integrated through the Cloudflare Worker and both have passed Android testing. **Current focus: research/define Africa & Nigeria, Current Affairs, and the new offline Bible architecture; then redesign the UI/UX around the complete product. V2 remains paused.**
 
 ## Long-term product vision
 Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz system for real users**, not just a small one-off quiz app. The goal is a reliable platform with fresh online questions, strong anti-repetition logic, multiple categories, meaningful difficulty, polished gameplay, useful explanations/results, dependable monetization, and a professional UI/UX that people enjoy returning to. Development should favor a stable foundation and incremental verification so future features can grow without bringing back the old static-question problems.
@@ -51,10 +51,12 @@ The original local question banks had repetition and weak difficulty variety. **
 6. Large online question system.
 7. Easy/Medium/Hard difficulty.
 8. Duplicate/recent-question prevention.
-9. Internet replenishment plus cache/offline support.
-10. Five categories, including Current Affairs.
-11. Better quiz/results/streak UI.
-12. Signed V1.1 APK/AAB and update testing.
+9. Clear online/offline behavior.
+10. Five category experiences.
+11. Offline Bible Library and online Bible Quiz.
+12. Better quiz/results/streak UI.
+13. Scalable navigation and UI architecture.
+14. Signed V1.1 APK/AAB and update testing.
 
 ## 4. Question engine
 `src/questionEngine.ts` is implemented with:
@@ -65,7 +67,7 @@ The original local question banks had repetition and weak difficulty variety. **
 - recent-question history
 - ID-based deduplication
 - no silent local-bank fallback
-- Science and General Knowledge as the currently integrated online categories; Science is fully phone-validated, General Knowledge is Worker-tested and awaiting Android validation
+- Science and General Knowledge as the currently integrated online categories; both are now phone-validated
 
 The app imports `getQuizQuestions()` from the question engine and starts quizzes through it. The old static question-bank fallback is not restored.
 
@@ -195,13 +197,13 @@ Current Worker error mapping includes:
 A transient `503 PROVIDER_UNAVAILABLE` was observed once during Android testing. Without any code change afterward, the same Debug #55 app successfully loaded and played Science questions, so the incident appears to have been temporary/provider-side or network-related. It should still be monitored during reliability testing.
 
 ## 10. Android Debug build — CURRENT
-### Debug run #55 — CURRENT TEST BUILD
-- Run ID: `35165301190`
-- Commit: `7cb664aa204000429ea8adaa782bd8d6dfee4d1e`
+### Latest Debug run #70
+- Run ID: `35419455391`
+- Commit: `0f3d88e49e0bc5890f60476602f340a411e262e3`
 - Result: **success**
-- Artifact ID: `10474812061`
+- Artifact ID: `10577430716`
 - Artifact name: `daily-quiz-debug-apk`
-- APK path: `android/app/build/outputs/apk/debug/app-debug.apk`
+- SHA-256: `9303376834bff893e774ab2d8f7c3c6289a6ddb9b9ddb4de2a41bb746629b02e`
 
 Build workflow was inspected before testing and confirmed to perform:
 - npm install
@@ -215,10 +217,10 @@ Build workflow was inspected before testing and confirmed to perform:
 
 Build logs showed `@capacitor-community/admob@8.1.0`, successful Capacitor sync, AdMob App ID injection and `BUILD SUCCESSFUL`.
 
-**Important:** Debug #55 is a Debug APK, not the final production-signed release. Do not use it as the public website APK.
+**Important:** Debug builds are development APKs, not the final production-signed release. Do not use it as the public website APK.
 
-## 11. Android Debug #55 — REAL PHONE TEST STATUS
-Debug #55 has now been installed/tested on the Android phone and the Science quiz is working end-to-end.
+## 11. Android Debug — REAL PHONE TEST STATUS
+Latest Debug run #70 has been installed/tested on the Android phone. Science and General Knowledge are now confirmed working end-to-end.
 
 Observed in screenshots/live use:
 - Science category opens successfully.
@@ -235,7 +237,7 @@ Observed in screenshots/live use:
 
 This confirms the practical path:
 ```text
-Debug #55 → questionEngine → Cloudflare Worker → Science provider → quiz UI
+Debug #70 → questionEngine → Cloudflare Worker → provider → quiz UI
 ```
 
 Do **not** uninstall the existing app merely for routine testing. The known Android package-conflict issue is related primarily to signing certificates when Debug and Release builds are mixed.
@@ -310,30 +312,119 @@ Obsolete workflows removed:
 
 Do not change the release workflow unnecessarily.
 
-## 16. Category/provider plan
-Current categories:
-- General Knowledge → `general` — **ONLINE PROVIDER INTEGRATED; Worker tests PASSED; Android validation pending**
-- Science → `science` — **ONLINE PROVIDER WORKING AND PHONE-VALIDATED**
-- Bible → `bible` — provider not connected yet
-- Africa & Nigeria → `africa_nigeria` — provider not connected yet
-- Current Affairs → `current_affairs` — provider not connected yet
+## 16. Category/provider roadmap — NEW MASTER PLAN
 
-The next development phase is to finish Android validation for General Knowledge, then add the remaining providers one at a time. Every new provider must be tested at the Worker level before Android integration.
+The remaining categories must not be implemented all at once. Use this sequence for every new category:
 
-### Provider order
-1. **General Knowledge** — **Worker integration and Easy/Medium/Hard API tests PASSED; Android validation is next.**
-2. **Bible** — add an appropriate reliable/licensed source, validate question quality and answer correctness, then test Android.
-3. **Africa & Nigeria** — add a reliable source with Nigeria/Africa coverage, validate difficulty and freshness where needed, then test Android.
-4. **Current Affairs** — use an online source with publication/freshness metadata; do not treat current-affairs questions as permanent evergreen content.
+Provider/source research → architecture/data model → Worker endpoint → browser/API tests → Question Engine integration → Android Debug test → recent-history/cache test.
 
-For each new category:
-```text
-Provider → Worker endpoint → browser/API tests → questionEngine → Android test → cache/recent-history test
-```
+### General Knowledge — COMPLETE
+- Open Trivia DB category 9
+- Worker integration complete
+- Easy/Medium/Hard tests complete
+- Android validation complete
 
-Do not connect all categories at once. One provider/category at a time keeps failures easy to isolate.
+### Science — COMPLETE
+- Open Trivia DB category 17
+- Worker integration complete
+- Easy/Medium/Hard tests complete
+- Android validation complete
 
-## 17. Offline/cache status
+### Africa & Nigeria — NEXT RESEARCH TARGET
+Before coding:
+- identify reliable Africa/Nigeria question sources
+- verify commercial-use rights
+- evaluate question quality and freshness
+- define Nigeria/Africa topic structure
+- define category-specific metadata
+- implement through Cloudflare Worker
+- test Worker, Question Engine, and Android one stage at a time
+
+Planned content areas include Nigerian history, geography, culture, civic/government knowledge, African history/geography/culture, and notable African figures.
+
+### Current Affairs — RESEARCH TARGET
+Current Affairs must be treated as changing content, not a permanent question bank.
+
+Target architecture:
+News/current-events source → Cloudflare Worker → question generation/normalization → Question Engine → Quiz.
+
+Questions should carry freshness metadata such as publishedAt, source, topic, and country/region. Old current-affairs content must not remain indefinitely usable simply because it is cached.
+
+### Bible — NEW PRODUCT EXPERIENCE
+Bible is no longer treated as only another category card.
+
+Desired structure:
+- Read Bible
+- Old Testament / New Testament
+- Book
+- Chapter
+- Reading screen
+- Bible Quiz
+- Quick Quiz
+- Book Quiz
+- Chapter Quiz
+- Topic Quiz
+- Future AI Bible Study
+
+Planned flow:
+Bible → Read Bible → Mark → Chapter 5 → Read → Quiz Me on This Chapter.
+
+#### Bible translation decision
+NIV has been deliberately dropped because commercial/mobile/offline licensing is too restrictive for the current project.
+
+The intended Bible Library translation is now the **World English Bible (WEB), Catholic edition / Catholic book order where the selected source provides it**.
+
+The Bible Library is intended to:
+- work offline
+- be stored in local/app storage after the text source and rights are verified
+- support book/chapter reading
+- remain independent of the online quiz provider
+- eventually support Bible search and study features
+
+Do not bundle any Bible text into the production APK until the exact source/license permits the required redistribution and software use.
+
+#### Bible quiz architecture
+Bible Quiz remains online:
+Bible quiz provider → Cloudflare Worker → Question Engine → Bible Quiz UI.
+
+Quizarama remains a candidate, but its public API licensing/commercial terms were not sufficiently clear during research. Do not integrate it until licensing is verified.
+
+#### Future AI Bible study
+The long-term goal is to generate questions from a selected Bible chapter/passage. This requires a Bible text source whose license explicitly permits the intended AI/question-generation use.
+
+## 17. Bible connectivity model
+The app will distinguish between offline-capable Bible reading and online-required quiz/online services.
+
+At startup, when offline, the future UX should explain:
+“No internet connection. Bible reading is available offline, but quizzes and online features require an internet connection.”
+
+Quiz entry:
+“Internet connection required. Please connect to the internet to start a quiz.”
+
+If connectivity disappears during an online flow:
+“Connection lost. Please reconnect to continue.”
+
+The exact final wording belongs to the UI/UX phase.
+
+Connectivity should be monitored throughout the app, not only once at launch.
+
+## 18. Offline/cache status
+The existing question cache/recent-history foundation is not full offline quiz support.
+
+- Bible Library: intended to work offline.
+- Online quizzes: require internet.
+- Current Affairs: requires internet for fresh content.
+- Africa & Nigeria online question delivery: requires internet.
+- Science/General new question retrieval: requires internet.
+
+Future reliability work:
+- controlled retry/backoff
+- clear connectivity messaging
+- cache-first behavior only where appropriate
+- no indefinite network waiting
+- explicit provider-failure handling
+
+
 The cache foundation exists, but full offline/retry behavior is **not finished**.
 
 Current Science behavior:
@@ -403,99 +494,54 @@ Auth:
 
 V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 
-## 22. Exact next steps — V1.1 roadmap
-### Phase A — finish core Science testing
-1. Finish the current Debug #55 Science quiz.
-2. Run several additional Science quizzes with good internet.
-3. Test Easy, Medium and Hard inventory through the app.
-4. Check that each quiz contains 10 questions.
-5. Check for duplicate questions/options within a quiz.
-6. Run multiple quizzes and verify recent-question avoidance.
-7. Test the cache by first loading Science online, then temporarily disabling internet and starting another quiz.
-8. Test temporary network/provider failure and confirm the app gives a clear recoverable error rather than hanging.
+## 26. Exact next steps — NEW ROADMAP
 
-### Phase B — test V1.1 ads
-9. Test Banner persistence/recovery.
-10. Test Interstitial on results.
-11. Test Rewarded +20 bonus.
-12. Test App Open behavior after foreground/background transitions.
-13. Test Rewarded Interstitial if/when its intended UI flow is enabled.
-14. Record any ad-specific failures separately from question-provider failures.
+### Phase A — Provider/source research
+1. Research reliable Africa & Nigeria question/content providers, including commercial rights, quality, freshness and API availability.
+2. Research Current Affairs/news providers with suitable licensing, freshness metadata, quotas and commercial use.
+3. Continue Bible quiz provider/licensing research; Quizarama is a candidate but not approved for integration.
+4. Verify the World English Bible Catholic edition/source and its redistribution/software rights before implementation.
+5. Define category-specific data-model extensions.
 
-### Phase C — add remaining online categories
-15. **General Knowledge Worker integration + Easy/Medium/Hard API tests — DONE.**
-16. Test General Knowledge in Debug Android.
-17. Run repeated General Knowledge quizzes and verify fresh/recent-question behavior.
-18. Add Bible provider.
-19. Deploy/test Bible Worker endpoint and Android flow.
-20. Add Africa & Nigeria provider.
-21. Deploy/test Africa & Nigeria Worker endpoint and Android flow.
-22. Add Current Affairs provider with publication/freshness metadata.
-23. Deploy/test Current Affairs endpoint and Android flow.
+### Phase B — Backend implementation, one category at a time
+6. Implement Africa & Nigeria through the Worker.
+7. Test Africa/Nigeria Worker responses.
+8. Integrate Africa/Nigeria into the Question Engine.
+9. Android-test Africa/Nigeria.
+10. Implement Current Affairs through the Worker.
+11. Test Current Affairs freshness/source metadata.
+12. Integrate Current Affairs into the Question Engine.
+13. Android-test Current Affairs.
+14. Implement the Bible Library/offline storage after source rights are verified.
+15. Implement Bible reader navigation.
+16. Implement the online Bible quiz connection.
+17. Android-test Bible reading offline and Bible quiz online.
 
-### Phase D — polish reliability and UX
-24. Finish controlled retry/backoff.
-25. Improve offline/cache messaging.
-26. Add user-facing difficulty selection/display if required by the final design.
-27. Improve explanations/results/streak presentation.
-28. Verify all five categories reject invalid/empty provider data safely.
+### Phase C — Major UI/UX redesign
+18. Review ui-ux-project.md using the now-known product architecture.
+19. Map the complete user journey and final information architecture.
+20. Wireframe Home, Categories, Bible, Quiz, Results, Connectivity/Error and Settings.
+21. Define the reusable design system.
+22. Create high-fidelity screens/prototype.
+23. Test the design on the Oppo A56.
+24. Implement the redesign in React/Vite only after the design is stable.
 
-### Phase E — production release
-29. After category/provider work and UI/UX changes are ready for release, update the Android version to a value higher than the current `versionCode 3` (next release target: `versionCode 4` or higher) and choose the intended versionName.
-30. Build signed Release APK/AAB using the existing permanent release key.
-31. Verify APK/AAB signatures.
-32. Test the signed Release APK installing/updating over the previous properly release-signed build without uninstalling.
-33. Only after signed-release verification, replace the old APK on the Richard Studios website.
-34. Retest website download/install/update path.
+### Phase D — Reliability and regression
+25. Implement centralized connectivity monitoring.
+26. Improve retry/backoff and user-facing error states.
+27. Verify online-required quiz behavior.
+28. Verify offline Bible reading.
+29. Verify recent-question avoidance across all online categories.
+30. Verify timer/scoring/streak behavior.
+31. Verify all AdMob flows.
+32. Run full regression testing.
 
-## 23. Rules for future chats
-- **Do not touch `v2-development` during V1.1 work.**
-- **Do not restore deleted static question-bank fallback.**
-- **Do not claim all five categories are online. Only Science is currently connected and verified.**
-- **Do not claim full offline support is finished.**
-- **Use `richardoha25`, not `richardo25`, in the Worker hostname.**
-- **Do not generate a new production keystore.**
-- **Do not store secrets/passwords in this file.**
-- **Identify the exact commit/run before testing a new APK.**
-- **Use Debug builds for development testing; use the signed Release build for final update-install testing.**
-- **Inspect relevant files before making changes whenever the cause is uncertain.**
-- **Make provider/category changes one at a time and test the Worker before rebuilding Android.**
+### Phase E — Production release
+33. Increase Android versionCode above 3.
+34. Build signed Release APK/AAB using the permanent production key.
+35. Verify signatures.
+36. Test signed Release installation/update over the previous release without uninstalling.
+37. Update the Richard Studios website only after release validation passes.
+38. Retest the public download/install/update path.
 
-## 24. Current checkpoint — 19 September 2026
 
-**Completed:**
-- V1.1 question-engine redesign: no full-question local cache; recent-history IDs only.
-- Obsolete static question-bank fallback remains removed.
-- Cloudflare Worker/API and Science/Open Trivia DB flow verified.
-- Centralized AdMob manager established in `src/adMob.ts`; duplicate inline App.tsx manager removed.
-- `package.json` aligned to version `1.1.3`.
-- Release workflow aligned to `versionName 1.1.3` / `versionCode 3`.
-- Signed Android Release APK/AAB build #5 succeeded and signatures were verified in the workflow.
-- **V1.1.3 signed APK successfully updated over the signed 19 August release without uninstalling.**
-- Previous package-conflict update problem is resolved for the tested Release-to-Release path.
-- **V1.1.3 phone validation is now PASSED:** repeated Science quizzes successfully fetch fresh online questions and the quiz remains functional through the tested runs.
-- **AdMob validation is now PASSED for the tested release:** ads display and update/refresh/recover as intended across the tested flows.
-- No blocking functional or ad failure was observed during the completed validation pass.
-- **General Knowledge Worker integration is DONE:** Open Trivia DB category 9 is connected through the Cloudflare Worker and the question engine accepts `general` alongside `science`.
-- **General Knowledge Worker tests PASSED:** Easy, Medium and Hard returned valid batches with four options, correct answers, IDs and source metadata. No encoding corruption or malformed response was observed.
-- A content-quality caveat was observed: Open Trivia DB General Knowledge can occasionally return niche or cross-domain questions. This is a content-quality consideration for later filtering/provider refinement, not a technical failure.
-- **General Knowledge Android validation is NOT yet done.**
-
-**Current milestone:**
-- **V1.1.3 remains the known-good signed-release checkpoint.** Core online Science delivery, quiz gameplay, recent/fresh question behavior, AdMob flows, and Release-to-Release updating have all been practically validated on the Android phone.
-- **General Knowledge is the current main-branch development checkpoint:** Worker integration and API tests are complete; Android validation is the nearest required test.
-- The current UI is functional but **not the final desired experience**. The major UI/UX redesign remains planned after the remaining category/provider work.
-
-**Immediate next development sequence:**
-1. Preserve the V1.1.3 signed-release checkpoint.
-2. Build/test General Knowledge in Debug Android.
-3. Run repeated General Knowledge quizzes and verify fresh/recent-question behavior.
-4. Add and test Bible online.
-5. Add and test Africa & Nigeria online.
-6. Add and test Current Affairs online.
-7. After the remaining categories are working and tested, switch to `ui-ux-project.md` and begin the planned UI/UX design phase.
-
-**Long-term goal:**
-Build Daily Quiz & Challenge into a great, durable quiz platform that people can repeatedly use and trust. The long-term system should grow into multiple high-quality categories, fresh/current content where appropriate, strong difficulty and anti-repetition systems, polished gameplay/results, dependable monetization, and a professional UI/UX.
-
-**Paused:** V2 Firebase/Cloud Functions implementation.
