@@ -3,6 +3,10 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+concurrency:
+  group: android-debug-main
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
