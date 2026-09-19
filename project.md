@@ -1,7 +1,7 @@
 # Daily Quiz & Challenge — Project Continuity Record
 
 **Last updated:** 19 September 2026  
-**Stage:** V1.1.3 phone validation PASSED. Science online question delivery, fresh-question behavior, AdMob lifecycle/refresh flows, quiz gameplay, and the signed Release-to-Release update path have all been successfully tested on the phone. **Current focus: add and test the remaining online categories/providers. UI/UX redesign planning is now documented separately in `ui-ux-project.md`; implementation comes after the category work. V2 remains paused.**
+**Stage:** V1.1.3 is the last fully validated signed-release checkpoint. Science is production-tested end-to-end. General Knowledge is now integrated through the Cloudflare Worker and its Easy/Medium/Hard Worker tests have passed, but Android validation is still pending. **Current focus: test General Knowledge in Android, then add the remaining online categories/providers one at a time. UI/UX redesign planning is documented separately in `ui-ux-project.md`; implementation comes after category/provider work. V2 remains paused.**
 
 ## Long-term product vision
 Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz system for real users**, not just a small one-off quiz app. The goal is a reliable platform with fresh online questions, strong anti-repetition logic, multiple categories, meaningful difficulty, polished gameplay, useful explanations/results, dependable monetization, and a professional UI/UX that people enjoy returning to. Development should favor a stable foundation and incremental verification so future features can grow without bringing back the old static-question problems.
@@ -17,7 +17,7 @@ Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz sy
 
 **V1.1.3 validation result:** the installed signed release was tested on the phone and the planned functional/ad checks passed. Science repeatedly retrieves fresh online questions, the quiz flow works, ads display and refresh/recover as intended, and the app remains usable through repeated testing. No blocking failure was observed in the completed validation pass.
 
-**Immediate next step:** preserve this known-good checkpoint and add/test the remaining online categories one at a time. Do not make unnecessary changes to the working question/ad architecture while category work is underway.
+**Immediate next step:** preserve the V1.1.3 signed-release checkpoint and test the newly integrated General Knowledge path in Android. Do not make unnecessary changes to the working Science/AdMob architecture while category work is underway.
 
 **UI/UX planning update:** a dedicated `ui-ux-project.md` has been created as the blueprint for the future redesign. It is intentionally separate from this file so this project record stays concise. The current UI remains functional but is **not the desired final experience**.
 
@@ -38,7 +38,7 @@ Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz sy
 - 100 base points
 - streak tracking
 - best-score/trophy display
-- Original categories: General Knowledge, Bible, Africa & Nigeria, Science
+- Current categories: General Knowledge, Bible, Africa & Nigeria, Science, Current Affairs
 
 The original local question banks had repetition and weak difficulty variety. **They are no longer used as the V1.1 fallback.**
 
@@ -65,7 +65,7 @@ The original local question banks had repetition and weak difficulty variety. **
 - recent-question history
 - ID-based deduplication
 - no silent local-bank fallback
-- Science as the currently supported online category
+- Science and General Knowledge as the currently integrated online categories; Science is fully phone-validated, General Knowledge is Worker-tested and awaiting Android validation
 
 The app imports `getQuizQuestions()` from the question engine and starts quizzes through it. The old static question-bank fallback is not restored.
 
@@ -85,7 +85,7 @@ Android App
     ↓
 Question Engine
     ↓
-Cloudflare Worker ← Open Trivia DB (Science)
+Cloudflare Worker ← Open Trivia DB (Science / General Knowledge)
     ↓
 Validate / Normalize / Deduplicate
     ↓
@@ -103,7 +103,7 @@ Quiz
 Current flow:
 1. Require internet for online retrieval.
 2. Reject unsupported categories instead of silently using old local banks.
-3. For Science, fetch fresh Easy/Medium/Hard questions from the Worker.
+3. For Science and General Knowledge, fetch fresh Easy/Medium/Hard questions from the Worker.
 4. Validate and normalize returned questions.
 5. Read recent-history IDs and exclude them when alternatives exist.
 6. Avoid duplicate IDs within the current quiz.
@@ -161,7 +161,7 @@ Verified response:
 }
 ```
 
-Science endpoint has been successfully tested for **Easy, Medium and Hard**. Example:
+Science endpoint has been successfully tested for **Easy, Medium and Hard**. General Knowledge has also been successfully tested for **Easy, Medium and Hard**. Example:
 ```text
 /api/questions?category=science&difficulty=medium&limit=20
 ```
@@ -175,11 +175,12 @@ Validation tests previously passed:
 
 CORS support and `OPTIONS` handling are present in the Worker for browser/WebView access.
 
-## 9. Open Trivia DB / Science
+## 9. Open Trivia DB / Science + General Knowledge
 Open Trivia DB is the first provider integration.
 - public JSON API
 - no API key
 - Science & Nature category ID: `17`
+- General Knowledge category ID: `9`
 - multiple-choice questions provide one correct + three incorrect answers
 - Worker requests URL-encoded responses
 - Worker validates the provider response and maps provider errors
@@ -311,16 +312,16 @@ Do not change the release workflow unnecessarily.
 
 ## 16. Category/provider plan
 Current categories:
-- General Knowledge → `general`
-- Science → `science` — **ONLINE PROVIDER WORKING**
+- General Knowledge → `general` — **ONLINE PROVIDER INTEGRATED; Worker tests PASSED; Android validation pending**
+- Science → `science` — **ONLINE PROVIDER WORKING AND PHONE-VALIDATED**
 - Bible → `bible` — provider not connected yet
 - Africa & Nigeria → `africa_nigeria` — provider not connected yet
 - Current Affairs → `current_affairs` — provider not connected yet
 
-The next major development phase is to add the remaining providers one at a time, testing each provider at the Worker level before integrating it into the app.
+The next development phase is to finish Android validation for General Knowledge, then add the remaining providers one at a time. Every new provider must be tested at the Worker level before Android integration.
 
 ### Provider order
-1. **General Knowledge** — add provider/source, validate Easy/Medium/Hard, test 20-question batches, then test Android.
+1. **General Knowledge** — **Worker integration and Easy/Medium/Hard API tests PASSED; Android validation is next.**
 2. **Bible** — add an appropriate reliable/licensed source, validate question quality and answer correctness, then test Android.
 3. **Africa & Nigeria** — add a reliable source with Nigeria/Africa coverage, validate difficulty and freshness where needed, then test Android.
 4. **Current Affairs** — use an online source with publication/freshness metadata; do not treat current-affairs questions as permanent evergreen content.
@@ -362,6 +363,9 @@ A prototype Current Affairs bank was previously created from 30 fact pairs and e
 The prototype was intentionally removed from `main` because V1.1 is moving to online sourcing rather than keeping the old static bank as fallback.
 
 ## 20. Important recent commits/checkpoints
+### General Knowledge question-engine integration
+`40fdd0f3d1dc775ba878e19c8ffe55b6f15e22dd`
+
 ### Question engine
 `ec9d96e9eed9e5084db65331d6a6ab25d961d79c`
 
@@ -419,9 +423,9 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 14. Record any ad-specific failures separately from question-provider failures.
 
 ### Phase C — add remaining online categories
-15. Add General Knowledge provider.
-16. Deploy and test General Knowledge Worker endpoint for Easy/Medium/Hard.
-17. Test General Knowledge in Debug Android.
+15. **General Knowledge Worker integration + Easy/Medium/Hard API tests — DONE.**
+16. Test General Knowledge in Debug Android.
+17. Run repeated General Knowledge quizzes and verify fresh/recent-question behavior.
 18. Add Bible provider.
 19. Deploy/test Bible Worker endpoint and Android flow.
 20. Add Africa & Nigeria provider.
@@ -437,10 +441,10 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 28. Verify all five categories reject invalid/empty provider data safely.
 
 ### Phase E — production release
-29. Build signed V1.1 APK/AAB using the existing permanent release key.
-30. Verify APK/AAB signatures.
-31. Test the signed V1.1 APK installing/updating from the previous properly release-signed V1 build.
-32. Confirm versionCode `2` / versionName `1.1.0`.
+29. After category/provider work and UI/UX changes are ready for release, update the Android version to a value higher than the current `versionCode 3` (next release target: `versionCode 4` or higher) and choose the intended versionName.
+30. Build signed Release APK/AAB using the existing permanent release key.
+31. Verify APK/AAB signatures.
+32. Test the signed Release APK installing/updating over the previous properly release-signed build without uninstalling.
 33. Only after signed-release verification, replace the old APK on the Richard Studios website.
 34. Retest website download/install/update path.
 
@@ -457,7 +461,7 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 - **Inspect relevant files before making changes whenever the cause is uncertain.**
 - **Make provider/category changes one at a time and test the Worker before rebuilding Android.**
 
-## 24. Current checkpoint — 18 September 2026
+## 24. Current checkpoint — 19 September 2026
 
 **Completed:**
 - V1.1 question-engine redesign: no full-question local cache; recent-history IDs only.
@@ -472,18 +476,24 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 - **V1.1.3 phone validation is now PASSED:** repeated Science quizzes successfully fetch fresh online questions and the quiz remains functional through the tested runs.
 - **AdMob validation is now PASSED for the tested release:** ads display and update/refresh/recover as intended across the tested flows.
 - No blocking functional or ad failure was observed during the completed validation pass.
+- **General Knowledge Worker integration is DONE:** Open Trivia DB category 9 is connected through the Cloudflare Worker and the question engine accepts `general` alongside `science`.
+- **General Knowledge Worker tests PASSED:** Easy, Medium and Hard returned valid batches with four options, correct answers, IDs and source metadata. No encoding corruption or malformed response was observed.
+- A content-quality caveat was observed: Open Trivia DB General Knowledge can occasionally return niche or cross-domain questions. This is a content-quality consideration for later filtering/provider refinement, not a technical failure.
+- **General Knowledge Android validation is NOT yet done.**
 
 **Current milestone:**
-- **V1.1.3 is a known-good tested checkpoint.** Core online Science delivery, quiz gameplay, recent/fresh question behavior, AdMob flows, and Release-to-Release updating have all been practically validated on the Android phone.
-- The current UI is functional but **not the final desired experience**. The next major development task is a substantial quiz UI/UX redesign.
+- **V1.1.3 remains the known-good signed-release checkpoint.** Core online Science delivery, quiz gameplay, recent/fresh question behavior, AdMob flows, and Release-to-Release updating have all been practically validated on the Android phone.
+- **General Knowledge is the current main-branch development checkpoint:** Worker integration and API tests are complete; Android validation is the nearest required test.
+- The current UI is functional but **not the final desired experience**. The major UI/UX redesign remains planned after the remaining category/provider work.
 
 **Immediate next development sequence:**
-1. Preserve the current V1.1.3 working checkpoint.
-2. Add and test General Knowledge online.
-3. Add and test Bible online.
-4. Add and test Africa & Nigeria online.
-5. Add and test Current Affairs online.
-6. After the remaining categories are working and tested, switch to `ui-ux-project.md` and begin the planned UI/UX design phase.
+1. Preserve the V1.1.3 signed-release checkpoint.
+2. Build/test General Knowledge in Debug Android.
+3. Run repeated General Knowledge quizzes and verify fresh/recent-question behavior.
+4. Add and test Bible online.
+5. Add and test Africa & Nigeria online.
+6. Add and test Current Affairs online.
+7. After the remaining categories are working and tested, switch to `ui-ux-project.md` and begin the planned UI/UX design phase.
 
 **Long-term goal:**
 Build Daily Quiz & Challenge into a great, durable quiz platform that people can repeatedly use and trust. The long-term system should grow into multiple high-quality categories, fresh/current content where appropriate, strong difficulty and anti-repetition systems, polished gameplay/results, dependable monetization, and a professional UI/UX.
