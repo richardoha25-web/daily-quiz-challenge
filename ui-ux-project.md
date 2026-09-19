@@ -5,9 +5,9 @@
 
 ## 1. Design Project Status
 
-**Current phase:** UI/UX planning — do not redesign production code yet.
+**Current phase:** UI/UX planning + product architecture alignment — do not redesign production code yet.
 
-The current V1.1.3 app has reached a stable functional checkpoint. The immediate development priority is to finish and test the remaining online quiz categories/providers before beginning the major UI/UX implementation.
+Science and General Knowledge are now integrated and Android-tested. The remaining work is to research/define Africa & Nigeria, Current Affairs, and the new Bible reading/quiz architecture before the major UI implementation. This file and the main `project.md` must stay synchronized at major planning checkpoints.
 
 When the functional foundation is ready, this file becomes the primary blueprint for the redesign.
 
@@ -192,13 +192,15 @@ The home screen should not simply present five equal category rectangles.
 
 Every category gets its own identity while remaining part of one design system.
 
+The category model is now broader than the original five-card quiz layout. Bible is a multi-screen reading/study experience, while Current Affairs and Africa & Nigeria require online content workflows. The final navigation must accommodate these differences without fragmenting the overall design language.
+
 Initial categories:
 
 - General Knowledge — brain/globe/knowledge imagery
 - Science — atom/science imagery
-- Bible — book/light imagery
+- Bible — book/light imagery; opens into a dedicated Bible experience rather than immediately forcing a quiz
 - Africa & Nigeria — subtle African geographic/cultural identity
-- Current Affairs — news/world imagery
+- Current Affairs — news/world imagery and freshness/status cues
 
 Rules:
 
@@ -392,9 +394,9 @@ The user should understand that the rewarded action is optional.
 
 The redesign must preserve ad functionality and must not hide, overlap, or break the ad containers.
 
-## 17. Loading, Error & Offline UX
+## 17. Loading, Error & Connectivity UX
 
-Because the app depends on online question delivery, network states are first-class UX states.
+Because online question delivery is required for quizzes while the Bible Library is intended to work offline, connectivity is a first-class global UX state.
 
 Design states for:
 
@@ -417,6 +419,19 @@ Messages should be:
 
 Example direction:
 
+**No internet connection**  
+“Bible reading is available offline, but quizzes and online features require an internet connection.”
+
+For quiz entry:
+
+**Internet connection required**  
+“Please connect to the internet to start a quiz.”
+
+If the connection disappears:
+
+**Connection lost**  
+“Please reconnect to continue.”
+
 **Quiz unavailable**  
 “We couldn't load new questions right now.”
 
@@ -426,7 +441,7 @@ Avoid exposing raw technical errors to normal users.
 
 ## 18. Navigation
 
-Navigation should be simple and predictable.
+Navigation should be simple and predictable, but the final architecture must support both quick quiz play and the deeper Bible reading experience.
 
 We will decide during UX architecture whether the final product needs:
 
@@ -437,6 +452,27 @@ We will decide during UX architecture whether the final product needs:
 - Home/category/game/result flow
 
 Navigation must not compete with the quiz itself.
+
+### Product information architecture direction
+
+```text
+DAILY QUIZ & CHALLENGE
+│
+├── Home
+├── Quizzes
+│   ├── General Knowledge
+│   ├── Science
+│   ├── Africa & Nigeria
+│   ├── Current Affairs
+│   └── Bible Quiz
+├── Bible
+│   ├── Read Bible
+│   └── Bible Quiz
+├── Results / Progress
+└── Settings
+```
+
+This is an architecture direction, not a locked visual navigation implementation.
 
 ## 19. Component Design System
 
@@ -537,8 +573,8 @@ Requirements:
 
 ## 23. UX Architecture Workflow
 
-### Phase 1 — UX Architecture
-Map the complete user journey.
+### Phase 1 — Product/UX Architecture
+First map the complete product journey using the now-known category/provider capabilities. Do not finalize visual navigation before the Africa & Nigeria, Current Affairs and Bible architecture is sufficiently understood.
 
 Define:
 
@@ -643,7 +679,7 @@ The product design philosophy is:
 
 The current stable app is valuable.
 
-The redesign should be developed from a known-good functional checkpoint so that visual changes can be separated from functional debugging.
+The redesign should be developed from a known-good functional checkpoint so visual changes can be separated from functional debugging. Do not redesign only the current five-card screen and then retrofit Bible; design the final information architecture around the complete product.
 
 The existing main `project.md` remains the source of truth for app-development status.
 
@@ -676,25 +712,28 @@ Not yet started:
 
 ## 28. Immediate UI/UX Next Steps
 
-When the app's remaining V1.1 categories/providers have been completed and tested:
+The UI/UX implementation remains intentionally deferred, but planning must now stay synchronized with backend/category research.
 
-1. Review this blueprint.
-2. Map the complete user journey.
-3. Create the first wireframes.
+1. Track the Africa & Nigeria provider architecture.
+2. Track the Current Affairs provider/freshness architecture.
+3. Track the Bible Library/offline reader + online quiz architecture.
+4. Review this blueprint against those capabilities.
+5. Map the complete product/user journey.
+6. Create the first wireframes.
 4. Start with the highest-impact screens:
    - Home
    - Category selection
    - Quiz
    - Results
-5. Review the visual direction.
-6. Establish the reusable design system.
-7. Build the remaining screens.
-8. Create an interactive prototype.
-9. Test the prototype on the Oppo A56.
-10. Refine before touching production UI code.
-11. Implement carefully in React/Vite.
-12. Build an APK.
-13. Perform full regression testing.
+7. Review the visual direction.
+8. Establish the reusable design system.
+9. Build the remaining screens.
+10. Create an interactive prototype.
+11. Test the prototype on the Oppo A56.
+12. Refine before touching production UI code.
+13. Implement carefully in React/Vite.
+14. Build an APK.
+15. Perform full regression testing.
 
 ## 29. Long-Term UI/UX Goal
 
@@ -719,6 +758,16 @@ It should support future expansion such as:
 The design system must therefore be built for **long-term scalability**, not just the next APK.
 
 ---
+
+## 30. Current synchronized product direction
+
+**Bible:** World English Bible (WEB), Catholic edition / Catholic book order where the selected source provides it. Bible reading is intended to work offline from local storage after the source/license is verified. Bible quizzes remain online.
+
+**Connectivity:** The redesigned app needs a centralized connectivity state. Online-required features should clearly explain the requirement; offline Bible reading should remain usable.
+
+**Provider sequence:** General Knowledge and Science are complete; Africa & Nigeria and Current Affairs are next research targets; Bible architecture/provider research continues in parallel.
+
+**Design sequencing:** Define the remaining product architecture first, then redesign the UI/UX once around the complete experience. Keep this file synchronized with `project.md`.
 
 ## Design North Star
 
