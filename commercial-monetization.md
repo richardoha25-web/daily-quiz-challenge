@@ -1,8 +1,22 @@
 # Daily Quiz & Challenge — Commercial & Monetization Plan
 
 **File:** `commercial-monetization.md`  
-**Status:** Strategic product specification — planned, not yet fully implemented  
+**Status:** Strategic product specification — planned, not yet fully implemented. Commercial implementation remains deferred while the three remaining V1 categories are completed and the existing app is stabilized.  
 **Purpose:** Single source of truth for the commercial, premium, advertising, entitlement, and revenue architecture of Daily Quiz & Challenge.
+
+---
+
+## V1 checkpoint — 20 September 2026
+
+The commercial strategy and billing architecture remain planned specifications. No billing, Premium entitlement enforcement, or new monetization implementation is being started during the current V1 category-completion milestone.
+
+Immediate product priority:
+- Finish Africa & Nigeria.
+- Finish Bible.
+- Finish Current Affairs.
+- Stabilize the full V1 quiz experience.
+
+After V1 stabilization, the commercial plan will be revisited alongside the technical architecture, new brand/package identity, and UI/UX redesign. Provider/source choices for the remaining categories should consider commercial licensing, but category completion should not be blocked by trying to perfect the entire future monetization system now.
 
 ---
 
