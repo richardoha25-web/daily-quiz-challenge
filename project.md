@@ -1,7 +1,7 @@
 # Daily Quiz & Challenge — Project Continuity Record
 
 **Last updated:** 20 September 2026  
-**Stage:** V1.1.4 AdMob Reliability Pass is implemented and **Android Debug validation PASSED**. Science and General Knowledge remain the fully validated online quiz categories. **Current focus: proceed to Africa & Nigeria provider/source research, then Current Affairs and Bible architecture. V2 remains paused.**
+**Stage:** V1.1.4 AdMob Reliability Pass is implemented and **Android Debug validation PASSED**. Science and General Knowledge remain the fully validated online quiz categories. **Current focus: complete the remaining Africa & Nigeria, Bible, and Current Affairs categories and stabilize the existing V1 before starting major architectural, branding, or UI/UX changes. V2 remains paused.**
 
 ## Long-term product vision
 Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz system for real users**, not just a small one-off quiz app. The goal is a reliable platform with fresh online questions, strong anti-repetition logic, multiple categories, meaningful difficulty, polished gameplay, useful explanations/results, dependable monetization, and a professional UI/UX that people enjoy returning to. Development should favor a stable foundation and incremental verification so future features can grow without bringing back the old static-question problems.
@@ -19,7 +19,7 @@ Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz sy
 
 **V1.1.4 Android Debug validation result:** the latest Debug APK was installed and tested on the Android phone. The startup/loading experience, test App Open behavior, Home bottom banner, Quiz top banner, Results bottom banner, interstitial, and rewarded +20 flow behaved as expected. Banner placement remained usable and did not block quiz content. Development is using AdMob test ads, so this validates the implementation/lifecycle rather than guaranteeing production ad fill or identical real-ad availability.
 
-**Immediate next step:** begin provider/source research for Africa & Nigeria. Do not switch to production AdMob IDs merely for development testing; production availability can vary with fill, network, inventory and account/frequency controls.
+**Immediate next step:** complete the remaining three V1 categories — Africa & Nigeria, Bible, and Current Affairs — using practical providers/sources that can supply suitable content. Provider category labels do not need to exactly match the app's user-facing categories; the Worker can normalize relevant source content into the app's category model. After all five categories are working, run a full V1 stabilization pass before beginning the larger planned redesign, branding, native Android migration, account, and billing work. Do not switch to production AdMob IDs merely for development testing; production availability can vary with fill, network, inventory and account/frequency controls.
 
 **UI/UX planning update:** a dedicated `ui-ux-project.md` has been created as the blueprint for the future redesign. It is intentionally separate from this file so this project record stays concise. The current UI remains functional but is **not the desired final experience**.
 
@@ -425,7 +425,7 @@ Obsolete workflows removed:
 
 Do not change the release workflow unnecessarily.
 
-## 16. Category/provider roadmap — NEW MASTER PLAN
+## 16. Category/provider roadmap — V1 COMPLETION MASTER PLAN
 
 The remaining categories must not be implemented all at once. Use this sequence for every new category:
 
@@ -443,14 +443,14 @@ Provider/source research → architecture/data model → Worker endpoint → bro
 - Easy/Medium/Hard tests complete
 - Android validation complete
 
-### Africa & Nigeria — NEXT RESEARCH TARGET
+### Africa & Nigeria — IN PROGRESS / NEXT CATEGORY
 Before coding:
-- identify reliable Africa/Nigeria question sources
+- identify a practical reliable source/provider that can supply relevant African/Nigerian questions
+- provider taxonomy does not need to exactly match the app category; relevant Africa/Nigeria history, geography, culture, civic knowledge, notable people, etc. can be normalized into one app category
 - verify commercial-use rights
 - evaluate question quality and freshness
-- define Nigeria/Africa topic structure
-- define category-specific metadata
-- implement through Cloudflare Worker
+- define the minimum topic coverage needed for V1
+- implement through Cloudflare Worker without disturbing existing Science/General Knowledge flows
 - test Worker, Question Engine, and Android one stage at a time
 
 Planned content areas include Nigerian history, geography, culture, civic/government knowledge, African history/geography/culture, and notable African figures.
@@ -504,6 +504,32 @@ Quizarama remains a candidate, but its public API licensing/commercial terms wer
 
 #### Future AI Bible study
 The long-term goal is to generate questions from a selected Bible chapter/passage. This requires a Bible text source whose license explicitly permits the intended AI/question-generation use.
+
+## V1 completion checkpoint
+
+The immediate objective is deliberately narrow: **finish the three remaining categories and establish a stable V1 before beginning major redesign or migration work.**
+
+### Remaining V1 categories
+- Africa & Nigeria — next implementation target.
+- Bible — implement after/alongside Africa & Nigeria using the planned Bible-specific content/licensing approach.
+- Current Affairs — implement as fresh online content, with provider/source strategy appropriate to changing information.
+
+### Provider principle for this milestone
+The provider's internal category structure does **not** need to mirror the app's user-facing categories. For V1, the goal is to obtain suitable usable questions/content and normalize them into the app's three remaining categories. We should not block completion merely because a provider labels content as Africa, Nigeria, History, Geography, Culture, Religion, or another narrower/broader taxonomy.
+
+Provider quality and licensing still matter, but we should solve the category problem pragmatically first and avoid premature provider perfection or multi-provider complexity unless it is necessary for reliability.
+
+### What happens after the three categories
+Once Africa & Nigeria, Bible, and Current Affairs are functioning:
+1. Run a full V1 category and quiz-flow stability pass.
+2. Verify internet-loss/error behavior, question retrieval, duplicate/recent-history behavior, scoring, ads, navigation, results, and repeated sessions across all categories.
+3. Treat the existing React/Vite/Capacitor app as the validated V1/reference implementation.
+4. Conduct a technical/product audit before major changes.
+5. Revisit the planned brand/company name, application/package identity, native Android architecture, UI/UX redesign, accounts, billing, and broader learning-platform work.
+
+The native Android direction and new brand are **planned future decisions, not current implementation tasks**. Do not rename the package, migrate the stack, or replace the current UI solely because these plans have been discussed.
+
+---
 
 ## 17. Bible connectivity model
 The app will distinguish between offline-capable Bible reading and online-required quiz/online services.
@@ -658,5 +684,4 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 38. Update the Richard Studios website only after release validation passes.
 39. Retest the public download/install/update path.
 40. Keep billing architecture synchronized across `project.md`, `commercial-monetization.md`, and `ui-ux-project.md`; do not implement billing until the planned commercial/account foundation is ready.
-
 
