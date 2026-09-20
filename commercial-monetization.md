@@ -546,21 +546,150 @@ The exact state machine will be defined during implementation.
 
 ---
 
-# 19. Google Play Billing
+# 19. Billing and payment architecture
 
-When the Android app is published commercially on Google Play, digital subscriptions and one-time digital purchases should be designed around **Google Play Billing**.
+The commercial payment system should separate **payment collection**, **trusted verification**, and **feature entitlement**.
 
-The app should not invent an insecure custom payment mechanism.
+### 19.1 Primary Android payment layer
 
-Purchase/subscription verification should not rely solely on values supplied by the APK.
+For digital subscriptions and one-time digital purchases distributed through Google Play, the planned primary payment layer is **Google Play Billing**.
 
-The eventual architecture should use trusted server-side verification and entitlement synchronization.
+Planned purchase types include:
 
-### Current status
+- Premium monthly subscription.
+- Premium yearly subscription.
+- One-time Remove Ads purchase.
+- One-time premium content packs.
+- Other eligible digital products introduced later.
 
-Google Play Billing does not need to be implemented immediately.
+The app should not create an insecure custom card-payment mechanism inside the Android APK for Google Play digital purchases. The final implementation must follow the applicable Google Play billing requirements and supported alternative-billing/program rules in force when implemented.
 
-First build the commercial architecture and entitlement model so Billing can be added without redesigning the whole app.
+### 19.2 Trusted purchase and entitlement flow
+
+```text
+User
+  ↓
+Premium / Store UI
+  ↓
+Google Play Billing
+  ↓
+Purchase / subscription result
+  ↓
+Trusted verification + synchronization
+  ↓
+Subscription / purchase state
+  ↓
+Centralized entitlements
+  ↓
+Feature/content access
+```
+
+The client must not be the sole authority for Premium access. A client-side purchase-success callback can initiate synchronization, but trusted backend verification should determine the authoritative commercial state.
+
+### 19.3 Centralized entitlement model
+
+The app should avoid hard-coding rules throughout individual screens or categories.
+
+Potential entitlement IDs:
+
+- `premium`
+- `remove_ads`
+- `bible_full`
+- `current_affairs_pro`
+- `advanced_stats`
+- `endless_mode`
+- future content-pack/feature IDs
+
+Example:
+
+**Purchase Premium → verified purchase → `premium = active` → Premium-enabled features become available.**
+
+This allows the commercial offer to evolve without rebuilding payment logic into every feature.
+
+### 19.4 User access states
+
+The entitlement system should support states such as:
+
+- Free.
+- Premium monthly.
+- Premium yearly.
+- Remove Ads.
+- Premium + Remove Ads if offered.
+- Active until subscription expiry after cancellation.
+- Expired.
+- Grace/recovery states where supported.
+- Restored purchase.
+- Pending/unverified.
+- Verification failure.
+- Synchronization failure.
+
+The exact state machine will be finalized during implementation.
+
+### 19.5 Firebase / Cloudflare role
+
+The eventual trusted architecture can use the existing backend foundation:
+
+**Android App**
+→ **Billing client**
+→ **Trusted verification/synchronization**
+→ **Firebase/Cloudflare services**
+→ **Central entitlement state**
+→ **Feature/content access**
+
+Potential commercial data includes:
+
+- `users`
+- `subscriptions`
+- `purchases`
+- `entitlements`
+- verification state
+- expiry/cancellation state
+- restore/synchronization state
+
+Cloudflare Worker remains the intermediary for provider/content services and may participate in access-aware delivery where appropriate. Private provider keys and trusted commercial secrets must never be embedded in the APK.
+
+### 19.6 Future web/direct-payment channel
+
+A separate web-payment path may be introduced later for products legitimately sold outside the Google Play Android purchase flow.
+
+A provider such as a suitable international/web payment processor can be evaluated at that stage based on:
+
+- country availability
+- international payment coverage
+- payout support for Richard Studios
+- transaction fees
+- recurring-payment support
+- refund/dispute handling
+- API quality
+- commercial/legal requirements
+- platform rules
+
+The web payment system should map into the same entitlement model where appropriate rather than creating a second incompatible Premium system.
+
+### 19.7 UX requirements
+
+The payment experience should provide:
+
+- Premium/store entry.
+- Clear benefits.
+- Clear price and billing period.
+- Monthly/yearly choices where offered.
+- One-time purchase presentation where offered.
+- Purchase confirmation.
+- Restore/synchronize purchases.
+- Current entitlement status.
+- Expiry/cancellation information where relevant.
+- Grace/error states where supported.
+- A clear return path to the app.
+- No deceptive or aggressive paywalls.
+
+### 19.8 Implementation status
+
+**Architecture only — not implemented.**
+
+Do not create production subscription IDs, purchase products, billing code or entitlement enforcement yet.
+
+Billing should be implemented only after the core content architecture is stable and the account/entitlement foundation is ready.
 
 ---
 
