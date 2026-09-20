@@ -5,11 +5,14 @@
 
 ## 1. Design Project Status
 
-**Current phase:** UI/UX planning + product architecture alignment — do not redesign production code yet.
+**Current phase:** UI/UX planning + product architecture alignment — do not redesign production code yet. The immediate V1 priority is to finish Africa & Nigeria, Bible, and Current Affairs and stabilize the existing app before beginning the major redesign.
 
 Science and General Knowledge are now integrated and Android-tested. The remaining work is to research/define Africa & Nigeria, Current Affairs, and the new Bible reading/quiz architecture before the major UI implementation. This file and the main `project.md` must stay synchronized at major planning checkpoints.
 
 When the functional foundation is ready, this file becomes the primary blueprint for the redesign.
+
+### V1 checkpoint — 20 September 2026
+The redesign is intentionally deferred while the current V1 is completed. The current React/Vite/Capacitor UI remains the working validation interface. Discussion of a future native Android foundation, new product/company branding, and expanded learning-platform navigation is planning only; none should trigger a production UI rewrite yet. After the three remaining categories are working, a full V1 stability pass will precede the major UI/UX implementation.
 
 ## 2. Product Vision
 
