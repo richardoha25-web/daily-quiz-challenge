@@ -394,6 +394,96 @@ The user should understand that the rewarded action is optional.
 
 The redesign must preserve ad functionality and must not hide, overlap, or break the ad containers.
 
+## 16.1 Billing, Premium and purchase UX
+
+Billing is a planned product experience and must be designed together with the commercial entitlement architecture.
+
+### Payment experience
+
+For the Android Google Play version, digital purchases should use the planned Google Play Billing flow.
+
+The UI should not make users enter card details directly into the quiz app. The app should present the product clearly and then hand the transaction to the supported Google Play purchase experience.
+
+Conceptual journey:
+
+```text
+Home / Profile
+      ↓
+Premium / Store
+      ↓
+Choose product
+      ↓
+Google Play purchase flow
+      ↓
+Purchase confirmation
+      ↓
+Entitlement synchronization
+      ↓
+Premium feature/content unlocked
+```
+
+### Planned purchase surfaces
+
+The redesign should account for:
+
+- Premium landing/store screen.
+- Monthly/yearly subscription cards where offered.
+- One-time Remove Ads product.
+- Premium content-pack cards.
+- Product detail/benefit view where needed.
+- Purchase confirmation state.
+- Restore/synchronize purchases.
+- Active Premium status.
+- Expired/cancelled/pending/error states where relevant.
+
+### UX principles
+
+- Show the value before asking for payment.
+- Make prices and billing periods obvious.
+- Clearly distinguish subscriptions from one-time purchases.
+- Never hide important terms.
+- Do not use deceptive urgency.
+- Do not create aggressive paywalls.
+- Keep the free experience useful.
+- Make restore/synchronization easy to find.
+- Clearly communicate what the user's entitlement unlocks.
+- Keep purchase errors understandable and actionable.
+- Never make an unavailable payment method look available.
+- Preserve the user's place in the app when returning from the purchase flow.
+
+### Entitlement-aware UI
+
+The interface should consume centralized entitlement state rather than independently deciding who is Premium.
+
+Example:
+
+```text
+Entitlement: premium = active
+        ↓
+Premium category/mode cards become unlocked
+        ↓
+Locked features show clear benefits and upgrade action
+```
+
+This same design should work later for:
+
+- `remove_ads`
+- `bible_full`
+- `current_affairs_pro`
+- `advanced_stats`
+- `endless_mode`
+- future content packs
+
+### Web/direct-payment future
+
+A separate web purchase experience may be designed later for legitimately web-sold products. It should remain visually and commercially consistent with the app while respecting the platform rules governing links and purchases from the Android app.
+
+### Current status
+
+**Billing UI is planned, not implemented.** It belongs in the high-fidelity redesign/prototype phase before production billing code is added.
+
+---
+
 ## 17. Loading, Error & Connectivity UX
 
 Because online question delivery is required for quizzes while the Bible Library is intended to work offline, connectivity is a first-class global UX state.
