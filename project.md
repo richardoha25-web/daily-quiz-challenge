@@ -1,6 +1,6 @@
 # Daily Quiz & Challenge — Project Continuity Record
 
-**Last updated:** 19 September 2026  
+**Last updated:** 20 September 2026  
 **Stage:** V1.1.4 AdMob Reliability Pass is implemented and **Android Debug validation PASSED**. Science and General Knowledge remain the fully validated online quiz categories. **Current focus: proceed to Africa & Nigeria provider/source research, then Current Affairs and Bible architecture. V2 remains paused.**
 
 ## Long-term product vision
@@ -282,6 +282,115 @@ Ad availability is not guaranteed; fill, inventory, network, account and frequen
 
 **V1.1.4 Android validation PASSED:** test ads confirmed the startup/loading flow, returning-launch App Open handling, Home bottom banner, Quiz top banner, Results bottom banner, interstitial and Rewarded +20 behavior. The test environment does not guarantee production ad fill or identical real-ad availability; production ads can vary with inventory, network, account/frequency controls and other serving conditions.
 
+## 13.1 Planned billing and entitlement architecture — DESIGN ONLY
+
+Billing is a planned commercial capability, not a current implementation milestone.
+
+### Primary Android payment architecture
+
+For digital subscriptions and one-time digital purchases distributed through Google Play, the planned primary payment layer is **Google Play Billing**.
+
+The app should not implement a custom card-payment system inside the Android APK for Google Play digital purchases. The final implementation must follow the applicable Google Play billing requirements and supported program options at the time of implementation.
+
+Conceptual flow:
+
+```text
+User
+  ↓
+Premium / Store UI
+  ↓
+Google Play Billing
+  ↓
+Purchase or subscription result
+  ↓
+Trusted purchase verification
+  ↓
+Entitlement service
+  ↓
+User access
+```
+
+### Entitlement architecture
+
+Payment status and feature access must be separated.
+
+The Android client must not permanently grant Premium merely because it received a client-side purchase-success callback. A trusted backend verification/synchronization layer should determine the authoritative entitlement state.
+
+Conceptual model:
+
+```text
+Google Play purchase
+        ↓
+Trusted verification
+        ↓
+Subscription / purchase state
+        ↓
+Entitlements
+        ↓
+Access control
+        ↓
+Premium feature/content
+```
+
+Planned entitlement IDs include:
+
+- `premium`
+- `remove_ads`
+- `bible_full`
+- `current_affairs_pro`
+- `advanced_stats`
+- `endless_mode`
+- future content-pack or feature entitlements
+
+The UI, quiz engine and content services should query centralized entitlement state rather than each implementing separate payment rules.
+
+### Backend responsibility
+
+Future billing implementation should use trusted backend infrastructure for purchase verification and entitlement synchronization. Firebase and/or Cloudflare can participate according to the final security architecture.
+
+Potential commercial data:
+
+- `users`
+- `subscriptions`
+- `purchases`
+- `entitlements`
+- entitlement status/expiry information
+- verification state
+- restore/synchronization state
+
+Private billing/provider secrets must never be embedded in the APK.
+
+### Future web/direct-payment channel
+
+A separate web-payment path may be considered later for products or purchases that are legitimately sold outside the Google Play Android purchase flow. A web payment provider can be selected at that stage after checking provider availability, fees, international coverage, commercial rights and applicable platform rules.
+
+The web payment path must remain separate from the Android Google Play Billing entitlement flow, while both ultimately map to the same centralized entitlement model where legally and technically appropriate.
+
+### UX requirements
+
+The future billing UX should include:
+
+- Premium/store entry
+- Clear product benefits
+- Monthly/yearly subscription choices where offered
+- One-time purchase presentation where offered
+- Price and billing-period clarity
+- Purchase confirmation
+- Restore/synchronize purchases
+- Active entitlement state
+- Expiry/cancellation messaging where relevant
+- Grace/error states where supported
+- Clear path back to the app
+- No deceptive or aggressive paywalls
+
+### Current status
+
+**Architecture planned only. No Google Play Billing code, purchase products, subscription IDs or production entitlement enforcement should be added yet.**
+
+Billing implementation belongs after the core online content architecture, UI/UX redesign and stable account/entitlement foundation are sufficiently mature.
+
+---
+
 ## 14. Android versioning/signing
 Package ID must remain `com.richard.dailyquizchallenge`.
 
@@ -548,5 +657,6 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 37. Test signed Release installation/update over the previous release without uninstalling.
 38. Update the Richard Studios website only after release validation passes.
 39. Retest the public download/install/update path.
+40. Keep billing architecture synchronized across `project.md`, `commercial-monetization.md`, and `ui-ux-project.md`; do not implement billing until the planned commercial/account foundation is ready.
 
 
