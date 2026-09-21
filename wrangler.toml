@@ -1,3 +1,6 @@
 name = "daily-quiz-intermidiary"
 main = "worker/index.js"
 compatibility_date = "2026-09-17"
+
+[secrets]
+required = ["AFRICA_API_KEY"]
