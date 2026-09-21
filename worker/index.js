@@ -75,6 +75,67 @@ version: "1.0"
 }, 200, request);
 }
 
+if (url.pathname === "/api/test/quizbase-africa-nigeria") {
+const apiUrl = new URL("https://quizbase.runriva.com/api/v1/questions/random");
+apiUrl.searchParams.set("amount", "10");
+apiUrl.searchParams.set("lang", "en");
+apiUrl.searchParams.set("regions", "ng");
+apiUrl.searchParams.set("quality", "high");
+
+let response;
+
+try {
+response = await fetch(apiUrl.toString(), {
+headers: {
+"X-API-Key": QUIZBASE_API_KEY
+},
+signal: AbortSignal.timeout(10000)
+});
+} catch (error) {
+return json({
+ok: false,
+error: "QUIZBASE_TIMEOUT",
+message: "QuizBase test request timed out."
+}, 504, request);
+}
+
+if (!response.ok) {
+const body = await response.text();
+return json({
+ok: false,
+error: "QUIZBASE_UNAVAILABLE",
+status: response.status,
+message: "QuizBase test request failed.",
+providerResponse: body.slice(0, 2000)
+}, 502, request);
+}
+
+let data;
+
+try {
+data = await response.json();
+} catch (error) {
+return json({
+ok: false,
+error: "QUIZBASE_INVALID_RESPONSE",
+message: "QuizBase returned an invalid JSON response."
+}, 502, request);
+}
+
+return json({
+ok: true,
+provider: "QuizBase",
+test: "Africa/Nigeria",
+filters: {
+amount: 10,
+language: "en",
+regions: ["ng"],
+quality: "high"
+},
+data
+}, 200, request);
+}
+
 if (url.pathname === "/api/questions") {
 const category = url.searchParams.get("category");
 const difficulty = url.searchParams.get("difficulty");
