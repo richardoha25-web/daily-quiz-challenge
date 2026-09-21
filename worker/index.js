@@ -221,82 +221,121 @@ data
 }
 
 if (url.pathname === "/api/test/wikidata-africa-nigeria") {
-const countryQuery = `
-SELECT ?subject ?subjectLabel ?capital ?capitalLabel WHERE {
-  ?subject wdt:P30 wd:Q15;
-           wdt:P36 ?capital.
+const query = `
+SELECT ?country ?countryLabel ?capital ?capitalLabel WHERE {
+  VALUES ?country {
+    wd:Q1033
+    wd:Q117
+    wd:Q114
+    wd:Q79
+    wd:Q258
+    wd:Q1041
+    wd:Q1036
+    wd:Q1037
+  }
+  ?country wdt:P36 ?capital.
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
 }
 LIMIT 12
 `;
 
-const nigeriaStateQuery = `
-SELECT ?subject ?subjectLabel ?capital ?capitalLabel WHERE {
-  ?subject wdt:P17 wd:Q1033;
-           wdt:P36 ?capital.
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
-}
-LIMIT 12
-`;
-
-let countryRows;
-let nigeriaStateRows;
+let rows;
 
 try {
-countryRows = await fetchWikidataRows(countryQuery);
-nigeriaStateRows = await fetchWikidataRows(nigeriaStateQuery);
+rows = await fetchWikidataRows(query);
 } catch (error) {
 return json({
 ok: false,
 error: "WIKIDATA_UNAVAILABLE",
 message: "Wikidata prototype request failed.",
-details: String(error).slice(0, 1000)
+detail: error instanceof Error ? error.message : String(error)
 }, 502, request);
 }
 
+const facts = rows
+.map(row => ({
+type: "country_capital",
+entity: wikidataValue(row, "country"),
+entityLabel: wikidataValue(row, "countryLabel"),
+value: wikidataValue(row, "capital"),
+valueLabel: wikidataValue(row, "capitalLabel")
+}))
+.filter(item => item.entityLabel && item.valueLabel);
+
 const questions = [];
 
-for (const row of countryRows) {
-const question = await buildWikidataCapitalQuestion(
-row,
-countryRows,
-"country"
+for (const fact of shuffle(facts)) {
+if (questions.length >= 8) break;
+
+const distractorPool = shuffle(
+facts
+.filter(item => item.value !== fact.value && item.valueLabel !== fact.valueLabel)
+.map(item => item.valueLabel)
 );
 
-if (question) {
-questions.push(question);
-}
+const distractors = [];
+for (const answer of distractorPool) {
+if (!distractors.includes(answer)) distractors.push(answer);
+if (distractors.length === 3) break;
 }
 
-for (const row of nigeriaStateRows) {
-const question = await buildWikidataCapitalQuestion(
-row,
-nigeriaStateRows,
-"state"
+if (distractors.length < 3) continue;
+
+const reverse = Math.random() < 0.35;
+const question = reverse
+? `${fact.valueLabel} is the capital of which country?`
+: `Which city serves as the capital of ${fact.entityLabel}?`;
+
+const correctAnswer = reverse ? fact.entityLabel : fact.valueLabel;
+const options = shuffle([
+correctAnswer,
+...distractors
+]);
+
+const id = await createId(
+`wikidata|africa_nigeria|country_capital|${fact.entity}|${fact.value}`
 );
 
-if (question) {
-questions.push(question);
+questions.push({
+id: `wikidata-${id}`,
+category: "africa_nigeria",
+difficulty: "medium",
+question,
+options,
+correctAnswer,
+explanation: "",
+source: "Wikidata",
+sourceId: fact.entity,
+isRemote: true,
+createdAt: new Date().toISOString(),
+updatedAt: new Date().toISOString()
+});
 }
+
+if (questions.length === 0) {
+return json({
+ok: false,
+error: "NO_QUESTIONS",
+message: "Wikidata did not provide enough valid Africa & Nigeria prototype questions."
+}, 404, request);
 }
 
 return json({
 ok: true,
 category: "africa_nigeria",
-prototype: true,
+difficulty: "medium",
+limit: questions.length,
 source: "Wikidata",
-template: [
-"country → capital",
-"Nigerian state → capital"
+queryType: "small seeded African country-capital query",
+questionTemplates: [
+"Which city serves as the capital of {country}?",
+"{capital} is the capital of which country?"
 ],
-counts: {
-africanCountryFacts: countryRows.length,
-nigerianStateFacts: nigeriaStateRows.length,
-generatedQuestions: questions.length
-},
-questions: questions.slice(0, 20)
+factsReturned: facts.length,
+questions
 }, 200, request);
 }
+
 
 if (url.pathname === "/api/questions") {
 const category = url.searchParams.get("category");
