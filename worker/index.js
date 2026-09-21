@@ -51,7 +51,7 @@ return Array.from(new Uint8Array(hash))
 }
 
 export default {
-async fetch(request) {
+async fetch(request, env) {
 const url = new URL(request.url);
 
 if (request.method === "OPTIONS") {
@@ -87,7 +87,7 @@ let response;
 try {
 response = await fetch(apiUrl.toString(), {
 headers: {
-"X-API-Key": QUIZBASE_API_KEY
+"X-API-Key": env.QUIZBASE_API_KEY
 },
 signal: AbortSignal.timeout(10000)
 });
