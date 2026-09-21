@@ -1,4 +1,5 @@
 const OPEN_TRIVIA_URL = "https://opentdb.com/api.php";
+const WIKIDATA_SPARQL_URL = "https://query.wikidata.org/sparql";
 
 function json(data, status = 200, request) {
 const origin = request?.headers.get("Origin") || "*";
@@ -48,6 +49,99 @@ const hash = await crypto.subtle.digest("SHA-256", data);
 return Array.from(new Uint8Array(hash))
 .map(byte => byte.toString(16).padStart(2, "0"))
 .join("");
+}
+
+async function fetchWikidataRows(query) {
+const apiUrl = new URL(WIKIDATA_SPARQL_URL);
+apiUrl.searchParams.set("query", query);
+apiUrl.searchParams.set("format", "json");
+
+const response = await fetch(apiUrl.toString(), {
+headers: {
+"Accept": "application/sparql-results+json",
+"User-Agent": "DailyQuizChallenge/1.0 (Wikidata prototype)"
+},
+signal: AbortSignal.timeout(10000)
+});
+
+if (!response.ok) {
+const body = await response.text();
+throw new Error(`Wikidata returned HTTP ${response.status}: ${body.slice(0, 500)}`);
+}
+
+const data = await response.json();
+return data?.results?.bindings || [];
+}
+
+async function buildWikidataCapitalQuestion(row, pool, type) {
+const subject = row.subject?.value;
+const subjectLabel = row.subjectLabel?.value;
+const answer = row.capitalLabel?.value;
+const answerId = row.capital?.value?.split("/").pop();
+
+if (!subject || !subjectLabel || !answer || !answerId) {
+return null;
+}
+
+const distractors = [];
+const seen = new Set([answer.toLowerCase()]);
+
+for (const candidate of pool) {
+const candidateAnswer = candidate.capitalLabel?.value?.trim();
+
+if (!candidateAnswer) {
+continue;
+}
+
+const key = candidateAnswer.toLowerCase();
+
+if (seen.has(key)) {
+continue;
+}
+
+seen.add(key);
+distractors.push(candidateAnswer);
+
+if (distractors.length === 3) {
+break;
+}
+
+}
+
+if (distractors.length !== 3) {
+return null;
+}
+
+const question = type === "state"
+? `Which city serves as the capital of ${subjectLabel}?`
+: `What is the capital city of ${subjectLabel}?`;
+
+const correctAnswer = answer;
+const options = shuffle([correctAnswer, ...distractors]);
+
+const idSource = [
+"wikidata",
+type,
+subject,
+answerId
+].join("|");
+
+const id = await createId(idSource);
+
+return {
+id: `wikidata-${id}`,
+category: "africa_nigeria",
+difficulty: "medium",
+question,
+options,
+correctAnswer,
+explanation: "",
+source: "Wikidata",
+sourceId: `${subject.split("/").pop()}|P36|${answerId}`,
+isRemote: true,
+createdAt: new Date().toISOString(),
+updatedAt: new Date().toISOString()
+};
 }
 
 export default {
@@ -123,6 +217,84 @@ ok: true,
 provider: "QuizBase",
 test: "QuizBase authentication (/api/v1/me)",
 data
+}, 200, request);
+}
+
+if (url.pathname === "/api/test/wikidata-africa-nigeria") {
+const countryQuery = `
+SELECT ?subject ?subjectLabel ?capital ?capitalLabel WHERE {
+  ?subject wdt:P30 wd:Q15;
+           wdt:P36 ?capital.
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+LIMIT 12
+`;
+
+const nigeriaStateQuery = `
+SELECT ?subject ?subjectLabel ?capital ?capitalLabel WHERE {
+  ?subject wdt:P17 wd:Q1033;
+           wdt:P36 ?capital.
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+LIMIT 12
+`;
+
+let countryRows;
+let nigeriaStateRows;
+
+try {
+countryRows = await fetchWikidataRows(countryQuery);
+nigeriaStateRows = await fetchWikidataRows(nigeriaStateQuery);
+} catch (error) {
+return json({
+ok: false,
+error: "WIKIDATA_UNAVAILABLE",
+message: "Wikidata prototype request failed.",
+details: String(error).slice(0, 1000)
+}, 502, request);
+}
+
+const questions = [];
+
+for (const row of countryRows) {
+const question = await buildWikidataCapitalQuestion(
+row,
+countryRows,
+"country"
+);
+
+if (question) {
+questions.push(question);
+}
+}
+
+for (const row of nigeriaStateRows) {
+const question = await buildWikidataCapitalQuestion(
+row,
+nigeriaStateRows,
+"state"
+);
+
+if (question) {
+questions.push(question);
+}
+}
+
+return json({
+ok: true,
+category: "africa_nigeria",
+prototype: true,
+source: "Wikidata",
+template: [
+"country → capital",
+"Nigerian state → capital"
+],
+counts: {
+africanCountryFacts: countryRows.length,
+nigerianStateFacts: nigeriaStateRows.length,
+generatedQuestions: questions.length
+},
+questions: questions.slice(0, 20)
 }, 200, request);
 }
 
