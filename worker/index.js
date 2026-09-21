@@ -1,4 +1,6 @@
-import { AFRICA_NIGERIA_QUESTION_BANK } from "./data/africaNigeriaQuestionBank.js";\n\nconst OPEN_TRIVIA_URL = "https://opentdb.com/api.php";
+import { AFRICA_NIGERIA_QUESTION_BANK } from "./data/africaNigeriaQuestionBank.js";
+
+const OPEN_TRIVIA_URL = "https://opentdb.com/api.php";
 
 function json(data, status = 200, request) {
 const origin = request?.headers.get("Origin") || "*";
