@@ -76,11 +76,7 @@ version: "1.0"
 }
 
 if (url.pathname === "/api/test/quizbase-africa-nigeria") {
-const apiUrl = new URL("https://quizbase.runriva.com/api/v1/questions/random");
-apiUrl.searchParams.set("amount", "10");
-apiUrl.searchParams.set("lang", "en");
-apiUrl.searchParams.set("regions", "ng");
-apiUrl.searchParams.set("quality", "high");
+const apiUrl = new URL("https://quizbase.runriva.com/api/v1/me");
 
 let response;
 
@@ -125,13 +121,7 @@ message: "QuizBase returned an invalid JSON response."
 return json({
 ok: true,
 provider: "QuizBase",
-test: "Africa/Nigeria",
-filters: {
-amount: 10,
-language: "en",
-regions: ["ng"],
-quality: "high"
-},
+test: "QuizBase authentication (/api/v1/me)",
 data
 }, 200, request);
 }
