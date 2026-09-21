@@ -1,4 +1,4 @@
-const OPEN_TRIVIA_URL = "https://opentdb.com/api.php";
+import { AFRICA_NIGERIA_QUESTION_BANK } from "./data/africaNigeriaQuestionBank.js";\n\nconst OPEN_TRIVIA_URL = "https://opentdb.com/api.php";
 
 function json(data, status = 200, request) {
 const origin = request?.headers.get("Origin") || "*";
@@ -72,6 +72,78 @@ return json({
 ok: true,
 service: "daily-quiz-intermediary",
 version: "1.0"
+}, 200, request);
+}
+
+if (url.pathname === "/api/test/africa-api") {
+const apiKey = env.AFRICA_API_KEY;
+
+if (!apiKey) {
+return json({
+ok: false,
+error: "AFRICA_API_KEY_NOT_CONFIGURED",
+message: "Africa API secret is not configured on the Worker."
+}, 500, request);
+}
+
+let response;
+try {
+response = await fetch("https://api.africa-api.com/v1/countries/ng", {
+headers: {
+Authorization: `Bearer ${apiKey}`
+},
+signal: AbortSignal.timeout(8000)
+});
+} catch (error) {
+return json({
+ok: false,
+error: "AFRICA_API_TIMEOUT",
+message: "Africa API request timed out."
+}, 504, request);
+}
+
+if (response.status === 401 || response.status === 403) {
+return json({
+ok: false,
+error: "AFRICA_API_AUTH_FAILED",
+message: "Africa API authentication failed. Check the AFRICA_API_KEY Worker secret."
+}, response.status, request);
+}
+
+if (response.status === 429) {
+return json({
+ok: false,
+error: "AFRICA_API_RATE_LIMITED",
+message: "Africa API free-tier rate limit was reached."
+}, 429, request);
+}
+
+if (!response.ok) {
+return json({
+ok: false,
+error: "AFRICA_API_UNAVAILABLE",
+message: "Africa API returned an unexpected error."
+}, 503, request);
+}
+
+let data;
+try {
+data = await response.json();
+} catch (error) {
+return json({
+ok: false,
+error: "AFRICA_API_INVALID_RESPONSE",
+message: "Africa API returned invalid JSON."
+}, 503, request);
+}
+
+return json({
+ok: true,
+provider: "Africa API",
+country: data?.data?.name || "Nigeria",
+verified: true,
+availableFields: Object.keys(data?.data || {}),
+questionBankCount: AFRICA_NIGERIA_QUESTION_BANK.length
 }, 200, request);
 }
 
@@ -406,6 +478,26 @@ difficulty: difficulty,
 limit: limit,
 source: "Open Trivia DB",
 questions: questions
+}, 200, request);
+}
+
+if (category === "africa_nigeria") {
+const questions = AFRICA_NIGERIA_QUESTION_BANK
+.filter(item => item.difficulty === difficulty)
+.map(item => ({
+...item,
+isRemote: false,
+createdAt: item.createdAt || "2026-09-21T00:00:00.000Z",
+updatedAt: item.updatedAt || "2026-09-21T00:00:00.000Z"
+}));
+
+return json({
+ok: true,
+category: "africa_nigeria",
+difficulty: difficulty,
+limit: limit,
+source: "Africa API",
+questions: shuffle(questions).slice(0, limit)
 }, 200, request);
 }
 
