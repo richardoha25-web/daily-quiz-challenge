@@ -180,7 +180,7 @@ async function fetchRemote(
       explanation: q.explanation || '',
       source: q.source || 'remote',
       sourceId: q.sourceId,
-      isRemote: true,
+      isRemote: q.isRemote ?? true,
       createdAt: q.createdAt || new Date().toISOString(),
       updatedAt: q.updatedAt || new Date().toISOString(),
     }));
@@ -230,7 +230,7 @@ export async function getQuizQuestions(
 ): Promise<QuizQuestion[]> {
   const category = categoryKey(categoryName);
 
-  if (category !== 'science' && category !== 'general') {
+  if (category !== 'science' && category !== 'general' && category !== 'africa_nigeria') {
     throw new Error('NO_ONLINE_SOURCE:' + category);
   }
 
