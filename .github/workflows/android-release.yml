@@ -31,48 +31,17 @@ jobs:
       - name: Sync Capacitor Android project
         run: npx cap sync android
 
-      - name: Harden Android WebView cache for in-place updates
-        run: |
-          python3 << 'EOF'
-          from pathlib import Path
-          path = Path("android/app/src/main/java/com/richard/dailyquizchallenge/MainActivity.java")
-          path.parent.mkdir(parents=True, exist_ok=True)
-          path.write_text("""package com.richard.dailyquizchallenge;
-
-          import android.os.Bundle;
-          import android.webkit.WebSettings;
-
-          import com.getcapacitor.BridgeActivity;
-
-          public class MainActivity extends BridgeActivity {
-              @Override
-              public void onCreate(Bundle savedInstanceState) {
-                  super.onCreate(savedInstanceState);
-
-                  if (getBridge() != null && getBridge().getWebView() != null) {
-                      WebSettings settings = getBridge().getWebView().getSettings();
-                      settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-                      getBridge().getWebView().clearCache(true);
-                      getBridge().getWebView().clearHistory();
-                      getBridge().getWebView().reload();
-                  }
-              }
-          }
-          """)
-          EOF
-          test -f android/app/src/main/java/com/richard/dailyquizchallenge/MainActivity.java
-
-      - name: Set V1.1.8 Android version for update validation
+      - name: Set V1.1.9 Android version for update validation
         run: |
           python3 << 'EOF'
           from pathlib import Path
           p = Path("android/app/build.gradle")
           s = p.read_text()
           import re
-          s = re.sub(r'versionCode\s+\d+', 'versionCode 6', s, count=1)
-          s = re.sub(r'versionName\s+[\"\'][^\"\']+[\"\']', 'versionName "1.1.8"', s, count=1)
+          s = re.sub(r'versionCode\s+\d+', 'versionCode 7', s, count=1)
+          s = re.sub(r'versionName\s+[\"\'][^\"\']+[\"\']', 'versionName "1.1.9"', s, count=1)
           p.write_text(s)
-          print("Configured versionCode=6, versionName=1.1.8")
+          print("Configured versionCode=7, versionName=1.1.9")
           EOF
           grep -nE 'versionCode|versionName' android/app/build.gradle
 
