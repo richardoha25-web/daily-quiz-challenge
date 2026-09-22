@@ -6,9 +6,9 @@
 ## Long-term product vision
 Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz system for real users**, not just a small one-off quiz app. The goal is a reliable platform with fresh online questions, strong anti-repetition logic, multiple categories, meaningful difficulty, polished gameplay, useful explanations/results, dependable monetization, and a professional UI/UX that people enjoy returning to. Development should favor a stable foundation and incremental verification so future features can grow without bringing back the old static-question problems.
 
-## Current milestone — V1.1.4 AdMob Reliability Pass
-- `package.json` version: `1.1.4`.
-- Android release target: `versionName 1.1.4`, `versionCode 4`.
+## Current milestone — V1.1.9 Android update-validation checkpoint
+- `package.json` version: `1.1.9`.
+- Android release target: `versionName 1.1.9`, `versionCode 7`.
 - Existing permanent production signing key and package ID were preserved.
 - **Release-to-Release update test PASSED:** V1.1.3 installed directly over the signed 19 August release APK without uninstalling.
 - Release artifact: `daily-quiz-release` from Android Release APK and AAB #5; SHA-256: `a5b4069b863238863d5505c5f6b95a2968bb17d1abcc41f881e96457211fbdc6`.
@@ -44,7 +44,8 @@ Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz sy
 - 100 base points
 - streak tracking
 - best-score/trophy display
-- Current categories: General Knowledge, Bible, Africa & Nigeria, Science, Current Affairs
+- Current category set: General Knowledge, Bible, Africa & Nigeria, Science, Current Affairs
+- V1.1.9 implementation status: General Knowledge, Science, and Africa & Nigeria are integrated/verified; Bible and Current Affairs remain.
 
 The original local question banks had repetition and weak difficulty variety. **They are no longer used as the V1.1 fallback.**
 
@@ -402,16 +403,16 @@ Billing implementation belongs after the core online content architecture, UI/UX
 - This confirms that the permanent production package ID and signing/update path remain usable for future releases.
 - Do not revert the V1.1.9 Capacitor origin/service-worker configuration without a specific reason and regression test.
 
-## 14. Android versioning/signing
+## 15. Android versioning/signing
 Package ID must remain `com.richard.dailyquizchallenge`.
 
 Release/version history:
 - V1.0 → `1.0.0`, versionCode `1`
 - Previous V1.1 release → `1.1.0`, versionCode `2`
-- **V1.1.9 update-validation build → `1.1.9`, versionCode `7` — in-place update PASSED**
+- **V1.1.9 update-validation build → `1.1.9`, versionCode `7` — in-place update PASSED.**
 - V1.1.8 update-validation build → `1.1.8`, versionCode `6` — APK was correct but stale native app content remained after in-place update.
-- **V1.1.4 → `1.1.4`, versionCode `4`**
-- **V1.1.3 → `1.1.3`, versionCode `3`**
+- V1.1.4 → `1.1.4`, versionCode `4`.
+- V1.1.3 → `1.1.3`, versionCode `3`.
 
 Future releases must use a higher versionCode while preserving the same production signing key and package ID.
 
@@ -424,13 +425,13 @@ Release rules:
 - Website APKs must be release-signed.
 - Never store signing passwords/keystore contents in this file.
 
-## 15. Release workflow
+## 16. Release workflow
 `.github/workflows/android-release.yml`
 
 Current verified workflow blob SHA:
 `aebcd837f7640705b15d281d0873d5f0bfa8fe4a`
 
-It builds the current release as `versionCode 3` / `versionName 1.1.3`, injects AdMob App ID, uses Java 21, restores the permanent key from `KEYSTORE_BASE64`, signs APK/AAB, verifies signatures and uploads artifacts.
+It builds the current release as `versionCode 7` / `versionName 1.1.9`, injects the AdMob App ID, uses Java 21, restores the permanent production key from `KEYSTORE_BASE64`, signs APK/AAB, verifies signatures and uploads artifacts.
 
 Obsolete workflows removed:
 - `.github/workflows/generate-keystore.yml`
@@ -438,7 +439,7 @@ Obsolete workflows removed:
 
 Do not change the release workflow unnecessarily.
 
-## 16. Category/provider roadmap — V1 COMPLETION MASTER PLAN
+## 17. Category/provider roadmap — V1 COMPLETION MASTER PLAN
 
 The remaining categories must not be implemented all at once. Use this sequence for every new category:
 
@@ -543,7 +544,7 @@ The native Android direction and new brand are **planned future decisions, not c
 
 ---
 
-## 17. Bible connectivity model
+## 18. Bible connectivity model
 The app will distinguish between offline-capable Bible reading and online-required quiz/online services.
 
 At startup, when offline, the future UX should explain:
@@ -559,7 +560,7 @@ The exact final wording belongs to the UI/UX phase.
 
 Connectivity should be monitored throughout the app, not only once at launch.
 
-## 18. Offline/cache status
+## 19. Offline/cache status
 The existing question cache/recent-history foundation is not full offline quiz support.
 
 - Bible Library: intended to work offline.
@@ -591,7 +592,7 @@ Future work:
 - no indefinite network waiting
 - explicit handling of temporary provider failures
 
-## 18. Duplicate/freshness rules
+## 20. Duplicate/freshness rules
 1. Validate/filter provider responses.
 2. Deduplicate the IndexedDB pool by question ID.
 3. Avoid recent-history IDs when enough alternatives exist.
@@ -599,12 +600,12 @@ Future work:
 5. Current Affairs must carry publication/freshness metadata.
 6. Current Affairs must be refreshed online rather than relying indefinitely on old cached material.
 
-## 19. Current Affairs history
+## 21. Current Affairs history
 A prototype Current Affairs bank was previously created from 30 fact pairs and expanded into 120 playable questions. A Debug APK confirmed the category/interface worked.
 
 The prototype was intentionally removed from `main` because V1.1 is moving to online sourcing rather than keeping the old static bank as fallback.
 
-## 20. Important recent commits/checkpoints
+## 22. Important recent commits/checkpoints
 ### General Knowledge question-engine integration
 `40fdd0f3d1dc775ba878e19c8ffe55b6f15e22dd`
 
@@ -632,7 +633,7 @@ The prototype was intentionally removed from `main` because V1.1 is moving to on
 ### Release workflow checkpoint
 `38f83541d6017ee2e23ee89844dededa687d54aa`
 
-## 21. Firebase / V2 — PAUSED, NOT ABANDONED
+## 23. Firebase / V2 — PAUSED, NOT ABANDONED
 V2 architecture:
 **Firebase Authentication + Firestore + Firebase Cloud Functions**.
 
@@ -645,7 +646,7 @@ Auth:
 
 V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 
-## 26. Exact next steps — NEW ROADMAP
+## 24. Exact next steps — CURRENT ROADMAP
 
 ### Phase A — Provider/source research
 1. Research reliable Africa & Nigeria question/content providers, including commercial rights, quality, freshness and API availability.
@@ -660,8 +661,7 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 8. Android-test Bible reading offline and Bible quiz online.
 9. Implement Current Affairs through the Worker.
 10. Test Current Affairs freshness/source metadata.
-11. Test Current Affairs freshness/source metadata.
-12. Integrate Current Affairs into the Question Engine.
+11. Integrate Current Affairs into the Question Engine.
 13. Android-test Current Affairs.
 14. Implement the Bible Library/offline storage after source rights are verified.
 15. Implement Bible reader navigation.
@@ -684,12 +684,12 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 28. Verify offline Bible reading.
 29. Verify recent-question avoidance across all online categories.
 30. Verify timer/scoring/streak behavior.
-31. V1.1.4 AdMob startup/loading/App Open and screen-aware banner placement validation — **PASSED on Debug/test ads**.
+31. V1.1.4 AdMob startup/loading/App Open and screen-aware banner placement validation — **PASSED on Debug/test ads** (historical validation checkpoint).
 32. Verify AdMob flows again during final Release/regression testing with appropriate production/test-device safeguards.
 33. Run full regression testing.
 
 ### Phase E — Production release
-34. Increase Android versionCode above 4 for the next production release.
+34. Increase Android versionCode above 7 for the next production release.
 35. Build signed Release APK/AAB using the permanent production key.
 36. Verify signatures.
 37. Test signed Release installation/update over the previous release without uninstalling.
