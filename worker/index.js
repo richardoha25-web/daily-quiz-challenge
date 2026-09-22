@@ -1,3 +1,4 @@
+// Preview rebuild trigger: Africa API Worker-secret configuration is verified outside the repository.
 import { AFRICA_NIGERIA_QUESTION_BANK } from "./data/africaNigeriaQuestionBank.js";
 
 const OPEN_TRIVIA_URL = "https://opentdb.com/api.php";
@@ -27,7 +28,7 @@ return text
 .replace(/”/g, '"')
 .replace(/‘/g, "'")
 .replace(/’/g, "'")
-.replace(/&#(\d+);/g, (_, code) =>
+.replace(/&#(\\d+);/g, (_, code) =>
 String.fromCharCode(Number(code))
 );
 }
