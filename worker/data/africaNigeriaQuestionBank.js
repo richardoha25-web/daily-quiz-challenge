@@ -14,20 +14,6 @@ export const AFRICA_NIGERIA_QUESTION_BANK = [
     isRemote: false
   },
   {
-    id: "africa-api-ng-official-name",
-    category: "africa_nigeria",
-    difficulty: "medium",
-    question: "What is the official name of Nigeria?",
-    options: ["Republic of Nigeria", "Federal Republic of Nigeria", "United Republic of Nigeria", "Federation of Nigerian States"],
-    correctAnswer: "Federal Republic of Nigeria",
-    explanation: "Nigeria's official name is the Federal Republic of Nigeria, reflecting its federal system of government.",
-    source: "Africa API",
-    sourceId: "countries/ng:official_name",
-    sourceUrl: "https://africa-api.com/docs/countries",
-    license: "Africa API source data; attribution required for public-facing republication",
-    isRemote: false
-  },
-  {
     id: "africa-api-ng-region",
     category: "africa_nigeria",
     difficulty: "easy",
