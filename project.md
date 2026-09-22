@@ -662,38 +662,33 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 9. Implement Current Affairs through the Worker.
 10. Test Current Affairs freshness/source metadata.
 11. Integrate Current Affairs into the Question Engine.
-13. Android-test Current Affairs.
-14. Implement the Bible Library/offline storage after source rights are verified.
-15. Implement Bible reader navigation.
-16. Implement the online Bible quiz connection.
-17. Android-test Bible reading offline and Bible quiz online.
+12. Android-test Current Affairs.
 
 ### Phase C — Major UI/UX redesign
-18. Review ui-ux-project.md using the now-known product architecture.
-19. Map the complete user journey and final information architecture.
-20. Wireframe Home, Categories, Bible, Quiz, Results, Connectivity/Error and Settings.
-21. Define the reusable design system.
-22. Create high-fidelity screens/prototype.
-23. Test the design on the Oppo A56.
-24. Implement the redesign in React/Vite only after the design is stable.
+13. Review ui-ux-project.md using the now-known product architecture.
+14. Map the complete user journey and final information architecture.
+15. Wireframe Home, Categories, Bible, Quiz, Results, Connectivity/Error and Settings.
+16. Define the reusable design system.
+17. Create high-fidelity screens/prototype.
+18. Test the design on the Oppo A56.
+19. Implement the redesign in React/Vite only after the design is stable.
 
 ### Phase D — Reliability and regression
-25. Implement centralized connectivity monitoring.
-26. Improve retry/backoff and user-facing error states.
-27. Verify online-required quiz behavior.
-28. Verify offline Bible reading.
-29. Verify recent-question avoidance across all online categories.
-30. Verify timer/scoring/streak behavior.
-31. V1.1.4 AdMob startup/loading/App Open and screen-aware banner placement validation — **PASSED on Debug/test ads** (historical validation checkpoint).
-32. Verify AdMob flows again during final Release/regression testing with appropriate production/test-device safeguards.
-33. Run full regression testing.
+20. Implement centralized connectivity monitoring.
+21. Improve retry/backoff and user-facing error states.
+22. Verify online-required quiz behavior.
+23. Verify offline Bible reading.
+24. Verify recent-question avoidance across all online categories.
+25. Verify timer/scoring/streak behavior.
+26. V1.1.4 AdMob startup/loading/App Open and screen-aware banner placement validation — **PASSED on Debug/test ads** (historical validation checkpoint).
+27. Verify AdMob flows again during final Release/regression testing with appropriate production/test-device safeguards.
+28. Run full regression testing.
 
 ### Phase E — Production release
-34. Increase Android versionCode above 7 for the next production release.
-35. Build signed Release APK/AAB using the permanent production key.
-36. Verify signatures.
-37. Test signed Release installation/update over the previous release without uninstalling.
-38. Update the Richard Studios website only after release validation passes.
-39. Retest the public download/install/update path.
-40. Keep billing architecture synchronized across `project.md`, `commercial-monetization.md`, and `ui-ux-project.md`; do not implement billing until the planned commercial/account foundation is ready.
-
+29. Increase Android versionCode above 7 for the next production release.
+30. Build signed Release APK/AAB using the permanent production key.
+31. Verify signatures.
+32. Test signed Release installation/update over the previous release without uninstalling.
+33. Update the Richard Studios website only after release validation passes.
+34. Retest the public download/install/update path.
+35. Keep billing architecture synchronized across `project.md`, `commercial-monetization.md`, and `ui-ux-project.md`; do not implement billing until the planned commercial/account foundation is ready.
