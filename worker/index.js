@@ -370,7 +370,7 @@ provider: "Africa API",
 country: data?.data?.name || "Nigeria",
 verified: true,
 availableFields: Object.keys(data?.data || {}),
-questionBankCount: AFRICA_NIGERIA_QUESTION_BANK.length
+sourceMode: "live Africa API facts -> generated questions"
 }, 200, request);
 }
 
