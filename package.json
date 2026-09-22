@@ -1,7 +1,7 @@
 {
   "name": "daily-quiz-challenge",
   "private": true,
-  "version": "1.1.4",
+  "version": "1.1.9",
   "type": "module",
   "scripts": {
     "dev": "vite",

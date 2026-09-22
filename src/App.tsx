@@ -332,7 +332,7 @@ function App() {
         </main>
       )}
 
-      <footer>Daily Quiz &amp; Challenge · Version 1.1.4 · Online question engine · Ads help keep the quiz free.</footer>
+      <footer>Daily Quiz &amp; Challenge · Version 1.1.9 · Online question engine · Ads help keep the quiz free.</footer>
     </div>
   );
 }

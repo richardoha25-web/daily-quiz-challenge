@@ -28,17 +28,17 @@ jobs:
       - name: Sync Capacitor Android project
         run: npx cap sync android
 
-      - name: Set V1.1.4 Android version
+      - name: Set Android release version
         run: |
           python3 << 'EOF'
           from pathlib import Path
           p = Path("android/app/build.gradle")
           s = p.read_text()
           import re
-          s = re.sub(r'versionCode\s+\d+', 'versionCode 4', s, count=1)
-          s = re.sub(r'versionName\s+[\"\'][^\"\']+[\"\']', 'versionName "1.1.4"', s, count=1)
+          s = re.sub(r'versionCode\s+\d+', 'versionCode 7', s, count=1)
+          s = re.sub(r'versionName\s+[\"\'][^\"\']+[\"\']', 'versionName "1.1.9"', s, count=1)
           p.write_text(s)
-          print("Configured versionCode=4, versionName=1.1.4")
+          print("Configured versionCode=7, versionName=1.1.9")
           EOF
           grep -nE 'versionCode|versionName' android/app/build.gradle
 
@@ -91,7 +91,7 @@ jobs:
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
-          keytool -list -keystore daily-quiz-release.keystore             -storetype PKCS12             -alias dailyquiz             -storepass "$KEYSTORE_PASSWORD" >/dev/null
+          keytool -list -keystore daily-quiz-release.keystore -storetype PKCS12 -alias dailyquiz -storepass "$KEYSTORE_PASSWORD" >/dev/null
 
       - name: Convert PKCS12 keystore to temporary JKS
         working-directory: android
@@ -100,7 +100,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           rm -f daily-quiz-release.jks
-          keytool -importkeystore             -srckeystore daily-quiz-release.keystore             -srcstoretype PKCS12             -srcstorepass "$KEYSTORE_PASSWORD"             -srcalias dailyquiz             -srckeypass "$KEY_PASSWORD"             -destkeystore daily-quiz-release.jks             -deststoretype JKS             -deststorepass "$KEYSTORE_PASSWORD"             -destkeypass "$KEYSTORE_PASSWORD"             -noprompt
+          keytool -importkeystore -srckeystore daily-quiz-release.keystore -srcstoretype PKCS12 -srcstorepass "$KEYSTORE_PASSWORD" -srcalias dailyquiz -srckeypass "$KEY_PASSWORD" -destkeystore daily-quiz-release.jks -deststoretype JKS -deststorepass "$KEYSTORE_PASSWORD" -destkeypass "$KEYSTORE_PASSWORD" -noprompt
           test -s daily-quiz-release.jks
 
       - name: Verify temporary JKS signing key
@@ -108,7 +108,7 @@ jobs:
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
-          keytool -list -keystore daily-quiz-release.jks             -storetype JKS             -alias dailyquiz             -storepass "$KEYSTORE_PASSWORD" >/dev/null
+          keytool -list -keystore daily-quiz-release.jks -storetype JKS -alias dailyquiz -storepass "$KEYSTORE_PASSWORD" >/dev/null
 
       - name: Configure Gradle release signing with temporary JKS
         working-directory: android
