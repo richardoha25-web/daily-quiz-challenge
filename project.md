@@ -1,7 +1,7 @@
 # Daily Quiz & Challenge — Project Continuity Record
 
-**Last updated:** 20 September 2026  
-**Stage:** V1.1.4 AdMob Reliability Pass is implemented and **Android Debug validation PASSED**. Science and General Knowledge remain the fully validated online quiz categories. **Current focus: complete the remaining Africa & Nigeria, Bible, and Current Affairs categories and stabilize the existing V1 before starting major architectural, branding, or UI/UX changes. V2 remains paused.**
+**Last updated:** 22 September 2026  
+**Stage:** V1.1.4 AdMob Reliability Pass is implemented and **Android Debug validation PASSED**. Science, General Knowledge, and **Africa & Nigeria are now integrated and verified**. The Africa & Nigeria production Worker deployment has been tested successfully. **Current focus: complete Bible and Current Affairs, then run the full V1 stabilization pass before major architectural, branding, or UI/UX changes. V2 remains paused.**
 
 ## Long-term product vision
 Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz system for real users**, not just a small one-off quiz app. The goal is a reliable platform with fresh online questions, strong anti-repetition logic, multiple categories, meaningful difficulty, polished gameplay, useful explanations/results, dependable monetization, and a professional UI/UX that people enjoy returning to. Development should favor a stable foundation and incremental verification so future features can grow without bringing back the old static-question problems.
@@ -17,9 +17,13 @@ Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz sy
 
 **V1.1.3 validation result:** the installed signed release was tested on the phone and the planned functional/ad checks passed. Science repeatedly retrieves fresh online questions, the quiz flow works, ads display and refresh/recover as intended, and the app remains usable through repeated testing. No blocking failure was observed in the completed validation pass.
 
-**V1.1.4 Android Debug validation result:** the latest Debug APK was installed and tested on the Android phone. The startup/loading experience, test App Open behavior, Home bottom banner, Quiz top banner, Results bottom banner, interstitial, and rewarded +20 flow behaved as expected. Banner placement remained usable and did not block quiz content. Development is using AdMob test ads, so this validates the implementation/lifecycle rather than guaranteeing production ad fill or identical real-ad availability.
+**V1.1.4 Android Debug validation result:** the latest Debug APK was installed and tested on the Android phone. The startup/loading experience, test App Open behavior, Home bottom banner, Quiz top banner, Results bottom banner, interstitial, and rewarded +20 flow behaved as expected. Banner placement remained usable and did not block quiz content.
 
-**Immediate next step:** complete the remaining three V1 categories — Africa & Nigeria, Bible, and Current Affairs — using practical providers/sources that can supply suitable content. Provider category labels do not need to exactly match the app's user-facing categories; the Worker can normalize relevant source content into the app's category model. After all five categories are working, run a full V1 stabilization pass before beginning the larger planned redesign, branding, native Android migration, account, and billing work. Do not switch to production AdMob IDs merely for development testing; production availability can vary with fill, network, inventory and account/frequency controls.
+**Africa & Nigeria production verification:** the merged live Africa API question-generation system is deployed through the production Cloudflare Worker and was tested from the user's phone. Easy, Medium, and Hard production responses were confirmed working correctly, including the revised question-generation formats and ambiguity fixes. Africa API commercial-use terms were reviewed; the project will use clear Africa API/original-source attribution without claiming a single universal upstream license.
+
+**AdMob production transition:** the existing AdMob integration is unchanged. `src/adMob.ts` retains the tested lifecycle/recovery architecture and both test/production IDs. The Android **release workflow now explicitly builds with `VITE_ADMOB_TEST_MODE=false`**, so production APK/AAB builds select the real AdMob unit IDs. Debug builds continue to use test ads. Production ad fill remains subject to inventory, network, account, frequency and policy conditions.
+
+**Immediate next step:** finish Bible and Current Affairs, then run a full V1 stabilization pass before beginning the larger planned redesign, branding, native Android migration, account, and billing work.
 
 **UI/UX planning update:** a dedicated `ui-ux-project.md` has been created as the blueprint for the future redesign. It is intentionally separate from this file so this project record stays concise. The current UI remains functional but is **not the desired final experience**.
 
@@ -443,17 +447,16 @@ Provider/source research → architecture/data model → Worker endpoint → bro
 - Easy/Medium/Hard tests complete
 - Android validation complete
 
-### Africa & Nigeria — IN PROGRESS / NEXT CATEGORY
-Before coding:
-- identify a practical reliable source/provider that can supply relevant African/Nigerian questions
-- provider taxonomy does not need to exactly match the app category; relevant Africa/Nigeria history, geography, culture, civic knowledge, notable people, etc. can be normalized into one app category
-- verify commercial-use rights
-- evaluate question quality and freshness
-- define the minimum topic coverage needed for V1
-- implement through Cloudflare Worker without disturbing existing Science/General Knowledge flows
-- test Worker, Question Engine, and Android one stage at a time
+### Africa & Nigeria — INTEGRATED / PRODUCTION WORKER VERIFIED
+- Africa API is the current factual source for the V1 Africa & Nigeria implementation.
+- The live Worker converts sourced country/reference facts into quiz questions instead of exposing raw API wording.
+- Easy, Medium, and Hard production endpoints were tested successfully after the `main` deployment.
+- Question-generation quality fixes are in production, including removal of the rejected official-name question format, unique-currency safeguards, and distinct-subregion distractors.
+- Recent-question IDs remain part of the Question Engine's anti-repetition system.
+- Commercial-use terms and attribution requirements were reviewed. The app should identify Africa API and the original data providers identified by Africa API in its source/attribution information; it should not claim a single universal license for all underlying fields.
+- The current implementation does not alter the existing Science/General Knowledge provider flows or AdMob architecture.
 
-Planned content areas include Nigerian history, geography, culture, civic/government knowledge, African history/geography/culture, and notable African figures.
+Planned future expansion can add Nigerian history, geography, culture, civic/government knowledge, African history/geography/culture, and notable African figures through additional validated sources where licensing permits.
 
 ### Current Affairs — RESEARCH TARGET
 Current Affairs must be treated as changing content, not a permanent question bank.

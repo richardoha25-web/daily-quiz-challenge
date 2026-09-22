@@ -5,14 +5,14 @@
 
 ## 1. Design Project Status
 
-**Current phase:** UI/UX planning + product architecture alignment — do not redesign production code yet. The immediate V1 priority is to finish Africa & Nigeria, Bible, and Current Affairs and stabilize the existing app before beginning the major redesign.
+**Current phase:** UI/UX planning + product architecture alignment — do not redesign production code yet. Africa & Nigeria is now integrated and production-verified. The immediate V1 priority is to finish Bible and Current Affairs, then stabilize the full V1 before beginning the major redesign.
 
-Science and General Knowledge are now integrated and Android-tested. The remaining work is to research/define Africa & Nigeria, Current Affairs, and the new Bible reading/quiz architecture before the major UI implementation. This file and the main `project.md` must stay synchronized at major planning checkpoints.
+Science and General Knowledge are integrated and Android-tested, and Africa & Nigeria is now integrated and production-verified. The remaining work is to define/implement Current Affairs and the new Bible reading/quiz architecture before the major UI implementation. This file and the main `project.md` must stay synchronized at major planning checkpoints.
 
 When the functional foundation is ready, this file becomes the primary blueprint for the redesign.
 
-### V1 checkpoint — 20 September 2026
-The redesign is intentionally deferred while the current V1 is completed. The current React/Vite/Capacitor UI remains the working validation interface. Discussion of a future native Android foundation, new product/company branding, and expanded learning-platform navigation is planning only; none should trigger a production UI rewrite yet. After the three remaining categories are working, a full V1 stability pass will precede the major UI/UX implementation.
+### V1 checkpoint — 22 September 2026
+The redesign is intentionally deferred while the current V1 is completed. The current React/Vite/Capacitor UI remains the working validation interface. Discussion of a future native Android foundation, new product/company branding, and expanded learning-platform navigation is planning only; none should trigger a production UI rewrite yet. After Bible and Current Affairs are working, a full V1 stability pass will precede the major UI/UX implementation.
 
 ## 2. Product Vision
 
@@ -372,6 +372,10 @@ Use the amber/gold accent selectively for:
 - 🎁 Rewards
 
 These elements should feel rewarding without overwhelming the main quiz experience.
+
+## V1.1.4 production checkpoint — 22 September 2026
+
+Africa & Nigeria is now a real production content experience behind the Cloudflare Worker. The redesign must support source/attribution information for externally sourced content without cluttering the quiz screen. The existing AdMob architecture is considered validated and should be preserved during the redesign; production builds now select real AdMob IDs while Debug builds continue to use test ads.
 
 ## 16. Ads & Monetization UX
 

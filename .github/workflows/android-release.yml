@@ -19,8 +19,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build web app
-        run: npm run build
+      - name: Build web app with production AdMob ads
+        run: VITE_ADMOB_TEST_MODE=false npm run build
 
       - name: Add Android platform
         run: npx cap add android
