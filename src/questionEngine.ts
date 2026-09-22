@@ -19,7 +19,14 @@ const DB_NAME = 'DailyQuizDB';
 const DB_VERSION = 3;
 const QUESTION_STORE = 'questions';
 const HISTORY_STORE = 'recent_history';
-const WORKER_URL = 'https://daily-quiz-intermidiary.richardoha25.workers.dev';
+const PRODUCTION_WORKER_URL = 'https://daily-quiz-intermidiary.richardoha25.workers.dev';
+const AFRICA_NIGERIA_TEST_WORKER_URL =
+  'https://africa-nigeria-poc-daily-quiz-intermidiary.richardoha25.workers.dev';
+
+const workerUrlForCategory = (category: string) =>
+  category === 'africa_nigeria'
+    ? AFRICA_NIGERIA_TEST_WORKER_URL
+    : PRODUCTION_WORKER_URL;
 const RECENT_LIMIT = 60;
 
 const categoryKey = (name: string) => {
@@ -114,7 +121,7 @@ async function fetchRemote(
   limit = 20
 ): Promise<QuizQuestion[]> {
   const url =
-    WORKER_URL +
+    workerUrlForCategory(category) +
     '/api/questions?category=' +
     encodeURIComponent(category) +
     '&difficulty=' +
@@ -180,7 +187,7 @@ async function fetchRemote(
       explanation: q.explanation || '',
       source: q.source || 'remote',
       sourceId: q.sourceId,
-      isRemote: true,
+      isRemote: q.isRemote ?? true,
       createdAt: q.createdAt || new Date().toISOString(),
       updatedAt: q.updatedAt || new Date().toISOString(),
     }));
@@ -230,7 +237,7 @@ export async function getQuizQuestions(
 ): Promise<QuizQuestion[]> {
   const category = categoryKey(categoryName);
 
-  if (category !== 'science' && category !== 'general') {
+  if (category !== 'science' && category !== 'general' && category !== 'africa_nigeria') {
     throw new Error('NO_ONLINE_SOURCE:' + category);
   }
 
