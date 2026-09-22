@@ -1,19 +1,20 @@
 # Daily Quiz & Challenge — Commercial & Monetization Plan
 
 **File:** `commercial-monetization.md`  
-**Status:** Strategic product specification — planned, not yet fully implemented. Commercial implementation remains deferred while the three remaining V1 categories are completed and the existing app is stabilized.  
+**Status:** Strategic product specification — planned, not yet fully implemented. Africa & Nigeria is now production-verified; commercial implementation remains deferred while Bible and Current Affairs are completed and the full V1 is stabilized.  
 **Purpose:** Single source of truth for the commercial, premium, advertising, entitlement, and revenue architecture of Daily Quiz & Challenge.
 
 ---
 
-## V1 checkpoint — 20 September 2026
+## V1 checkpoint — 22 September 2026
 
 The commercial strategy and billing architecture remain planned specifications. No billing, Premium entitlement enforcement, or new monetization implementation is being started during the current V1 category-completion milestone.
 
 Immediate product priority:
-- Finish Africa & Nigeria.
+- Africa & Nigeria — integrated and production-verified.
 - Finish Bible.
 - Finish Current Affairs.
+- Run the full V1 stabilization pass.
 - Stabilize the full V1 quiz experience.
 
 After V1 stabilization, the commercial plan will be revisited alongside the technical architecture, new brand/package identity, and UI/UX redesign. Provider/source choices for the remaining categories should consider commercial licensing, but category completion should not be blocked by trying to perfect the entire future monetization system now.
@@ -1023,6 +1024,12 @@ Premium users are paying for a better experience, so quality expectations are hi
 
 ---
 
+# 30.1 Africa & Nigeria commercial/source checkpoint
+
+Africa & Nigeria now uses Africa API as the current factual source behind the Cloudflare Worker. Africa API's current terms permit commercial use, while public-facing republication of underlying data requires attribution and upstream source terms must also be respected. The app should therefore provide clear source/attribution information identifying Africa API and the original data providers identified by Africa API, without asserting a single universal license for every underlying field.
+
+This source decision supports the commercial product architecture but does not mean the app should assume all future Africa/Nigeria datasets have the same rights. Every additional provider or dataset must undergo the same commercial-rights review before production use.
+
 # 31. Advertising strategy
 
 Advertising remains primarily a free-tier monetization mechanism.
@@ -1040,7 +1047,8 @@ Planned principle:
 - Avoid excessive interruption.
 - Rewarded ads remain optional.
 - Premium users receive no ads.
-- Test ads are used during development.
+- Test ads are used during Debug/development builds.
+- Production release builds now explicitly select the real AdMob IDs.
 - Production ad performance must be evaluated separately from test-ad behavior.
 
 Test ads proving reliable lifecycle behavior does **not** guarantee production ad fill.
@@ -1362,7 +1370,7 @@ The guiding principle remains:
 **Google Play Billing:** Future  
 **Provider licensing:** Ongoing research  
 **UI/UX Premium screens:** Future Figma work  
-**V1.1.4:** Remains focused on reliable quiz/ad infrastructure  
+**V1.1.4:** Africa & Nigeria is production-verified; the existing AdMob architecture is preserved and release builds now use production ad IDs  
 **V2:** Remains paused
 
 This document is the working commercial blueprint and should be updated whenever a major monetization decision is made.
