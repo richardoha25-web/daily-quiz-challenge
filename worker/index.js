@@ -135,7 +135,7 @@ explanation,
 source: "Africa API",
 sourceId: id,
 sourceUrl: "https://africa-api.com/docs/countries",
-license: "Africa API commercial use permitted; public-facing republication must attribute underlying sources",
+license: "Africa API source data; verify current provider terms before production republication",
 isRemote: true,
 createdAt: new Date().toISOString(),
 updatedAt: new Date().toISOString()
@@ -749,7 +749,7 @@ factCountryCount: countries.length,
 generatedQuestionCount: generatedQuestions.length,
 questions: generatedQuestions.slice(0, limit)
 }, 200, request);
-}}
+}
 
 // Other categories are not connected to an external provider yet.
 return json({
