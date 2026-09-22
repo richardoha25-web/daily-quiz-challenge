@@ -22,8 +22,7 @@ jobs:
       - name: Inject AdMob App ID
         run: |
           if ! grep -q "admob_app_id" android/app/src/main/res/values/strings.xml; then
-            sed -i 's|</resources>|<string name="admob_app_id">ca-app-pub-8496227439538798~7943409473</string>
-</resources>|' android/app/src/main/res/values/strings.xml
+            sed -i 's|</resources>|<string name="admob_app_id">ca-app-pub-8496227439538798~7943409473</string>\n</resources>|' android/app/src/main/res/values/strings.xml
           fi
           python3 << 'EOF'
           import re
