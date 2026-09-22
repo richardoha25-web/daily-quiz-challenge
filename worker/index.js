@@ -147,118 +147,186 @@ const questions = [];
 const validCountries = countries.filter(country =>
 country &&
 typeof country.id === "string" &&
-typeof country.name === "string"
+typeof country.name === "string" &&
+country.name.trim()
 );
 
-const addCountryValueQuestions = (field, label, template) => {
-const values = uniqueValues(validCountries, country => country[field]);
-
-for (const country of validCountries) {
-const correct = country[field];
-if (correct === null || correct === undefined || String(correct).trim() === "") continue;
-
-const options = makeOptions(correct, values);
-if (!options) continue;
-
-questions.push(generatedQuestion({
-id: `africa-api-${country.id}-${field}`,
-difficulty,
-question: template(country, correct),
-correctAnswer: correct,
-options,
-explanation: `${label}: ${correct}. Source: Africa API country reference data.`
-}));
-}
-};
-
-if (difficulty === "easy") {
-addCountryValueQuestions(
-"capital",
-"Capital",
-country => `What is the capital of ${country.name}?`
-);
-
-addCountryValueQuestions(
-"region",
-"Region",
-country => `In which region of Africa is ${country.name} located?`
-);
-
-const currencyCodes = validCountries.flatMap(country =>
-Array.isArray(country.currencies)
-? country.currencies.filter(Boolean).map(String)
-: []
-);
-const currencyPool = [...new Set(currencyCodes)];
-
-for (const country of validCountries) {
-const currencies = Array.isArray(country.currencies)
-? country.currencies.filter(Boolean).map(String)
-: [];
-if (!currencies.length) continue;
-
-const correct = currencies[0];
-const options = makeOptions(correct, currencyPool);
-if (!options) continue;
-
-questions.push(generatedQuestion({
-id: `africa-api-${country.id}-currency`,
-difficulty: "easy",
-question: `Which currency code is listed for ${country.name}?`,
-correctAnswer: correct,
-options,
-explanation: `Currency code: ${correct}. Source: Africa API country reference data.`
-}));
-}
-}
-
-if (difficulty === "medium") {
-addCountryValueQuestions(
-"official_name",
-"Official name",
-country => `What is the official name of ${country.name}?`
-);
-
-addCountryValueQuestions(
-"subregion",
-"Subregion",
-country => `Which African subregion includes ${country.name}?`
-);
-
-const capitalCountries = validCountries.filter(country =>
+const countriesWithCapital = validCountries.filter(country =>
 typeof country.capital === "string" && country.capital.trim()
 );
 
-for (const country of capitalCountries) {
+const countriesWithRegion = validCountries.filter(country =>
+typeof country.region === "string" && country.region.trim()
+);
+
+const countriesWithSubregion = validCountries.filter(country =>
+typeof country.subregion === "string" && country.subregion.trim()
+);
+
+const countriesWithCurrency = validCountries.filter(country =>
+Array.isArray(country.currencies) && country.currencies.filter(Boolean).length > 0
+);
+
+const addQuestion = (id, question, correctAnswer, options, explanation) => {
+if (!options || options.length !== 4) return;
+questions.push(generatedQuestion({
+id,
+difficulty,
+question,
+correctAnswer,
+options,
+explanation
+}));
+};
+
+// EASY: direct, unambiguous factual recall.
+if (difficulty === "easy") {
+for (const country of countriesWithCapital) {
+const options = makeOptions(
+country.capital,
+countriesWithCapital.map(item => item.capital)
+);
+addQuestion(
+`africa-api-${country.id}-capital`,
+`What is the capital of ${country.name}?`,
+country.capital,
+options,
+`Capital: ${country.capital}. Source: Africa API country reference data.`
+);
+}
+
+for (const country of countriesWithRegion) {
+const options = makeOptions(
+country.region,
+countriesWithRegion.map(item => item.region)
+);
+addQuestion(
+`africa-api-${country.id}-region`,
+`In which region of Africa is ${country.name} located?`,
+country.region,
+options,
+`Region: ${country.region}. Source: Africa API country reference data.`
+);
+}
+
+const currencyCodes = countriesWithCurrency.flatMap(country =>
+country.currencies.filter(Boolean).map(String)
+);
+
+for (const country of countriesWithCurrency) {
+const correct = String(country.currencies.filter(Boolean)[0]);
+const options = makeOptions(correct, currencyCodes);
+addQuestion(
+`africa-api-${country.id}-currency`,
+`Which currency code is listed for ${country.name}?`,
+correct,
+options,
+`Currency code: ${correct}. Source: Africa API country reference data.`
+);
+}
+}
+
+// MEDIUM: connect two related facts instead of copying a raw field.
+if (difficulty === "medium") {
+for (const country of countriesWithCapital) {
 const options = makeOptions(
 country.name,
-capitalCountries.map(item => item.name)
+countriesWithCapital.map(item => item.name)
 );
-if (!options) continue;
-
-questions.push(generatedQuestion({
-id: `africa-api-${country.id}-country-by-capital`,
-difficulty: "medium",
-question: `Which African country has ${country.capital} as its capital?`,
-correctAnswer: country.name,
+addQuestion(
+`africa-api-${country.id}-country-by-capital`,
+`Which African country has ${country.capital} as its capital?`,
+country.name,
 options,
-explanation: `${country.capital} is the capital of ${country.name}. Source: Africa API country reference data.`
-}));
+`${country.capital} is the capital of ${country.name}. Source: Africa API country reference data.`
+);
+}
+
+const currencyCountryPairs = [];
+for (const country of countriesWithCurrency) {
+for (const currency of country.currencies.filter(Boolean).map(String)) {
+currencyCountryPairs.push({ country, currency });
 }
 }
 
+for (const pair of currencyCountryPairs) {
+const options = makeOptions(
+pair.country.name,
+currencyCountryPairs.map(item => item.country.name)
+);
+addQuestion(
+`africa-api-${pair.country.id}-country-by-currency-${pair.currency}`,
+`Which African country is listed as using the currency code ${pair.currency}?`,
+pair.country.name,
+options,
+`Currency code ${pair.currency} is listed for ${pair.country.name}. Source: Africa API country reference data.`
+);
+}
+
+for (const country of countriesWithSubregion) {
+const sameSubregion = countriesWithSubregion.filter(
+item => item.subregion === country.subregion && item.id !== country.id
+);
+if (sameSubregion.length < 3) continue;
+
+const options = makeOptions(
+country.name,
+sameSubregion.map(item => item.name)
+);
+addQuestion(
+`africa-api-${country.id}-country-by-subregion`,
+`Which country below is also part of the ${country.subregion} African subregion?`,
+country.name,
+options,
+`${country.name} is listed in the ${country.subregion} subregion. Source: Africa API country reference data.`
+);
+}
+}
+
+// HARD: combine multiple independent facts into one identification problem.
+// We deliberately avoid official_name and raw area-number questions because
+// they either reveal the answer or create weak memorization questions.
 if (difficulty === "hard") {
-addCountryValueQuestions(
-"area_km2",
-"Approximate area",
-country => `What is the approximate area of ${country.name}?`
+const candidates = validCountries.filter(country =>
+typeof country.capital === "string" && country.capital.trim() &&
+typeof country.region === "string" && country.region.trim() &&
+Array.isArray(country.currencies) && country.currencies.filter(Boolean).length > 0
 );
 
-addCountryValueQuestions(
-"official_name",
-"Official name",
-country => `Which country has the official name "${country.official_name}"?`
+for (const country of candidates) {
+const currency = String(country.currencies.filter(Boolean)[0]);
+
+const clue = `Identify the African country described by these clues: its capital is ${country.capital}, it is in ${country.region}, and its listed currency code is ${currency}.`;
+
+const options = makeOptions(
+country.name,
+candidates.map(item => item.name)
 );
+
+addQuestion(
+`africa-api-${country.id}-three-fact-identification`,
+clue,
+country.name,
+options,
+`The three clues point to ${country.name}: capital ${country.capital}, region ${country.region}, currency code ${currency}. Source: Africa API country reference data.`
+);
+}
+
+for (const country of candidates) {
+const options = makeOptions(
+country.name,
+candidates.map(item => item.name)
+);
+
+const question = `Which African country has ${country.capital} as its capital and is located in ${country.region}?`;
+addQuestion(
+`africa-api-${country.id}-capital-region-identification`,
+question,
+country.name,
+options,
+`${country.name} has ${country.capital} as its capital and is listed in ${country.region}. Source: Africa API country reference data.`
+);
+}
 }
 
 return shuffle(
