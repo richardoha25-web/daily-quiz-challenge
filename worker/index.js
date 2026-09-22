@@ -249,10 +249,20 @@ currencyCountryPairs.push({ country, currency });
 }
 }
 
+const currencyCountryCounts = new Map();
 for (const pair of currencyCountryPairs) {
+currencyCountryCounts.set(
+pair.currency,
+(currencyCountryCounts.get(pair.currency) || 0) + 1
+);
+}
+
+for (const pair of currencyCountryPairs) {
+if (currencyCountryCounts.get(pair.currency) !== 1) continue;
+
 const options = makeOptions(
 pair.country.name,
-currencyCountryPairs.map(item => item.country.name)
+countriesWithCurrency.map(item => item.name)
 );
 addQuestion(
 `africa-api-${pair.country.id}-country-by-currency-${pair.currency}`,
@@ -264,14 +274,13 @@ options,
 }
 
 for (const country of countriesWithSubregion) {
-const sameSubregion = countriesWithSubregion.filter(
-item => item.subregion === country.subregion && item.id !== country.id
+const differentSubregion = countriesWithSubregion.filter(
+item => item.subregion !== country.subregion
 );
-if (sameSubregion.length < 3) continue;
 
 const options = makeOptions(
 country.name,
-sameSubregion.map(item => item.name)
+differentSubregion.map(item => item.name)
 );
 addQuestion(
 `africa-api-${country.id}-country-by-subregion`,
