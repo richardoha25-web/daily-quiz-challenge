@@ -1,7 +1,7 @@
 # Daily Quiz & Challenge — Project Continuity Record
 
 **Last updated:** 22 September 2026  
-**Stage:** V1.1.4 AdMob Reliability Pass is implemented and **Android Debug validation PASSED**. Science, General Knowledge, and **Africa & Nigeria are now integrated and verified**. The Africa & Nigeria production Worker deployment has been tested successfully. **Current focus: complete Bible and Current Affairs, then run the full V1 stabilization pass before major architectural, branding, or UI/UX changes. V2 remains paused.**
+**Stage:** V1.1.9 Android update-validation fix is implemented and **in-place update testing PASSED**. The app now updates successfully over the previous installed release without requiring uninstall/reinstall, while the new app content loads correctly. Science, General Knowledge, and **Africa & Nigeria are integrated and verified**. **Current focus: complete Bible and Current Affairs, then run the full V1 stabilization pass before major architectural, branding, or UI/UX changes. V2 remains paused.**
 
 ## Long-term product vision
 Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz system for real users**, not just a small one-off quiz app. The goal is a reliable platform with fresh online questions, strong anti-repetition logic, multiple categories, meaningful difficulty, polished gameplay, useful explanations/results, dependable monetization, and a professional UI/UX that people enjoy returning to. Development should favor a stable foundation and incremental verification so future features can grow without bringing back the old static-question problems.
@@ -395,14 +395,23 @@ Billing implementation belongs after the core online content architecture, UI/UX
 
 ---
 
+## 14. Android update validation — V1.1.9
+- V1.1.7/V1.1.8 in-place update testing exposed stale app content after Android package updates even though the new APK itself contained the correct bundle.
+- The successful V1.1.9 fix moved the native Capacitor app to a dedicated local HTTPS origin and disabled native service-worker request resolution, removing the stale PWA/service-worker path from the native app.
+- V1.1.9 / `versionCode 7` was installed directly over the existing app and **the update worked correctly**. The new startup/loading experience, updated app content and existing functionality were confirmed after the update.
+- This confirms that the permanent production package ID and signing/update path remain usable for future releases.
+- Do not revert the V1.1.9 Capacitor origin/service-worker configuration without a specific reason and regression test.
+
 ## 14. Android versioning/signing
 Package ID must remain `com.richard.dailyquizchallenge`.
 
 Release/version history:
 - V1.0 → `1.0.0`, versionCode `1`
 - Previous V1.1 release → `1.1.0`, versionCode `2`
-- **Current V1.1.4 → `1.1.4`, versionCode `4` (release workflow prepared; signed release still pending validation)**
-- **Previous V1.1.3 → `1.1.3`, versionCode `3`**
+- **V1.1.9 update-validation build → `1.1.9`, versionCode `7` — in-place update PASSED**
+- V1.1.8 update-validation build → `1.1.8`, versionCode `6` — APK was correct but stale native app content remained after in-place update.
+- **V1.1.4 → `1.1.4`, versionCode `4`**
+- **V1.1.3 → `1.1.3`, versionCode `3`**
 
 Future releases must use a higher versionCode while preserving the same production signing key and package ID.
 
@@ -513,9 +522,9 @@ The long-term goal is to generate questions from a selected Bible chapter/passag
 The immediate objective is deliberately narrow: **finish the three remaining categories and establish a stable V1 before beginning major redesign or migration work.**
 
 ### Remaining V1 categories
-- Africa & Nigeria — next implementation target.
-- Bible — implement after/alongside Africa & Nigeria using the planned Bible-specific content/licensing approach.
-- Current Affairs — implement as fresh online content, with provider/source strategy appropriate to changing information.
+- **Africa & Nigeria — COMPLETE / VERIFIED.**
+- **Bible — next remaining implementation target.** Use the planned Bible-specific content/licensing approach.
+- **Current Affairs — remaining implementation target.** Implement as fresh online content with provider/source strategy appropriate to changing information.
 
 ### Provider principle for this milestone
 The provider's internal category structure does **not** need to mirror the app's user-facing categories. For V1, the goal is to obtain suitable usable questions/content and normalize them into the app's three remaining categories. We should not block completion merely because a provider labels content as Africa, Nigeria, History, Geography, Culture, Religion, or another narrower/broader taxonomy.
@@ -646,11 +655,11 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 5. Define category-specific data-model extensions.
 
 ### Phase B — Backend implementation, one category at a time
-6. Implement Africa & Nigeria through the Worker.
-7. Test Africa/Nigeria Worker responses.
-8. Integrate Africa/Nigeria into the Question Engine.
-9. Android-test Africa/Nigeria.
-10. Implement Current Affairs through the Worker.
+6. **Africa & Nigeria — COMPLETE / VERIFIED; no further implementation required for this checkpoint.**
+7. **Bible — next implementation focus:** verify source/licensing, implement the offline Bible Library, then the online Bible quiz.
+8. Android-test Bible reading offline and Bible quiz online.
+9. Implement Current Affairs through the Worker.
+10. Test Current Affairs freshness/source metadata.
 11. Test Current Affairs freshness/source metadata.
 12. Integrate Current Affairs into the Question Engine.
 13. Android-test Current Affairs.
