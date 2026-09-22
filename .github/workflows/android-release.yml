@@ -2,9 +2,6 @@ name: Android Release APK and AAB
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - v1-1-7-update-validation
 
 jobs:
   build-release:
@@ -31,7 +28,7 @@ jobs:
       - name: Sync Capacitor Android project
         run: npx cap sync android
 
-      - name: Set V1.1.9 Android version for update validation
+      - name: Set Android release version
         run: |
           python3 << 'EOF'
           from pathlib import Path
