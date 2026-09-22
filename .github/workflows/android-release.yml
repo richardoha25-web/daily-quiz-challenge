@@ -2,6 +2,9 @@ name: Android Release APK and AAB
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - v1-1-7-update-validation
 
 jobs:
   build-release:
@@ -36,26 +39,26 @@ jobs:
           path.parent.mkdir(parents=True, exist_ok=True)
           path.write_text("""package com.richard.dailyquizchallenge;
 
-import android.os.Bundle;
-import android.webkit.WebSettings;
+          import android.os.Bundle;
+          import android.webkit.WebSettings;
 
-import com.getcapacitor.BridgeActivity;
+          import com.getcapacitor.BridgeActivity;
 
-public class MainActivity extends BridgeActivity {
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+          public class MainActivity extends BridgeActivity {
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
 
-        if (getBridge() != null && getBridge().getWebView() != null) {
-            WebSettings settings = getBridge().getWebView().getSettings();
-            settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-            getBridge().getWebView().clearCache(true);
-            getBridge().getWebView().clearHistory();
-            getBridge().getWebView().reload();
-        }
-    }
-}
-""")
+                  if (getBridge() != null && getBridge().getWebView() != null) {
+                      WebSettings settings = getBridge().getWebView().getSettings();
+                      settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+                      getBridge().getWebView().clearCache(true);
+                      getBridge().getWebView().clearHistory();
+                      getBridge().getWebView().reload();
+                  }
+              }
+          }
+          """)
           EOF
           test -f android/app/src/main/java/com/richard/dailyquizchallenge/MainActivity.java
 
