@@ -8,15 +8,15 @@ const root = document.getElementById('root')!;
 
 async function prepareWebRuntime() {
   if (Capacitor.isNativePlatform()) {
-    // Capacitor Android apps ship their web assets inside the APK. A PWA
-    // service worker is unnecessary on native and can keep serving an older
-    // app bundle after an in-place APK update.
+    // The native APK contains the authoritative web bundle. Do not let a
+    // previously installed PWA service worker keep serving an older bundle
+    // after an in-place Android update.
     if ('serviceWorker' in navigator) {
       try {
         const registrations = await navigator.serviceWorker.getRegistrations();
         await Promise.all(registrations.map((registration) => registration.unregister()));
       } catch {
-        // Continue loading the native app even if cleanup is unavailable.
+        // Continue loading even if browser cleanup is unavailable.
       }
     }
 
@@ -25,15 +25,10 @@ async function prepareWebRuntime() {
         const cacheNames = await caches.keys();
         await Promise.all(cacheNames.map((name) => caches.delete(name)));
       } catch {
-        // Cache cleanup must never block app startup.
+        // Cache cleanup must never block native app startup.
       }
     }
-
-    createRoot(root).render(<StrictMode><App /></StrictMode>);
-    return;
-  }
-
-  if ('serviceWorker' in navigator) {
+  } else if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       void navigator.serviceWorker
         .register('./sw.js', { updateViaCache: 'none' })
