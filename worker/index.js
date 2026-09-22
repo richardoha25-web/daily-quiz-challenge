@@ -1,5 +1,4 @@
 // Preview rebuild trigger: Africa API Worker-secret configuration is verified outside the repository.
-import { AFRICA_NIGERIA_QUESTION_BANK } from "./data/africaNigeriaQuestionBank.js";
 
 const OPEN_TRIVIA_URL = "https://opentdb.com/api.php";
 
@@ -42,6 +41,231 @@ const j = Math.floor(Math.random() * (i + 1));
 }
 
 return result;
+}
+
+async function fetchAfricaCountries(env) {
+const apiKey = env.AFRICA_API_KEY;
+
+if (!apiKey) throw new Error("AFRICA_API_KEY_NOT_CONFIGURED");
+
+const cache = caches.default;
+const cacheKey = new Request("https://daily-quiz-africa-cache.internal/countries");
+const cached = await cache.match(cacheKey);
+
+if (cached) return cached.json();
+
+const apiUrl = new URL("https://api.africa-api.com/v1/countries");
+apiUrl.searchParams.set("paginate", "true");
+apiUrl.searchParams.set("page", "1");
+apiUrl.searchParams.set("per_page", "100");
+apiUrl.searchParams.set("sort", "name");
+
+let response;
+
+try {
+response = await fetch(apiUrl.toString(), {
+headers: {
+Authorization: `Bearer ${apiKey}`,
+Accept: "application/json"
+},
+signal: AbortSignal.timeout(8000)
+});
+} catch {
+throw new Error("AFRICA_API_TIMEOUT");
+}
+
+if (response.status === 401 || response.status === 403) {
+throw new Error("AFRICA_API_AUTH_FAILED");
+}
+
+if (response.status === 429) {
+throw new Error("AFRICA_API_RATE_LIMITED");
+}
+
+if (!response.ok) throw new Error("AFRICA_API_UNAVAILABLE");
+
+const data = await response.json();
+const countries = Array.isArray(data?.data) ? data.data : [];
+
+if (!countries.length) throw new Error("AFRICA_API_NO_COUNTRIES");
+
+const cachedResponse = new Response(JSON.stringify({
+countries,
+retrievedAt: new Date().toISOString()
+}), {
+headers: {
+"Content-Type": "application/json",
+"Cache-Control": "public, max-age=300"
+}
+});
+
+await cache.put(cacheKey, cachedResponse.clone());
+return cachedResponse.json();
+}
+
+function uniqueValues(countries, getter) {
+return [...new Set(
+countries
+.map(getter)
+.filter(value => value !== null && value !== undefined && String(value).trim() !== "")
+.map(value => String(value))
+)];
+}
+
+function makeOptions(correct, values) {
+const unique = [...new Set([String(correct), ...values.map(String)])];
+if (unique.length < 4) return null;
+
+const distractors = shuffle(
+unique.filter(value => value !== String(correct))
+).slice(0, 3);
+
+return shuffle([String(correct), ...distractors]);
+}
+
+function generatedQuestion({ id, difficulty, question, correctAnswer, options, explanation }) {
+return {
+id,
+category: "africa_nigeria",
+difficulty,
+question,
+options,
+correctAnswer: String(correctAnswer),
+explanation,
+source: "Africa API",
+sourceId: id,
+sourceUrl: "https://africa-api.com/docs/countries",
+license: "Africa API commercial use permitted; public-facing republication must attribute underlying sources",
+isRemote: true,
+createdAt: new Date().toISOString(),
+updatedAt: new Date().toISOString()
+};
+}
+
+function buildAfricaQuestions(countries, difficulty) {
+const questions = [];
+const validCountries = countries.filter(country =>
+country &&
+typeof country.id === "string" &&
+typeof country.name === "string"
+);
+
+const addCountryValueQuestions = (field, label, template) => {
+const values = uniqueValues(validCountries, country => country[field]);
+
+for (const country of validCountries) {
+const correct = country[field];
+if (correct === null || correct === undefined || String(correct).trim() === "") continue;
+
+const options = makeOptions(correct, values);
+if (!options) continue;
+
+questions.push(generatedQuestion({
+id: `africa-api-${country.id}-${field}`,
+difficulty,
+question: template(country, correct),
+correctAnswer: correct,
+options,
+explanation: `${label}: ${correct}. Source: Africa API country reference data.`
+}));
+}
+};
+
+if (difficulty === "easy") {
+addCountryValueQuestions(
+"capital",
+"Capital",
+country => `What is the capital of ${country.name}?`
+);
+
+addCountryValueQuestions(
+"region",
+"Region",
+country => `In which region of Africa is ${country.name} located?`
+);
+
+const currencyCodes = validCountries.flatMap(country =>
+Array.isArray(country.currencies)
+? country.currencies.filter(Boolean).map(String)
+: []
+);
+const currencyPool = [...new Set(currencyCodes)];
+
+for (const country of validCountries) {
+const currencies = Array.isArray(country.currencies)
+? country.currencies.filter(Boolean).map(String)
+: [];
+if (!currencies.length) continue;
+
+const correct = currencies[0];
+const options = makeOptions(correct, currencyPool);
+if (!options) continue;
+
+questions.push(generatedQuestion({
+id: `africa-api-${country.id}-currency`,
+difficulty: "easy",
+question: `Which currency code is listed for ${country.name}?`,
+correctAnswer: correct,
+options,
+explanation: `Currency code: ${correct}. Source: Africa API country reference data.`
+}));
+}
+}
+
+if (difficulty === "medium") {
+addCountryValueQuestions(
+"official_name",
+"Official name",
+country => `What is the official name of ${country.name}?`
+);
+
+addCountryValueQuestions(
+"subregion",
+"Subregion",
+country => `Which African subregion includes ${country.name}?`
+);
+
+const capitalCountries = validCountries.filter(country =>
+typeof country.capital === "string" && country.capital.trim()
+);
+
+for (const country of capitalCountries) {
+const options = makeOptions(
+country.name,
+capitalCountries.map(item => item.name)
+);
+if (!options) continue;
+
+questions.push(generatedQuestion({
+id: `africa-api-${country.id}-country-by-capital`,
+difficulty: "medium",
+question: `Which African country has ${country.capital} as its capital?`,
+correctAnswer: country.name,
+options,
+explanation: `${country.capital} is the capital of ${country.name}. Source: Africa API country reference data.`
+}));
+}
+}
+
+if (difficulty === "hard") {
+addCountryValueQuestions(
+"area_km2",
+"Approximate area",
+country => `What is the approximate area of ${country.name}?`
+);
+
+addCountryValueQuestions(
+"official_name",
+"Official name",
+country => `Which country has the official name "${country.official_name}"?`
+);
+}
+
+return shuffle(
+questions.filter((question, index, array) =>
+array.findIndex(candidate => candidate.id === question.id) === index
+)
+);
 }
 
 async function createId(text) {
@@ -485,24 +709,47 @@ questions: questions
 }
 
 if (category === "africa_nigeria") {
-const questions = AFRICA_NIGERIA_QUESTION_BANK
-.filter(item => item.difficulty === difficulty)
-.map(item => ({
-...item,
-isRemote: false,
-createdAt: item.createdAt || "2026-09-21T00:00:00.000Z",
-updatedAt: item.updatedAt || "2026-09-21T00:00:00.000Z"
-}));
+let countryPayload;
+
+try {
+countryPayload = await fetchAfricaCountries(env);
+} catch (error) {
+const code = error instanceof Error ? error.message : "AFRICA_API_UNAVAILABLE";
+const status = code === "AFRICA_API_RATE_LIMITED" ? 429 : 503;
+
+return json({
+ok: false,
+error: code,
+message: "Africa data provider is unavailable right now."
+}, status, request);
+}
+
+const countries = Array.isArray(countryPayload?.countries)
+? countryPayload.countries
+: [];
+
+const generatedQuestions = buildAfricaQuestions(countries, difficulty);
+
+if (generatedQuestions.length === 0) {
+return json({
+ok: false,
+error: "NO_QUESTIONS",
+message: "No valid Africa & Nigeria questions could be generated from the current country data."
+}, 404, request);
+}
 
 return json({
 ok: true,
 category: "africa_nigeria",
-difficulty: difficulty,
-limit: limit,
+difficulty,
+limit,
 source: "Africa API",
-questions: shuffle(questions).slice(0, limit)
+generatedFromFacts: true,
+factCountryCount: countries.length,
+generatedQuestionCount: generatedQuestions.length,
+questions: generatedQuestions.slice(0, limit)
 }, 200, request);
-}
+}}
 
 // Other categories are not connected to an external provider yet.
 return json({
