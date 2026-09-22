@@ -203,13 +203,13 @@ Current Worker error mapping includes:
 
 A transient `503 PROVIDER_UNAVAILABLE` was observed once during Android testing. Without any code change afterward, the same Debug #55 app successfully loaded and played Science questions, so the incident appears to have been temporary/provider-side or network-related. It should still be monitored during reliability testing.
 
-## 10. Android Debug build — CURRENT
+## 10. Android Debug build — historical V1.1.4 validation
 ### Latest Debug run #81
 - Run ID: `35451028401`
 - Commit: `d724e831b1e66e33397a7244a18f302a2f45f49f`
 - Result: **success**
 - Artifact name: `daily-quiz-debug-apk`
-- Purpose: final clean Debug build from the current `main` HEAD for V1.1.4 AdMob validation.
+- Purpose: historical clean Debug build used for V1.1.4 AdMob validation.
 
 Run #81 includes the V1.1.4 startup/App Open lifecycle, screen-aware banner placement, test-ad mode and the CI concurrency safeguard that cancels superseded Debug builds.
 
@@ -428,8 +428,8 @@ Release rules:
 ## 16. Release workflow
 `.github/workflows/android-release.yml`
 
-Current verified workflow blob SHA:
-`aebcd837f7640705b15d281d0873d5f0bfa8fe4a`
+Current release workflow file SHA on this validation branch:
+`e71e7999540e38add74cb99f14bd02ad7c31b197`
 
 It builds the current release as `versionCode 7` / `versionName 1.1.9`, injects the AdMob App ID, uses Java 21, restores the permanent production key from `KEYSTORE_BASE64`, signs APK/AAB, verifies signatures and uploads artifacts.
 
@@ -437,7 +437,7 @@ Obsolete workflows removed:
 - `.github/workflows/generate-keystore.yml`
 - `.github/workflows/keystore-to-base64.yml`
 
-Do not change the release workflow unnecessarily.
+The release workflow now represents the V1.1.9 production-release baseline. Future version bumps should update only the intended release version values and should preserve the permanent signing configuration and production AdMob mode.
 
 ## 17. Category/provider roadmap — V1 COMPLETION MASTER PLAN
 
