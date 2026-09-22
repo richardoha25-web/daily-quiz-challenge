@@ -1,17 +1,17 @@
 # Daily Quiz & Challenge — Project Continuity Record
 
 **Last updated:** 22 September 2026  
-**Stage:** V1.1.9 Android update-validation fix is implemented and **in-place update testing PASSED**. The app now updates successfully over the previous installed release without requiring uninstall/reinstall, while the new app content loads correctly. Science, General Knowledge, and **Africa & Nigeria are integrated and verified**. **Current focus: complete Bible and Current Affairs, then run the full V1 stabilization pass before major architectural, branding, or UI/UX changes. V2 remains paused.**
+**Stage:** V1.1.9 Android update-validation fix is implemented, **merged into `main` via PR #6**, and **in-place update testing PASSED**. The app now updates successfully over the previous installed release without requiring uninstall/reinstall, while the new app content loads correctly. Science, General Knowledge, and **Africa & Nigeria are integrated and verified**. The temporary V1.1.9 validation branch has been deleted. **Current focus: complete Bible and Current Affairs, then run the full V1 stabilization pass before major architectural, branding, or UI/UX changes. V2 remains paused.**
 
 ## Long-term product vision
 Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz system for real users**, not just a small one-off quiz app. The goal is a reliable platform with fresh online questions, strong anti-repetition logic, multiple categories, meaningful difficulty, polished gameplay, useful explanations/results, dependable monetization, and a professional UI/UX that people enjoy returning to. Development should favor a stable foundation and incremental verification so future features can grow without bringing back the old static-question problems.
 
-## Current milestone — V1.1.9 Android update-validation checkpoint
+## Current milestone — V1.1.9 production baseline on `main`
 - `package.json` version: `1.1.9`.
 - Android release target: `versionName 1.1.9`, `versionCode 7`.
 - Existing permanent production signing key and package ID were preserved.
 - **Release-to-Release update test PASSED:** V1.1.3 installed directly over the signed 19 August release APK without uninstalling.
-- Release artifact: `daily-quiz-release` from Android Release APK and AAB #5; SHA-256: `a5b4069b863238863d5505c5f6b95a2968bb17d1abcc41f881e96457211fbdc6`.
+- Historical signed release artifact: `daily-quiz-release` from Android Release APK and AAB #5; SHA-256: `a5b4069b863238863d5505c5f6b95a2968bb17d1abcc41f881e96457211fbdc6`.
 - Signed APK/AAB build and signature verification completed successfully.
 - GitHub emitted only Node.js 20 deprecation and future Ubuntu 26 migration warnings; neither prevented the build.
 
@@ -31,7 +31,8 @@ Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz sy
 - App: Daily Quiz & Challenge
 - Repo: `richardoha25-web/daily-quiz-challenge`
 - Active branch: `main`
-- V2 branch: `v2-development` — **do not touch during V1.1 work**
+- V2 branch: `v2-development` — **paused; do not touch during V1 work**
+- V1.1.9 validation branch: deleted after PR #6 was merged
 - AppDeploy project: `daily-quiz-challenge-zd50r1`
 - Stack: React + Vite + Capacitor 8.4.2
 - Android package: `com.richard.dailyquizchallenge`
@@ -428,7 +429,7 @@ Release rules:
 ## 16. Release workflow
 `.github/workflows/android-release.yml`
 
-Current release workflow file SHA on this validation branch:
+Current release workflow file SHA on `main`:
 `e71e7999540e38add74cb99f14bd02ad7c31b197`
 
 It builds the current release as `versionCode 7` / `versionName 1.1.9`, injects the AdMob App ID, uses Java 21, restores the permanent production key from `KEYSTORE_BASE64`, signs APK/AAB, verifies signatures and uploads artifacts.
