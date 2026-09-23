@@ -1395,3 +1395,19 @@ The guiding principle remains:
 **V2:** Remains paused
 
 This document is the working commercial blueprint and should be updated whenever a major monetization decision is made.
+
+## Current Affairs Phase 2 commercial-architecture checkpoint — 23 September 2026
+
+Current Affairs Phase 2 is now being implemented as a fact-first knowledge base. The content model is deliberately being kept compatible with the commercial architecture without introducing billing or paywalls yet.
+
+Future content records may support an optional access classification such as:
+- FREE
+- PREMIUM
+- SPECIAL_PACK
+- FUTURE_ENTITLEMENT
+
+This classification belongs at the content/topic/fact or generated-question layer as appropriate; it should not be hard-coded throughout the quiz UI or provider code. Actual entitlement enforcement will be added later through the centralized commercial architecture.
+
+For Current Affairs specifically, future premium value can come from deeper topic collections, expanded question pools, advanced difficulty, richer explanations/revision tools, advanced statistics and other educational features. The exact free/premium split remains undecided.
+
+Phase 2 rule: build the content system once and keep access control separable. Do not reduce content quality simply to create premium inventory, and do not implement subscriptions, purchases or premium locks during this phase.
