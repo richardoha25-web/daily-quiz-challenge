@@ -467,3 +467,55 @@ Phase 1 is complete when:
 After this documentation checkpoint, the next work should be **Phase 2: build the initial Current Affairs knowledge base**, starting with a small verified Nigeria/Africa/world dataset.
 
 Only after that dataset is validated should we implement the generator and connect `current_affairs` to the Worker.
+
+
+## 16. Phase 2 checkpoint — initial verified knowledge base
+
+Updated: 23 September 2026
+
+Phase 2 ingestion has now begun and the first verified seed is stored at:
+worker/current-affairs/data/phase2-initial-facts.js
+
+The seed currently covers:
+- Nigeria federal structure and current federal leadership.
+- All 36 Nigerian states, capitals and geopolitical zones.
+- FCT/Abuja and the 774-LGA administrative fact.
+- African Union and ECOWAS institutional facts.
+- United Nations and WHO institutional facts.
+- Nigerian economic institutions including the CBN and OPEC membership.
+- IMF and WTO institutional/economic facts.
+- Initial durable Olympic/sports facts plus a dated Dakar 2026 fact.
+
+### Phase 2 data rules
+
+Facts remain the source of truth. Questions are not being hand-written or generated yet.
+
+The dataset supports provenance and freshness through:
+- stable fact IDs
+- domain/topic/entity/attribute/value
+- validFrom / future validTo
+- lastVerified
+- source IDs
+- active/superseded status
+
+Dynamic statistics must add a reference period and dataset vintage before production use.
+
+### Commercial-aware content metadata
+
+The knowledge model is intentionally compatible with future monetization. A future optional field such as accessTier may classify content as free, premium, special_pack, or another entitlement without changing the fact model. No premium enforcement is implemented in Phase 2.
+
+### Verification caution
+
+Current officeholders, institutional leaders, membership counts and other changing facts are not permanent facts. They must be re-verified before a production refresh and superseded when an authoritative source changes.
+
+### Phase 2 remaining work
+
+1. Expand the verified dataset across all eight domains.
+2. Add more geography, institutional, economy, sports and science/technology facts.
+3. Add stronger source-registry coverage for remaining institutions.
+4. Add explicit update/supersession handling.
+5. Review the schema and future access-tier metadata.
+6. Validate the complete Phase 2 dataset.
+7. Only then begin Phase 3 question generation.
+
+Current status: Phase 2 — IN PROGRESS.
