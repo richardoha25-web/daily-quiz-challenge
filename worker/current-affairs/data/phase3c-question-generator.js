@@ -92,7 +92,7 @@ function getTemporalContext(fact) {
   }
   if (fact.validFrom) return ` from ${fact.validFrom}`;
 
-  return ` (verified ${fact.lastVerified || "date not specified"} )`;
+  return ` (verified ${fact.lastVerified || "date not specified"})`;
 }
 
 function assertFactShape(fact) {
@@ -193,11 +193,11 @@ function generateIdentification(fact, blueprint, difficulty) {
 }
 
 function generateClassification(fact, blueprint, difficulty) {
-  if (!fact.region && typeof fact.value !== "string") {
+  if (!fact.region) {
     return null;
   }
 
-  const classification = fact.region || fact.value;
+  const classification = fact.region;
   return createBaseDraft(
     fact,
     blueprint,
@@ -355,6 +355,10 @@ export function generateQuestionDraft({
 /**
  * Generate all safe single-fact drafts for a fact.
  *
+ * Classification is intentionally conservative: a fact must expose an
+ * explicit `region` classification. Generic string values are never
+ * treated as classifications.
+ *
  * Conservative by design: only blueprints whose answer can be derived
  * directly from the supplied fact are attempted.
  */
@@ -409,6 +413,7 @@ export function generateQuestionDraftBatch({
 }) {
   const drafts = [];
   const rejected = [];
+  const generatedKeys = new Set();
 
   for (const fact of facts) {
     if (drafts.length >= maxDrafts) break;
@@ -420,6 +425,24 @@ export function generateQuestionDraftBatch({
 
     for (const draft of result.drafts) {
       if (drafts.length >= maxDrafts) break;
+
+      const fingerprint = [
+        draft.question.trim().toLowerCase(),
+        draft.correctAnswer.trim().toLowerCase(),
+        draft.questionFamilyId,
+      ].join("|");
+
+      if (generatedKeys.has(fingerprint)) {
+        rejected.push({
+          blueprintId: draft.blueprintId,
+          factId: fact.id,
+          difficulty: draft.difficulty,
+          reason: "duplicate_generated_draft",
+        });
+        continue;
+      }
+
+      generatedKeys.add(fingerprint);
       drafts.push(draft);
     }
 
