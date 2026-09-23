@@ -851,3 +851,12 @@ Current Affairs **Quality Validator** is implemented in `worker/current-affairs/
 It provides the final pre-Question-Bank quality gate for structure, exactly four unique options, one correct answer, fact/source provenance, freshness, wording, political neutrality, difficulty and access-tier validity. It rejects questionable content conservatively rather than silently repairing it. Semantic and family duplicate detection remain reserved for Phase 3F.
 
 **Current Affairs status: Phase 3E complete. Next: Phase 3F — Duplicate / Family Detection.**
+
+
+## Phase 3F implementation checkpoint — 24 September 2026
+
+Current Affairs **Duplicate / Family Detection** is implemented in `worker/current-affairs/data/phase3f-duplicate-family-detector.js`.
+
+Anti-repetition now combines exact text, canonical concept/answer/variant identity, question-family identity, fact provenance, conservative wording-similarity review, same-family/same-concept quiz blocking, and question/family/concept recent-history cooldowns. Wording similarity is only a review signal to avoid false positives; provenance and family identity remain authoritative.
+
+**Current Affairs status: Phase 3F complete. Next: Phase 3G — Quiz Assembler.**
