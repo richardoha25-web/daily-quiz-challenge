@@ -1466,3 +1466,10 @@ The Current Affairs Question Blueprint layer is now implemented. Blueprint metad
 Blueprint selection is content-generation logic, not billing logic. Future premium/special-pack questions must pass the same factual, clarity, freshness, distractor and anti-duplication requirements as free questions. Access decisions remain centralized and are not embedded in individual blueprint behavior.
 
 **Commercial status:** no billing, subscriptions, paywalls or entitlement enforcement were added in Phase 3B.
+
+
+## Phase 3C commercial alignment — 24 September 2026
+
+The Current Affairs Question Generator now carries future access-tier metadata while keeping billing completely separate from content generation. Generated drafts default to `FREE`; future centralized commercial logic may classify validated content as `PREMIUM` or `SPECIAL_PACK` without changing generator behavior.
+
+The generator does not make access decisions, enforce entitlements, or create paywalls. Commercial classification must remain downstream of content quality and validation so premium content is held to the same factual, freshness, clarity and anti-duplication standards.
