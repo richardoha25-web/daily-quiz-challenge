@@ -937,3 +937,9 @@ The design system must therefore be built for **long-term scalability**, not jus
 > **Daily Quiz & Challenge should feel like a polished modern quiz product: clean white surfaces, sharp blue actions, dark navy hierarchy, a carefully controlled reward accent, excellent spacing, satisfying interactions, fresh content, and a gameplay experience people want to return to.**
 
 **Design first. Code second. Test everything. Protect the stable foundation.**
+
+## Phase 3G UX alignment — 24 September 2026
+
+The Current Affairs Quiz Assembler establishes the functional rules that the future UI/UX must represent clearly: a standard 10-question session, balanced difficulty, varied content, no same-family repeats, recent-question avoidance, and a clear insufficient-content/error state when a safe full quiz cannot be assembled.
+
+These are backend/content-selection constraints, not visual decisions. The major UI redesign remains deferred until the functional V1 foundation is stable.
