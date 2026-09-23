@@ -1411,3 +1411,8 @@ This classification belongs at the content/topic/fact or generated-question laye
 For Current Affairs specifically, future premium value can come from deeper topic collections, expanded question pools, advanced difficulty, richer explanations/revision tools, advanced statistics and other educational features. The exact free/premium split remains undecided.
 
 Phase 2 rule: build the content system once and keep access control separable. Do not reduce content quality simply to create premium inventory, and do not implement subscriptions, purchases or premium locks during this phase.
+
+
+## Current Affairs Phase 2 continuation — 23 September 2026
+
+The content layer now carries a future-only access-tier contract (free, premium, special_pack) while enforcement remains disabled. This preserves future monetization flexibility without coupling current quiz logic to billing. Additional institutional/economic facts are being added before question generation.
