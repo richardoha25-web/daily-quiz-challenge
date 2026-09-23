@@ -537,6 +537,58 @@ If the connection disappears:
 Avoid exposing raw technical errors to normal users.
 
 ## 18. Navigation
+### Future native Android navigation decision
+
+The current React/Vite/Capacitor V1 UI is **not** the target implementation for the final app-wide navigation structure.
+
+The future navigation architecture will be designed as an independent product/UX blueprint and implemented during the planned native Android migration. The current V1 remains stable and should not be reshaped into the future multi-section application merely to accommodate Bible.
+
+The future navigation design should support:
+- Clear top-level product destinations.
+- Nested navigation inside major sections such as Bible.
+- Predictable back/up behavior.
+- Independent navigation history where appropriate.
+- Scalable support for future account, progress, premium, settings and learning features.
+- Bible-specific hierarchy without turning every Bible function into a top-level button.
+
+Android's Navigation component supports navigation graphs, nested destinations, back stacks, and common patterns such as bottom navigation and navigation drawers; these patterns should inform the future native design without preselecting the final UI before wireframing. citeturn0search0
+
+### Bible information architecture — future design
+
+Bible should be treated as a major product section rather than a single quiz-category screen.
+
+Conceptual hierarchy:
+- Bible Home
+  - Read Bible
+    - Old Testament / New Testament
+    - Book
+    - Chapter
+    - Bible Reader
+      - Silent reading by default
+      - User-selected Listen action
+      - Play
+      - Pause / Resume
+      - Stop
+      - Future speed/voice controls
+  - Bible Quiz
+    - Quick Quiz
+    - Book Quiz
+    - Chapter Quiz
+    - Topic Quiz
+  - Future study tools
+
+**Voice reading must never auto-start when a chapter opens.** The reader opens in normal silent-reading mode. Audio begins only after the user explicitly chooses the listening action.
+
+### V1 Bible placeholder UX
+
+Until the native Bible experience is implemented, the current V1 Bible category should use a minimal, non-final placeholder such as:
+
+**Bible — Coming Soon**
+> A full Bible reading, study and quiz experience is being prepared for a future version of the app.
+
+The placeholder should not expose a large collection of temporary buttons such as Read, Read Aloud, Study, Books, Chapters, etc. Those belong to the future navigation design.
+
+
 
 Navigation should be simple and predictable, but the final architecture must support both quick quiz play and the deeper Bible reading experience.
 
@@ -809,6 +861,14 @@ Not yet started:
 
 ## 28. Immediate UI/UX Next Steps
 
+Before high-fidelity implementation, the product architecture must now be treated in two stages:
+
+1. **V1 stability:** finish Current Affairs and stabilize the existing React/Vite/Capacitor reference app.
+2. **Future native product design:** design the complete app-wide navigation and information architecture, including the Bible experience, as a standalone native Android product blueprint.
+
+Do not implement the full Bible navigation inside the current V1 merely to make the category functional.
+
+
 The UI/UX implementation remains intentionally deferred, but planning must now stay synchronized with backend/category research.
 
 1. Track the Africa & Nigeria provider architecture.
@@ -858,7 +918,7 @@ The design system must therefore be built for **long-term scalability**, not jus
 
 ## 30. Current synchronized product direction
 
-**Bible:** World English Bible (WEB), Catholic edition / Catholic book order where the selected source provides it. Bible reading is intended to work offline from local storage after the source/license is verified. Bible quizzes remain online.
+**Bible:** World English Bible (WEB), Catholic edition / Catholic book order (WEBC). Official source/licensing research is established; the source is public domain and the official distribution includes structured and read-aloud source formats. The full Bible reader, quiz modes and explicit user-controlled voice reading belong to the future native Android experience, not the current V1 UI. citeturn0search1turn0search2
 
 **Connectivity:** The redesigned app needs a centralized connectivity state. Online-required features should clearly explain the requirement; offline Bible reading should remain usable.
 
