@@ -1,6 +1,7 @@
 // Preview rebuild trigger: Africa API Worker-secret configuration is verified outside the repository.
 
 const OPEN_TRIVIA_URL = "https://opentdb.com/api.php";
+const NEWSDATA_URL = "https://newsdata.io/api/1/latest";
 
 function json(data, status = 200, request) {
 const origin = request?.headers.get("Origin") || "*";
@@ -354,6 +355,135 @@ return Array.from(new Uint8Array(hash))
 .join("");
 }
 
+function isUsableCurrentAffairsArticle(article) {
+const title = typeof article?.title === "string" ? article.title.trim() : "";
+const description = typeof article?.description === "string" ? article.description.trim() : "";
+const sourceName = typeof article?.source_name === "string" ? article.source_name.trim() : "";
+const articleId = typeof article?.article_id === "string" ? article.article_id.trim() : "";
+if (!title || !sourceName || !articleId) return false;
+
+const text = (title + " " + description).toLowerCase();
+const blockedPhrases = [
+  "opinion", "editorial", "commentary", "column", "analysis",
+  "should", "must", "slams", "blasts", "accuses", "alleges",
+  "claims", "urges", "calls on", "calls for", "vows", "warns"
+];
+if (blockedPhrases.some((phrase) => text.includes(phrase))) return false;
+if (title.length < 18 || title.length > 220) return false;
+return true;
+}
+
+function buildCurrentAffairsQuestions(articles, difficulty) {
+const usable = articles
+  .filter(isUsableCurrentAffairsArticle)
+  .filter((article, index, array) =>
+    array.findIndex((item) => item.article_id === article.article_id) === index
+  );
+
+const questions = [];
+
+for (let i = 0; i < usable.length; i += 1) {
+  const article = usable[i];
+  const others = usable.filter((_, index) => index !== i);
+
+  if (others.length < 3) continue;
+
+  let question;
+  let correctAnswer;
+  let distractorValues;
+
+  if (difficulty === "easy") {
+    question = "Which recent news headline was reported by " + article.source_name + "?";
+    correctAnswer = article.title;
+    distractorValues = others.map((item) => item.title);
+  } else if (difficulty === "medium") {
+    question = 'Which publication reported this recent headline: "' + article.title + '"?';
+    correctAnswer = article.source_name;
+    distractorValues = others.map((item) => item.source_name);
+  } else {
+    const published = typeof article.pubDate === "string" && article.pubDate
+      ? article.pubDate.replace(" ", "T") + "Z"
+      : "";
+    const dateText = published && !Number.isNaN(Date.parse(published))
+      ? new Intl.DateTimeFormat("en", { year: "numeric", month: "short", day: "numeric" }).format(new Date(published))
+      : "recently";
+    question = "Which recent headline was published by " + article.source_name + " on " + dateText + "?";
+    correctAnswer = article.title;
+    distractorValues = others.map((item) => item.title);
+  }
+
+  const options = makeOptions(correctAnswer, distractorValues);
+  if (!options) continue;
+
+  questions.push({
+    id: "newsdata-" + article.article_id + "-" + difficulty,
+    category: "current_affairs",
+    difficulty,
+    question,
+    options,
+    correctAnswer,
+    explanation: "Based on a recent NewsData.io report from " + article.source_name + ". Published: " + (article.pubDate || "unknown") + ".",
+    source: "NewsData.io",
+    sourceId: article.article_id,
+    sourceUrl: article.link || article.source_url || "",
+    publishedAt: article.pubDate || "",
+    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    isRemote: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  });
+}
+
+return shuffle(
+  questions.filter((question, index, array) =>
+    array.findIndex((candidate) => candidate.id === question.id) === index
+  )
+);
+}
+
+async function fetchCurrentAffairsArticles(env) {
+const apiKey = env.NEWSDATA_API_KEY;
+if (!apiKey) throw new Error("NEWSDATA_API_KEY_NOT_CONFIGURED");
+
+const apiUrl = new URL(NEWSDATA_URL);
+apiUrl.searchParams.set("apikey", apiKey);
+apiUrl.searchParams.set("language", "en");
+apiUrl.searchParams.set("category", "top,world,technology,business,science,sports");
+apiUrl.searchParams.set("size", "10");
+apiUrl.searchParams.set("removeduplicate", "1");
+
+let response;
+try {
+  response = await fetch(apiUrl.toString(), {
+    headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(10000)
+  });
+} catch {
+  throw new Error("NEWSDATA_TIMEOUT");
+}
+
+if (response.status === 401 || response.status === 403) {
+  throw new Error("NEWSDATA_AUTH_FAILED");
+}
+if (response.status === 429) {
+  throw new Error("NEWSDATA_RATE_LIMITED");
+}
+if (!response.ok) throw new Error("NEWSDATA_UNAVAILABLE");
+
+let data;
+try {
+  data = await response.json();
+} catch {
+  throw new Error("NEWSDATA_INVALID_RESPONSE");
+}
+
+if (data?.status !== "success" || !Array.isArray(data?.results)) {
+  throw new Error("NEWSDATA_INVALID_RESPONSE");
+}
+
+return data.results;
+}
+
 export default {
 async fetch(request, env) {
 const url = new URL(request.url);
@@ -460,7 +590,8 @@ const categories = [
 "general",
 "science",
 "bible",
-"africa_nigeria"
+"africa_nigeria",
+"current_affairs"
 ];
 
 const difficulties = [
@@ -782,6 +913,44 @@ difficulty: difficulty,
 limit: limit,
 source: "Open Trivia DB",
 questions: questions
+}, 200, request);
+}
+
+if (category === "current_affairs") {
+let articles;
+try {
+  articles = await fetchCurrentAffairsArticles(env);
+} catch (error) {
+  const code = error instanceof Error ? error.message : "NEWSDATA_UNAVAILABLE";
+  const status =
+    code === "NEWSDATA_AUTH_FAILED" ? 401 :
+    code === "NEWSDATA_RATE_LIMITED" ? 429 :
+    code === "NEWSDATA_TIMEOUT" ? 504 : 503;
+
+  return json({
+    ok: false,
+    error: code,
+    message: "Current Affairs news source is unavailable right now."
+  }, status, request);
+}
+
+const questions = buildCurrentAffairsQuestions(articles, difficulty);
+
+if (!questions.length) {
+  return json({
+    ok: false,
+    error: "NO_QUESTIONS",
+    message: "No usable Current Affairs questions were returned."
+  }, 404, request);
+}
+
+return json({
+  ok: true,
+  category: "current_affairs",
+  difficulty,
+  limit,
+  source: "NewsData.io",
+  questions: questions.slice(0, limit)
 }, 200, request);
 }
 
