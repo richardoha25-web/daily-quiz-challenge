@@ -737,3 +737,7 @@ The Current Affairs fact layer has been expanded across the remaining planned do
 No Question Bank or question-generation implementation has started. The immediate sequence is now: **complete Phase 2 expansion → audit/validate facts and sources → define update/supersession handling → Phase 3 question generation → later Question Bank architecture.**
 
 AdMob and the existing production quiz categories remain untouched by this Current Affairs content expansion.
+
+## Phase 2 audit checkpoint — 23 September 2026
+
+The Phase 2 audit found that the earlier expansion pass was not yet complete: Sports and Science & Technology coverage had not been fully inserted into the fact array, and one ECOWAS source ID needed normalization. These issues were corrected in the knowledge-base file. The current audit confirms a fact-first dataset with complete required fields for the active records, no duplicate fact IDs, and source references normalized to the source registry. Phase 2 remains in final validation rather than being declared production-complete until the full source/freshness/content-coverage review is finished.
