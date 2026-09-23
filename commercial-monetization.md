@@ -1,7 +1,7 @@
 # Daily Quiz & Challenge — Commercial & Monetization Plan
 
 **File:** `commercial-monetization.md`  
-**Status:** Strategic product specification — planned, not yet fully implemented. Africa & Nigeria is now production-verified; commercial implementation remains deferred while Bible and Current Affairs are completed and the full V1 is stabilized.  
+**Status:** Strategic product specification — planned, not yet fully implemented. Africa & Nigeria is production-verified; Current Affairs is the remaining V1 content implementation target. Bible commercial/product architecture is planned for the future native Android experience; commercial implementation remains deferred until the V1 foundation and later account/entitlement architecture are ready.  
 **Purpose:** Single source of truth for the commercial, premium, advertising, entitlement, and revenue architecture of Daily Quiz & Challenge.
 
 ---
@@ -20,6 +20,21 @@ Immediate product priority:
 After V1 stabilization, the commercial plan will be revisited alongside the technical architecture, new brand/package identity, and UI/UX redesign. Provider/source choices for the remaining categories should consider commercial licensing, but category completion should not be blocked by trying to perfect the entire future monetization system now.
 
 ---
+
+## V1 planning checkpoint — Bible UI and native migration
+
+The Bible is now treated as a future product experience rather than a V1 category implementation. The current V1 app may show a lightweight **Bible — Coming Soon / In Development** notice instead of exposing temporary Bible navigation.
+
+The future Bible experience may eventually support:
+- Offline Bible reading.
+- Bible Quiz.
+- Book/chapter/topic quiz modes.
+- Explicit user-controlled voice reading.
+- Future study features.
+
+The full Bible navigation and major UI/UX redesign will be designed independently and implemented during the planned native Android migration. This avoids building temporary monetization/UI rules into the current React/Vite/Capacitor V1.
+
+Commercial decisions for Bible — including any future free/premium split, premium study features, ad treatment, or entitlement requirements — remain undecided until the future product architecture is designed.
 
 ## 1. Purpose and guiding principles
 
