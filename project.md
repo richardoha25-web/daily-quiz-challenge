@@ -724,3 +724,8 @@ Current Affairs remains separate from the existing NewsData integration. NewsDat
 Commercial architecture remains a design constraint: future content can carry an access-tier classification, but no premium locks, billing or entitlement enforcement are being implemented during this Phase 2 work.
 
 Next: continue expanding and verifying the eight-domain knowledge base, then complete schema/update/supersession review before Phase 3 question generation.
+
+
+## Current Affairs Phase 2 continuation — 23 September 2026
+
+The verified Current Affairs seed has been expanded with additional institutional and economic relationships and future-only access-tier metadata. No premium enforcement or quiz-generation integration has been added. Continue Phase 2 expansion and validation before Phase 3.
