@@ -121,6 +121,61 @@ export const CURRENT_AFFAIRS_SOURCES = {
   },
 };
 
+  worldBankNigeria: {
+    id: "world-bank-nigeria",
+    name: "World Bank — Nigeria Overview",
+    url: "https://www.worldbank.org/en/country/nigeria/overview",
+    priority: "primary",
+  },
+  nationalGeographicContinents: {
+    id: "national-geographic-continents",
+    name: "National Geographic — Continents",
+    url: "https://education.nationalgeographic.org/resource/continent/",
+    priority: "secondary",
+  },
+  nationalGeographicAfricaGeography: {
+    id: "national-geographic-africa-geography",
+    name: "National Geographic — Africa Physical Geography",
+    url: "https://education.nationalgeographic.org/resource/africa-physical-geography/",
+    priority: "secondary",
+  },
+  unesco: {
+    id: "unesco",
+    name: "UNESCO — Member States",
+    url: "https://www.unesco.org/en/node/66561",
+    priority: "primary",
+  },
+  unicef: {
+    id: "unicef",
+    name: "UNICEF — Frequently Asked Questions",
+    url: "https://www.unicef.org/about/frequently-asked-questions",
+    priority: "primary",
+  },
+  itu: {
+    id: "itu",
+    name: "International Telecommunication Union — About",
+    url: "https://www.itu.int/en/about/Pages/default.aspx",
+    priority: "primary",
+  },
+  fifaWorldCup: {
+    id: "fifa-world-cup-2026",
+    name: "FIFA — World Cup 2026",
+    url: "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026",
+    priority: "primary",
+  },
+  worldAthletics: {
+    id: "world-athletics",
+    name: "World Athletics — Championships",
+    url: "https://worldathletics.org/results/world-athletics-championships",
+    priority: "primary",
+  },
+  nigeriaBoundaryCommission: {
+    id: "nigeria-boundary-commission",
+    name: "National Boundary Commission of Nigeria",
+    url: "https://boundarycommission.gov.ng/about-us/",
+    priority: "primary",
+  },
+
 const verifiedOn = "2026-09-23";
 
 export const CURRENT_AFFAIRS_INITIAL_FACTS = [
