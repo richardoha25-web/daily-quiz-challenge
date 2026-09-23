@@ -973,3 +973,22 @@ Phase 3D only supplies distractor candidates; it does not decide final correctne
 **Phase 3D status: implementation complete.**
 
 Next: **Phase 3E — Quality Validator.**
+
+
+## Phase 3E implementation checkpoint — 24 September 2026
+
+Phase 3E — **Quality Validator** is now implemented in `worker/current-affairs/data/phase3e-quality-validator.js`.
+
+This is the final quality gate before a generated question can be promoted to the validated Question Bank state. It checks structural validity, four-option integrity, exactly one correct answer, fact/source provenance, freshness metadata, question wording, unsupported/subjective language, political neutrality, difficulty consistency and access-tier validity.
+
+### Conservative quality policy
+
+The validator prefers rejection over questionable content. It never silently repairs an invalid question. Missing explanation is currently a warning rather than a rejection because explanation requirements can differ by quiz mode.
+
+Current-officeholder facts receive additional freshness scrutiny. Political/civic questions are allowed when factual and neutral, while persuasive or unsupported evaluative wording is rejected.
+
+Phase 3E deliberately does not perform semantic similarity or question-family duplicate detection; those remain Phase 3F responsibilities. Batch validation is explicitly bounded for predictable Worker execution.
+
+**Phase 3E status: implementation complete.**
+
+Next: **Phase 3F — Duplicate / Family Detection.**
