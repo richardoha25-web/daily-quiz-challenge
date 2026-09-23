@@ -237,7 +237,12 @@ export async function getQuizQuestions(
 ): Promise<QuizQuestion[]> {
   const category = categoryKey(categoryName);
 
-  if (category !== 'science' && category !== 'general' && category !== 'africa_nigeria') {
+  if (
+    category !== 'science' &&
+    category !== 'general' &&
+    category !== 'africa_nigeria' &&
+    category !== 'current_affairs'
+  ) {
     throw new Error('NO_ONLINE_SOURCE:' + category);
   }
 
