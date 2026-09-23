@@ -548,3 +548,7 @@ The new records use an expanded source registry. Primary institutional sources r
 ### Next step
 
 Finish the Phase 2 audit: verify dataset completeness, source IDs, schema consistency, freshness/update handling and supersession rules. Only after that audit should Phase 3 question generation begin. Question Bank design remains deliberately deferred until the expansion/audit is complete.
+
+## Phase 2 audit checkpoint — 23 September 2026
+
+The Phase 2 audit found that the earlier expansion pass was not yet complete: Sports and Science & Technology coverage had not been fully inserted into the fact array, and one ECOWAS source ID needed normalization. These issues were corrected in the knowledge-base file. The current audit confirms a fact-first dataset with complete required fields for the active records, no duplicate fact IDs, and source references normalized to the source registry. Phase 2 remains in final validation rather than being declared production-complete until the full source/freshness/content-coverage review is finished.
