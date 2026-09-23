@@ -711,3 +711,16 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 33. Update the Richard Studios website only after release validation passes.
 34. Retest the public download/install/update path.
 35. Keep billing architecture synchronized across `project.md`, `commercial-monetization.md`, and `ui-ux-project.md`; do not implement billing until the planned commercial/account foundation is ready.
+
+
+## Current Affairs Phase 2 implementation checkpoint — 23 September 2026
+
+Phase 2 has started. The first verified fact seed is now stored in worker/current-affairs/data/phase2-initial-facts.js.
+
+The seed covers Nigeria's federal structure/current leadership and all 36 states, Africa/AU/ECOWAS facts, UN/WHO institutional facts, Nigerian economic institutions, IMF/WTO facts, and initial sports/Olympic facts. The dataset is fact-first; the question generator and production current_affairs route have not been changed yet.
+
+Current Affairs remains separate from the existing NewsData integration. NewsData is reserved for the future News Quiz / Current Events experience.
+
+Commercial architecture remains a design constraint: future content can carry an access-tier classification, but no premium locks, billing or entitlement enforcement are being implemented during this Phase 2 work.
+
+Next: continue expanding and verifying the eight-domain knowledge base, then complete schema/update/supersession review before Phase 3 question generation.
