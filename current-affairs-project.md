@@ -863,3 +863,49 @@ The Question Bank remains conceptually separate from `recent_history` user histo
 **Phase 3A status: implementation complete.**
 
 Next: review/validate the Phase 3A model, then proceed to Phase 3B — the question blueprint/template system.
+
+
+## Phase 3B implementation checkpoint — 24 September 2026
+
+Phase 3B has now been implemented as the **Question Blueprint / Template System**. The blueprint layer defines controlled, reusable construction patterns between the verified fact/concept model and the future question generator.
+
+New file:
+`worker/current-affairs/data/phase3b-question-blueprints.js`
+
+The blueprint registry currently defines 12 supported construction patterns:
+- Direct attribute
+- Reverse attribute
+- Identification
+- Classification
+- Relationship
+- Institution/function
+- Comparison
+- Number/count
+- Chronology/date
+- Matching
+- Scenario/application
+- Odd-one-out
+- Multi-fact reasoning
+
+Each blueprint records its supported input shape, answer role, difficulty range, distractor strategy, family identity guidance, prompt intent and safety constraints. The blueprint layer therefore controls **how** questions may be constructed without generating the questions itself.
+
+### Phase 3B safety boundary
+
+Phase 3B does **not**:
+- generate question wording
+- generate distractors
+- decide factual correctness
+- perform semantic similarity detection
+- assemble quizzes
+- connect Current Affairs to the production Worker
+- enforce Premium/FREE entitlements
+
+The verified Phase 2 fact database remains the source of truth, while Phase 3A remains the canonical question/family data contract.
+
+### Important generation rule
+
+A blueprint may only use relationships supported by the verified fact model. It must not invent facts merely to make a question harder. Dynamic numeric facts require their reference period/dataset context, and scenario/multi-fact questions must derive their conclusions from supplied verified facts.
+
+**Phase 3B status: implementation complete.**
+
+Next: Phase 3C — Question Generator.
