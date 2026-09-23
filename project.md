@@ -860,3 +860,12 @@ Current Affairs **Duplicate / Family Detection** is implemented in `worker/curre
 Anti-repetition now combines exact text, canonical concept/answer/variant identity, question-family identity, fact provenance, conservative wording-similarity review, same-family/same-concept quiz blocking, and question/family/concept recent-history cooldowns. Wording similarity is only a review signal to avoid false positives; provenance and family identity remain authoritative.
 
 **Current Affairs status: Phase 3F complete. Next: Phase 3G — Quiz Assembler.**
+
+
+## Current Affairs Phase 3G checkpoint — 24 September 2026
+
+Phase 3G — Quiz Assembler has been implemented as a separate serving-selection layer. It assembles exactly 10 questions by default from active Question Bank records and applies recent-history, question-family, concept, difficulty, domain, topic and variant-diversity rules. The assembler does not modify the existing quiz engine, AdMob, or unrelated categories.
+
+The Question Bank remains a distinct content layer; Phase 3G consumes it rather than replacing it. Premium/access-tier metadata remains present for future commercial use but is not enforced beyond the assembler's configurable access-tier filter.
+
+**Current Affairs Phase 3G: complete. Next: Phase 3H — Worker integration.**
