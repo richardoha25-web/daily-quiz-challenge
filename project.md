@@ -842,3 +842,12 @@ Current Affairs **Distractor Generator** is implemented in `worker/current-affai
 It selects three distractors from the verified fact pool using attribute/topic/domain similarity, excludes the correct answer and duplicates, preserves distractor provenance, requires explicit context for relationship-based variants, and safely rejects drafts when three sufficiently supported distractors cannot be found. Batch processing is bounded for predictable Worker execution.
 
 **Current Affairs status: Phase 3D complete. Next: Phase 3E — Quality Validator.**
+
+
+## Phase 3E implementation checkpoint — 24 September 2026
+
+Current Affairs **Quality Validator** is implemented in `worker/current-affairs/data/phase3e-quality-validator.js`.
+
+It provides the final pre-Question-Bank quality gate for structure, exactly four unique options, one correct answer, fact/source provenance, freshness, wording, political neutrality, difficulty and access-tier validity. It rejects questionable content conservatively rather than silently repairing it. Semantic and family duplicate detection remain reserved for Phase 3F.
+
+**Current Affairs status: Phase 3E complete. Next: Phase 3F — Duplicate / Family Detection.**
