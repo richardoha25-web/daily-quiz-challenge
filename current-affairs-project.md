@@ -992,3 +992,27 @@ Phase 3E deliberately does not perform semantic similarity or question-family du
 **Phase 3E status: implementation complete.**
 
 Next: **Phase 3F — Duplicate / Family Detection.**
+
+
+## Phase 3F implementation checkpoint — 24 September 2026
+
+Phase 3F — **Duplicate / Family Detection** is now implemented in `worker/current-affairs/data/phase3f-duplicate-family-detector.js`.
+
+The anti-repetition system now has multiple deterministic protection layers:
+
+1. Exact question-text duplicate detection.
+2. Canonical concept + answer + variant identity detection.
+3. Question-family blocking.
+4. Concept/fact-provenance duplicate detection.
+5. Conservative wording-similarity review signal for differently worded questions.
+6. Same-family blocking within a single quiz.
+7. Optional same-concept blocking within a single quiz.
+8. Question, family and concept cooldowns against recent user history.
+
+Wording similarity is deliberately a **review signal**, not an automatic rejection, because common words can produce false positives. Provenance, concept and family identity remain the authoritative anti-repetition mechanisms.
+
+The module also provides a deterministic eligible-question filter and a Question Bank audit helper. Randomization remains outside this module so eligibility decisions remain reproducible and testable.
+
+**Phase 3F status: implementation complete.**
+
+Next: **Phase 3G — Quiz Assembler.**
