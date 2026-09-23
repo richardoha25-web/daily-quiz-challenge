@@ -807,3 +807,18 @@ The Question Bank remains separate from user recent history and must never block
 
 **Immediate implementation order:** build Phase 3A first. Do not begin Phase 3 generator code until the data model and family/relationship model are documented and validated.
 
+
+
+## Phase 3B implementation checkpoint — 24 September 2026
+
+Current Affairs Phase 3B is now implemented as the Question Blueprint / Template System.
+
+Added:
+- `worker/current-affairs/data/phase3b-question-blueprints.js`
+- 12 controlled question-construction blueprints covering direct, reverse, identification, classification, relationship, institution/function, comparison, number/count, chronology, matching, scenario, odd-one-out and multi-fact reasoning.
+- Blueprint contracts for input type, answer role, difficulty, distractor strategy, family identity and safety constraints.
+- Structural blueprint-registry validation.
+
+Phase 3B remains deliberately separated from generation, distractor creation, semantic duplicate detection, quiz assembly and Worker integration. The verified fact database remains the source of truth, and Phase 3A remains the question/family data contract.
+
+**Current Affairs status: Phase 3B complete. Next: Phase 3C — Question Generator.**
