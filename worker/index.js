@@ -1,7 +1,6 @@
 // Preview rebuild trigger: Africa API Worker-secret configuration is verified outside the repository.
 
 const OPEN_TRIVIA_URL = "https://opentdb.com/api.php";
-const NEWSDATA_URL = "https://newsdata.io/api/1/latest";
 
 function json(data, status = 200, request) {
 const origin = request?.headers.get("Origin") || "*";
