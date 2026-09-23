@@ -739,7 +739,7 @@ export const CURRENT_AFFAIRS_INITIAL_FACTS = [
     value: 12,
     validFrom: "2025-01-29",
     lastVerified: verifiedOn,
-    sourceId: "ecowas-members",
+    sourceId: "ecowas-member-states",
     status: "active",
   },
   {
@@ -750,7 +750,7 @@ export const CURRENT_AFFAIRS_INITIAL_FACTS = [
     attribute: "headquarters",
     value: "Abuja, Nigeria",
     lastVerified: verifiedOn,
-    sourceId: "ecowas-members",
+    sourceId: "ecowas-member-states",
     status: "active",
   },
   {
@@ -761,7 +761,7 @@ export const CURRENT_AFFAIRS_INITIAL_FACTS = [
     attribute: "statedAim",
     value: "Promote cooperation and integration leading toward an economic union in West Africa",
     lastVerified: verifiedOn,
-    sourceId: "ecowas-members",
+    sourceId: "ecowas-member-states",
     status: "active",
   },
 
@@ -811,7 +811,7 @@ export const CURRENT_AFFAIRS_INITIAL_FACTS = [
     attribute: "ECOWASHeadquartersLocation",
     value: "Abuja",
     lastVerified: verifiedOn,
-    sourceId: "ecowas-members",
+    sourceId: "ecowas-member-states",
     status: "active",
   },
   {
@@ -861,7 +861,7 @@ export const CURRENT_AFFAIRS_INITIAL_FACTS = [
     value: 1975,
     validFrom: "1975-05-28",
     lastVerified: verifiedOn,
-    sourceId: "ecowas-members",
+    sourceId: "ecowas-member-states",
     status: "active",
   },
   {
@@ -872,7 +872,7 @@ export const CURRENT_AFFAIRS_INITIAL_FACTS = [
     attribute: "westernAndSouthernBoundary",
     value: "Atlantic Ocean",
     lastVerified: verifiedOn,
-    sourceId: "ecowas-members",
+    sourceId: "ecowas-member-states",
     status: "active",
   },
 
