@@ -95,6 +95,30 @@ export const CURRENT_AFFAIRS_SOURCES = {
     url: "https://olympics.com/",
     priority: "primary",
   },
+  nigeriaStateHouseCabinet: {
+    id: "state-house-cabinet",
+    name: "The State House — Cabinet",
+    url: "https://statehouse.gov.ng/the-cabinet/",
+    priority: "primary",
+  },
+  nigeriaSupremeCourt: {
+    id: "supreme-court",
+    name: "Supreme Court of Nigeria",
+    url: "https://www.website.supremecourt.gov.ng/court-jurisdiction",
+    priority: "primary",
+  },
+  nigeriaNJC: {
+    id: "njc",
+    name: "National Judicial Council",
+    url: "https://njc.gov.ng/",
+    priority: "primary",
+  },
+  nasa: {
+    id: "nasa",
+    name: "NASA",
+    url: "https://www.nasa.gov/",
+    priority: "primary",
+  },
 };
 
 const verifiedOn = "2026-09-23";
