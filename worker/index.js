@@ -448,7 +448,6 @@ if (!apiKey) throw new Error("NEWSDATA_API_KEY_NOT_CONFIGURED");
 const apiUrl = new URL(NEWSDATA_URL);
 apiUrl.searchParams.set("apikey", apiKey);
 apiUrl.searchParams.set("language", "en");
-apiUrl.searchParams.set("category", "top,world,technology,business,science,sports");
 apiUrl.searchParams.set("size", "10");
 apiUrl.searchParams.set("removeduplicate", "1");
 
@@ -462,27 +461,46 @@ try {
   throw new Error("NEWSDATA_TIMEOUT");
 }
 
+let rawBody = "";
+try {
+  rawBody = await response.text();
+} catch {
+  throw new Error("NEWSDATA_RESPONSE_READ_FAILED");
+}
+
+let data = null;
+try {
+  data = JSON.parse(rawBody);
+} catch {
+  throw new Error("NEWSDATA_INVALID_RESPONSE");
+}
+
 if (response.status === 401 || response.status === 403) {
   throw new Error("NEWSDATA_AUTH_FAILED");
 }
 if (response.status === 429) {
   throw new Error("NEWSDATA_RATE_LIMITED");
 }
-if (!response.ok) throw new Error("NEWSDATA_UNAVAILABLE");
-
-let data;
-try {
-  data = await response.json();
-} catch {
-  throw new Error("NEWSDATA_INVALID_RESPONSE");
+if (!response.ok) {
+  throw new Error(
+    data?.results?.[0]?.message ||
+    data?.message ||
+    data?.code ||
+    `NEWSDATA_HTTP_${response.status}`
+  );
 }
-
 if (data?.status !== "success" || !Array.isArray(data?.results)) {
-  throw new Error("NEWSDATA_INVALID_RESPONSE");
+  throw new Error(
+    data?.results?.[0]?.message ||
+    data?.message ||
+    data?.code ||
+    "NEWSDATA_INVALID_RESPONSE"
+  );
 }
 
 return data.results;
 }
+
 
 export default {
 async fetch(request, env) {
@@ -925,12 +943,18 @@ try {
   const status =
     code === "NEWSDATA_AUTH_FAILED" ? 401 :
     code === "NEWSDATA_RATE_LIMITED" ? 429 :
-    code === "NEWSDATA_TIMEOUT" ? 504 : 503;
+    code === "NEWSDATA_TIMEOUT" ? 504 :
+    code === "NEWSDATA_API_KEY_NOT_CONFIGURED" ? 500 : 503;
 
   return json({
     ok: false,
     error: code,
-    message: "Current Affairs news source is unavailable right now."
+    message: "Current Affairs news source is unavailable right now.",
+    diagnostic: {
+      provider: "NewsData.io",
+      stage: "fetch",
+      detail: code
+    }
   }, status, request);
 }
 
