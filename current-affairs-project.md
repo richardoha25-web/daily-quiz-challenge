@@ -814,3 +814,52 @@ Test Current Affairs end-to-end on the Debug APK, including repeated quizzes, fa
 
 Do not replace the verified fact database with generated questions. Facts remain the source of truth. Do not mix Question Bank storage with user recent history. Do not reintroduce NewsData into the Current Affairs route.
 
+
+
+## Phase 3A implementation checkpoint — 24 September 2026
+
+Phase 3A has now been implemented as a **data-contract layer only**. No question generation, distractor generation, quiz assembly or production Current Affairs integration has been started.
+
+New file:
+`worker/current-affairs/data/phase3a-question-model.js`
+
+The model defines:
+
+- Supported question variant types.
+- Easy/Medium/Hard difficulty values.
+- Question lifecycle statuses.
+- Explicit rejection reasons.
+- Future access-tier metadata (`FREE`, `PREMIUM`, `SPECIAL_PACK`) without entitlement enforcement.
+- Concept records that connect knowledge relationships to verified fact IDs.
+- Question-family records that group substantially equivalent variants.
+- Canonical Question Bank question records with fact provenance.
+- Structural question validation.
+- A question-family selection key for later quiz assembly.
+
+### Important anti-repetition rule
+
+A question's wording is not its complete identity.
+
+```text
+Fact
+ ↓
+Concept
+ ↓
+Question Family
+ ↓
+Question Variant
+```
+
+For example, direct and reverse questions about Nigeria's capital share the same family and therefore cannot both be selected into one 10-question quiz.
+
+Phase 3A deliberately does **not** perform semantic similarity detection yet. That belongs to Phase 3F. It also does not decide whether a question is factually correct; that belongs to the later validation stages.
+
+### Phase 3A safety boundary
+
+The verified Phase 2 fact database remains the source of truth. The new model references facts by `factIds`; it does not copy or replace the fact database.
+
+The Question Bank remains conceptually separate from `recent_history` user history.
+
+**Phase 3A status: implementation complete.**
+
+Next: review/validate the Phase 3A model, then proceed to Phase 3B — the question blueprint/template system.
