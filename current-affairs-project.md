@@ -556,3 +556,261 @@ The Phase 2 audit found that the earlier expansion pass was not yet complete: Sp
 ## Final Phase 2 audit — 23 September 2026
 
 Final structural audit completed after the expansion corrections. The Current Affairs fact dataset now contains 86 active records across all seven implemented expansion areas represented in the Phase 2 scope: Nigeria (48), Africa (9), Economy (9), Sports (6), World (5), International Organizations (3), and Science & Technology (6). Every fact contains the required core fields, no duplicate fact IDs were found, every referenced source ID resolves to the source registry, the JavaScript array/export structure is intact, and no future-dated verification metadata was detected. Current officeholder/institutional and dated-event facts remain subject to freshness review before serving. Phase 2 content expansion is therefore complete and the dataset is ready to move to the next controlled stage: Phase 3 question-generation design/implementation. The Question Bank remains a later stage and is not being mixed into this audit.
+
+## NewsData isolation completed — 24 September 2026
+
+The NewsData integration has now been removed from the V1 `current_affairs` execution path.
+
+### Separation implemented
+
+- `worker/index.js` no longer contains the NewsData provider URL or NewsData article-fetching/generation implementation.
+- `current_affairs` no longer calls NewsData.
+- The V1 `current_affairs` route is intentionally disconnected while the fact-first Phase 3 question system is being built.
+- A separate `news_quiz` route now owns the future live-news path.
+- NewsData-specific modules are isolated under:
+  - `worker/news-quiz/provider.js`
+  - `worker/news-quiz/validator.js`
+  - `worker/news-quiz/generator.js`
+  - `worker/news-quiz/index.js`
+- The NewsData API secret remains a Worker secret because it belongs to the future News Quiz product; it is no longer part of Current Affairs logic.
+
+This is a deliberate temporary state: **Current Affairs is fact-first and News Quiz is live-news-first.** The existing V1 app should not be treated as having a finished Current Affairs provider until Phase 3 is implemented and tested.
+
+### Isolation boundary
+
+```text
+V1 Current Affairs
+    ↓
+Verified Current Affairs Facts
+    ↓
+Phase 3 Question System
+    ↓
+Current Affairs Quiz
+
+Separate future product:
+
+NewsData.io
+    ↓
+worker/news-quiz/*
+    ↓
+Future News Quiz / Current Events
+```
+
+No provider-specific NewsData parsing, article validation, or question generation is shared with the Current Affairs system.
+
+## Phase 3 — Question-generation architecture and plan
+
+Phase 3 begins only after the Phase 2 fact dataset and the NewsData isolation are complete.
+
+### Core architecture
+
+```text
+VERIFIED FACTS
+      ↓
+FACT RELATIONSHIP MAP
+      ↓
+QUESTION BLUEPRINTS
+      ↓
+Question Generator + Distractor Generator
+      ↓
+QUALITY VALIDATOR
+      ↓
+Validated Question Pool
+      ↓
+QUIZ ASSEMBLER
+      ↓
+Existing Quiz Engine
+```
+
+### Core identity model
+
+The system will treat questions as relationships, not merely strings:
+
+```text
+FACT
+  ↓
+CONCEPT
+  ↓
+QUESTION FAMILY
+  ↓
+QUESTION VARIANTS
+```
+
+For example, the fact that Nigeria's capital is Abuja can produce direct and reverse variants, but both belong to the same `questionFamilyId`. A single 10-question quiz must never contain two variants from the same family. User history should also support a longer family/relationship cooldown where practical.
+
+**Important rule:** different wording does not automatically mean a different question.
+
+### Planned question types
+
+The generator may support:
+
+- Direct recall
+- Reverse
+- Identification
+- Classification
+- Relationship
+- Institution/function
+- Comparison
+- Number/count
+- Chronology/date
+- Matching
+- Scenario/application
+- Odd-one-out
+- Multi-fact reasoning
+
+Question-type variety is useful, but **quality takes priority over forced variety**.
+
+### Difficulty model
+
+- **Easy:** direct recognition, common institutions, simple geography and straightforward facts.
+- **Medium:** relationships, reverse questions, classification and distinctions between similar facts.
+- **Hard:** multi-fact reasoning, comparisons, chronology, institutional distinctions and carefully constructed distractors.
+
+Difficulty must describe the actual reasoning required rather than being assigned merely to make a 3/4/3 quiz mix.
+
+### Question provenance model
+
+Generated questions should retain enough metadata to trace them back to verified facts:
+
+```json
+{
+  "questionId": "...",
+  "factIds": ["ng-federal-structure"],
+  "conceptId": "nigeria-federal-structure",
+  "questionFamilyId": "nigeria-federal-units",
+  "variantType": "direct",
+  "difficulty": "easy",
+  "question": "How many states does Nigeria have?",
+  "options": ["36", "30", "37", "40"],
+  "correctAnswer": "36",
+  "status": "active",
+  "lastValidated": "2026-09-23"
+}
+```
+
+Future access metadata may also support `FREE`, `PREMIUM` and `SPECIAL_PACK`, but entitlement enforcement remains outside Phase 3.
+
+### Distractor generation
+
+Distractors must be:
+
+- Plausible
+- Semantically related
+- Factually incorrect
+- Unambiguous
+- Appropriate to the domain
+- Appropriate to the difficulty
+
+The system must avoid obviously silly distractors and distractors that could also be technically correct.
+
+### Question lifecycle
+
+```text
+generated
+   ↓
+validated
+   ↓
+active
+   ↓
+used / revalidated
+   ↓
+superseded or retired
+```
+
+If a source fact changes, dependent questions must be identifiable and eligible for revalidation or supersession.
+
+### Quality validation
+
+Every generated question should pass checks for:
+
+- Factual correctness
+- Answer uniqueness
+- Distractor validity
+- Language clarity
+- Difficulty suitability
+- Exact/semantic duplication
+- Question-family duplication
+- Fact freshness
+- Source validity
+- Option integrity
+
+Rejected-question reasons should be explicit, such as:
+
+- duplicate
+- semantic duplicate
+- family duplicate
+- ambiguous
+- bad distractor
+- unsupported fact
+- stale fact
+- grammar problem
+- poor difficulty
+- insufficient information
+
+### Quiz-level assembly rules
+
+The future assembler should enforce:
+
+- No duplicate question IDs
+- No duplicate question families
+- No excessive concentration on one topic
+- Reasonable difficulty distribution
+- Reasonable question-type diversity
+- No stale facts
+- User recent-history avoidance
+
+The system should prefer quality and availability over mechanically forcing ten different question types.
+
+### Question Bank boundary
+
+The Question Bank remains separate from user history:
+
+```text
+FACT DATABASE
+      ↓
+QUESTION SYSTEM
+      ↓
+QUESTION BANK
+      ↓
+QUIZ
+      ↓
+USER HISTORY
+```
+
+The Question Bank stores questions the system owns. User history records what a particular user has already seen.
+
+The bank must never become a bottleneck. If eligible bank questions are insufficient, the system should generate and validate additional questions and then serve them.
+
+### Phase 3 stages
+
+**Phase 3A — Question data model & concept/family model**  
+Define question records, provenance, concepts, question families, variants, lifecycle status and future access metadata.
+
+**Phase 3B — Question blueprint/template system**  
+Define safe generation patterns for the supported question types and domains.
+
+**Phase 3C — Question generator**  
+Generate questions from verified facts and relationships.
+
+**Phase 3D — Distractor generator**  
+Construct plausible, factually incorrect, unambiguous options.
+
+**Phase 3E — Quality validator**  
+Reject questions that fail factual, linguistic, structural, difficulty or freshness checks.
+
+**Phase 3F — Duplicate/family detection**  
+Detect exact duplicates, semantic duplicates and related question families before quiz assembly.
+
+**Phase 3G — Quiz assembler**  
+Build valid 10-question quizzes while respecting family, topic, difficulty, freshness and user-history rules.
+
+**Phase 3H — Worker integration**  
+Connect the validated Current Affairs question system to the existing Worker without disturbing Science, General Knowledge, Africa & Nigeria or AdMob.
+
+**Phase 3I — Android/debug testing**  
+Test Current Affairs end-to-end on the Debug APK, including repeated quizzes, family cooldown behaviour, connectivity failures, stale-fact handling and regression of existing categories.
+
+### Phase 3 implementation safety rule
+
+Do not replace the verified fact database with generated questions. Facts remain the source of truth. Do not mix Question Bank storage with user recent history. Do not reintroduce NewsData into the Current Affairs route.
+
