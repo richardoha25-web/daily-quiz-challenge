@@ -355,21 +355,29 @@ return Array.from(new Uint8Array(hash))
 .join("");
 }
 
+function cleanNewsText(value) {
+return typeof value === "string"
+  ? value.replace(/\\s+/g, " ").replace(/\\s+([,.;!?])/g, "$1").trim()
+  : "";
+}
+
 function isUsableCurrentAffairsArticle(article) {
-const title = typeof article?.title === "string" ? article.title.trim() : "";
-const description = typeof article?.description === "string" ? article.description.trim() : "";
-const sourceName = typeof article?.source_name === "string" ? article.source_name.trim() : "";
-const articleId = typeof article?.article_id === "string" ? article.article_id.trim() : "";
-if (!title || !sourceName || !articleId) return false;
+const title = cleanNewsText(article?.title);
+const description = cleanNewsText(article?.description);
+const sourceName = cleanNewsText(article?.source_name);
+const articleId = cleanNewsText(article?.article_id);
+if (!title || !description || !sourceName || !articleId) return false;
+if (title.length < 18 || title.length > 220) return false;
+if (description.length < 45 || description.length > 600) return false;
 
 const text = (title + " " + description).toLowerCase();
 const blockedPhrases = [
-  "opinion", "editorial", "commentary", "column", "analysis",
-  "should", "must", "slams", "blasts", "accuses", "alleges",
-  "claims", "urges", "calls on", "calls for", "vows", "warns"
+  "opinion", "editorial", "commentary", "column",
+  "rumour", "rumor", "gossip", "clickbait",
+  "celebrity feud", "red carpet", "fashion evolution",
+  "adult star", "onlyfans"
 ];
 if (blockedPhrases.some((phrase) => text.includes(phrase))) return false;
-if (title.length < 18 || title.length > 220) return false;
 return true;
 }
 
@@ -385,36 +393,23 @@ const questions = [];
 for (let i = 0; i < usable.length; i += 1) {
   const article = usable[i];
   const others = usable.filter((_, index) => index !== i);
-
   if (others.length < 3) continue;
 
-  let question;
-  let correctAnswer;
-  let distractorValues;
+  const title = cleanNewsText(article.title);
+  const description = cleanNewsText(article.description);
+  const questionByDifficulty = {
+    easy: "Which headline best matches this recent news report: " + description,
+    medium: "According to this recent news report, which headline is correct: " + description,
+    hard: "Which recent headline is accurately described by this report: " + description
+  };
 
-  if (difficulty === "easy") {
-    question = "Which recent news headline was reported by " + article.source_name + "?";
-    correctAnswer = article.title;
-    distractorValues = others.map((item) => item.title);
-  } else if (difficulty === "medium") {
-    question = 'Which publication reported this recent headline: "' + article.title + '"?';
-    correctAnswer = article.source_name;
-    distractorValues = others.map((item) => item.source_name);
-  } else {
-    const published = typeof article.pubDate === "string" && article.pubDate
-      ? article.pubDate.replace(" ", "T") + "Z"
-      : "";
-    const dateText = published && !Number.isNaN(Date.parse(published))
-      ? new Intl.DateTimeFormat("en", { year: "numeric", month: "short", day: "numeric" }).format(new Date(published))
-      : "recently";
-    question = "Which recent headline was published by " + article.source_name + " on " + dateText + "?";
-    correctAnswer = article.title;
-    distractorValues = others.map((item) => item.title);
-  }
-
+  const question = questionByDifficulty[difficulty] || questionByDifficulty.easy;
+  const correctAnswer = title;
+  const distractorValues = others.map((item) => cleanNewsText(item.title));
   const options = makeOptions(correctAnswer, distractorValues);
   if (!options) continue;
 
+  const now = new Date().toISOString();
   questions.push({
     id: "newsdata-" + article.article_id + "-" + difficulty,
     category: "current_affairs",
@@ -422,15 +417,15 @@ for (let i = 0; i < usable.length; i += 1) {
     question,
     options,
     correctAnswer,
-    explanation: "Based on a recent NewsData.io report from " + article.source_name + ". Published: " + (article.pubDate || "unknown") + ".",
+    explanation: "The report from " + article.source_name + " states: " + description,
     source: "NewsData.io",
     sourceId: article.article_id,
     sourceUrl: article.link || article.source_url || "",
     publishedAt: article.pubDate || "",
     expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
     isRemote: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    createdAt: now,
+    updatedAt: now
   });
 }
 
