@@ -1473,3 +1473,12 @@ Blueprint selection is content-generation logic, not billing logic. Future premi
 The Current Affairs Question Generator now carries future access-tier metadata while keeping billing completely separate from content generation. Generated drafts default to `FREE`; future centralized commercial logic may classify validated content as `PREMIUM` or `SPECIAL_PACK` without changing generator behavior.
 
 The generator does not make access decisions, enforce entitlements, or create paywalls. Commercial classification must remain downstream of content quality and validation so premium content is held to the same factual, freshness, clarity and anti-duplication standards.
+
+
+## Phase 3G commercial-architecture alignment — 24 September 2026
+
+The Current Affairs Quiz Assembler now accepts configurable access tiers while keeping entitlement logic outside the content-selection module. The default serving configuration is FREE-only for the current V1. Future centralized commercial logic can supply PREMIUM or SPECIAL_PACK eligibility without changing question generation or quiz-quality rules.
+
+The assembler treats access tier as a content eligibility attribute, not as proof of purchase or subscription. No billing, payment, subscription, entitlement or paywall code was added in Phase 3G.
+
+Commercial rule remains: access control must never bypass factual validation, freshness checks, provenance, or anti-repetition protections.
