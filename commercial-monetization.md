@@ -1457,3 +1457,12 @@ These are metadata contracts only at this stage. They do not grant or deny acces
 Question provenance, fact relationships, freshness, question-family identity and lifecycle status should be retained so future premium content can be selected centrally without duplicating provider logic.
 
 The commercial rule remains: premium content must meet the same factual, clarity, distractor, freshness and anti-duplication standards as free content.
+
+
+## Phase 3B commercial alignment — 24 September 2026
+
+The Current Affairs Question Blueprint layer is now implemented. Blueprint metadata and question-generation contracts preserve future access-tier compatibility (`FREE`, `PREMIUM`, `SPECIAL_PACK`) without implementing entitlement enforcement.
+
+Blueprint selection is content-generation logic, not billing logic. Future premium/special-pack questions must pass the same factual, clarity, freshness, distractor and anti-duplication requirements as free questions. Access decisions remain centralized and are not embedded in individual blueprint behavior.
+
+**Commercial status:** no billing, subscriptions, paywalls or entitlement enforcement were added in Phase 3B.
