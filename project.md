@@ -833,3 +833,12 @@ The generator is deterministic and fact-first: it transforms verified facts plus
 Safety/efficiency controls include blueprint compatibility checks, required-fact validation, bounded batch generation, conservative classification handling, explicit context requirements for relationship-based questions, and batch fingerprinting to prevent duplicate generated drafts.
 
 **Current Affairs status: Phase 3C complete. Next: Phase 3D — Distractor Generator.**
+
+
+## Phase 3D implementation checkpoint — 24 September 2026
+
+Current Affairs **Distractor Generator** is implemented in `worker/current-affairs/data/phase3d-distractor-generator.js`.
+
+It selects three distractors from the verified fact pool using attribute/topic/domain similarity, excludes the correct answer and duplicates, preserves distractor provenance, requires explicit context for relationship-based variants, and safely rejects drafts when three sufficiently supported distractors cannot be found. Batch processing is bounded for predictable Worker execution.
+
+**Current Affairs status: Phase 3D complete. Next: Phase 3E — Quality Validator.**
