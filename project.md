@@ -1,4 +1,14 @@
 # Daily Quiz & Challenge — Project Continuity Record
+## Current Affairs architecture checkpoint — 23 September 2026
+
+The V1 Current Affairs category is now documented as a **separate fact-first knowledge system**. It is not a NewsData headline-question system. The new `current-affairs-project.md` defines the eight domains, fact schema, source registry, verification/update rules, question-generation plan, quality validation and anti-repetition identity.
+
+**NewsData isolation decision:** the existing NewsData integration is reserved for a future **News Quiz / Current Events** product. It must not supply the V1 `current_affairs` route. Future routing will explicitly separate `current_affairs` from `news_quiz` / `current_events`; provider-specific NewsData logic and credentials remain isolated from Current Affairs. Generic utilities may be shared, but provider-specific parsing/generation must not be shared.
+
+**Implementation order:** Phase 1 documentation is complete. Next is Phase 2: build and verify a small initial Current Affairs knowledge base before implementing question generation or changing the production `current_affairs` route. Existing Science, General Knowledge, Africa & Nigeria and AdMob behavior must remain untouched.
+
+**Documentation:** `current-affairs-project.md` is the dedicated Current Affairs technical continuity record. This file remains the overall project checkpoint; `ui-ux-project.md` remains the experience blueprint; `commercial-monetization.md` remains the commercial blueprint.
+
 
 **Last updated:** 23 September 2026  
 **Stage:** V1.1.9 Android update-validation fix is implemented, **merged into `main` via PR #6**, and **in-place update testing PASSED**. The app now updates successfully over the previous installed release without requiring uninstall/reinstall, while the new app content loads correctly. Science, General Knowledge, and **Africa & Nigeria are integrated and verified**. The temporary V1.1.9 validation branch has been deleted. **Current focus: complete Bible and Current Affairs, then run the full V1 stabilization pass before major architectural, branding, or UI/UX changes. V2 remains paused.**
