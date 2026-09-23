@@ -526,3 +526,25 @@ Current status: Phase 2 — IN PROGRESS.
 The knowledge seed has been deepened with additional Nigeria legislative/institutional facts, CBN functions, AU history/membership relationships, and World Bank/IMF/WTO institutional distinctions. A future-only access-tier metadata contract is also documented in the data layer; entitlement enforcement remains disabled.
 
 The next Phase 2 work remains systematic expansion across geography, economy, sports, and science/technology, followed by schema validation and supersession/update handling.
+
+## Phase 2 systematic expansion checkpoint — 23 September 2026
+
+The verified knowledge base has now been expanded across the remaining planned content areas before any Question Bank work begins. The expansion pass adds:
+
+- Nigeria: additional geography, international boundaries, Gulf of Guinea/Niger Delta context, economic institutions and core economic concepts.
+- Africa: additional physical geography, major regional institutions, AU/ECOWAS context, Sahara, Nile, Equator, Kilimanjaro and Great Rift Valley facts.
+- World geography: continents, oceans and basic Earth geography relationships.
+- Economy: inflation, GDP, central-bank policy concepts plus additional Nigeria/World Bank economic context.
+- International organizations: additional UN, WHO, UNICEF, UNESCO and ITU facts, with source-registry coverage expanded.
+- Sports: 2026 FIFA World Cup structure/hosts and World Athletics coverage in addition to Olympic facts.
+- Science & technology: ISS, Artemis II and international ICT/ITU facts.
+
+The expansion remains fact-first. No question generator, Question Bank, or production Current Affairs quiz route has been introduced yet.
+
+### Source rule
+
+The new records use an expanded source registry. Primary institutional sources remain preferred for current/institutional facts; trusted reference material is used for durable geography where an official institutional dataset is not the appropriate source.
+
+### Next step
+
+Finish the Phase 2 audit: verify dataset completeness, source IDs, schema consistency, freshness/update handling and supersession rules. Only after that audit should Phase 3 question generation begin. Question Bank design remains deliberately deferred until the expansion/audit is complete.
