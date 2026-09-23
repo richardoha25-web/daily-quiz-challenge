@@ -519,3 +519,10 @@ Current officeholders, institutional leaders, membership counts and other changi
 7. Only then begin Phase 3 question generation.
 
 Current status: Phase 2 — IN PROGRESS.
+
+
+## Phase 2 continuation checkpoint — 23 September 2026
+
+The knowledge seed has been deepened with additional Nigeria legislative/institutional facts, CBN functions, AU history/membership relationships, and World Bank/IMF/WTO institutional distinctions. A future-only access-tier metadata contract is also documented in the data layer; entitlement enforcement remains disabled.
+
+The next Phase 2 work remains systematic expansion across geography, economy, sports, and science/technology, followed by schema validation and supersession/update handling.
