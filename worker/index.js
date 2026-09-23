@@ -355,148 +355,6 @@ return Array.from(new Uint8Array(hash))
 .join("");
 }
 
-function cleanNewsText(value) {
-return typeof value === "string"
-  ? value.replace(/\\s+/g, " ").replace(/\\s+([,.;!?])/g, "$1").trim()
-  : "";
-}
-
-function isUsableCurrentAffairsArticle(article) {
-const title = cleanNewsText(article?.title);
-const description = cleanNewsText(article?.description);
-const sourceName = cleanNewsText(article?.source_name);
-const articleId = cleanNewsText(article?.article_id);
-if (!title || !description || !sourceName || !articleId) return false;
-if (title.length < 18 || title.length > 220) return false;
-if (description.length < 45 || description.length > 600) return false;
-
-const text = (title + " " + description).toLowerCase();
-const blockedPhrases = [
-  "opinion", "editorial", "commentary", "column",
-  "rumour", "rumor", "gossip", "clickbait",
-  "celebrity feud", "red carpet", "fashion evolution",
-  "adult star", "onlyfans"
-];
-if (blockedPhrases.some((phrase) => text.includes(phrase))) return false;
-return true;
-}
-
-function buildCurrentAffairsQuestions(articles, difficulty) {
-const usable = articles
-  .filter(isUsableCurrentAffairsArticle)
-  .filter((article, index, array) =>
-    array.findIndex((item) => item.article_id === article.article_id) === index
-  );
-
-const questions = [];
-
-for (let i = 0; i < usable.length; i += 1) {
-  const article = usable[i];
-  const others = usable.filter((_, index) => index !== i);
-  if (others.length < 3) continue;
-
-  const title = cleanNewsText(article.title);
-  const description = cleanNewsText(article.description);
-  const questionByDifficulty = {
-    easy: "Which headline best matches this recent news report: " + description,
-    medium: "According to this recent news report, which headline is correct: " + description,
-    hard: "Which recent headline is accurately described by this report: " + description
-  };
-
-  const question = questionByDifficulty[difficulty] || questionByDifficulty.easy;
-  const correctAnswer = title;
-  const distractorValues = others.map((item) => cleanNewsText(item.title));
-  const options = makeOptions(correctAnswer, distractorValues);
-  if (!options) continue;
-
-  const now = new Date().toISOString();
-  questions.push({
-    id: "newsdata-" + article.article_id + "-" + difficulty,
-    category: "current_affairs",
-    difficulty,
-    question,
-    options,
-    correctAnswer,
-    explanation: "The report from " + article.source_name + " states: " + description,
-    source: "NewsData.io",
-    sourceId: article.article_id,
-    sourceUrl: article.link || article.source_url || "",
-    publishedAt: article.pubDate || "",
-    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-    isRemote: true,
-    createdAt: now,
-    updatedAt: now
-  });
-}
-
-return shuffle(
-  questions.filter((question, index, array) =>
-    array.findIndex((candidate) => candidate.id === question.id) === index
-  )
-);
-}
-
-async function fetchCurrentAffairsArticles(env) {
-const apiKey = env.NEWSDATA_API_KEY;
-if (!apiKey) throw new Error("NEWSDATA_API_KEY_NOT_CONFIGURED");
-
-const apiUrl = new URL(NEWSDATA_URL);
-apiUrl.searchParams.set("apikey", apiKey);
-apiUrl.searchParams.set("language", "en");
-apiUrl.searchParams.set("size", "10");
-apiUrl.searchParams.set("removeduplicate", "1");
-
-let response;
-try {
-  response = await fetch(apiUrl.toString(), {
-    headers: { Accept: "application/json" },
-    signal: AbortSignal.timeout(10000)
-  });
-} catch {
-  throw new Error("NEWSDATA_TIMEOUT");
-}
-
-let rawBody = "";
-try {
-  rawBody = await response.text();
-} catch {
-  throw new Error("NEWSDATA_RESPONSE_READ_FAILED");
-}
-
-let data = null;
-try {
-  data = JSON.parse(rawBody);
-} catch {
-  throw new Error("NEWSDATA_INVALID_RESPONSE");
-}
-
-if (response.status === 401 || response.status === 403) {
-  throw new Error("NEWSDATA_AUTH_FAILED");
-}
-if (response.status === 429) {
-  throw new Error("NEWSDATA_RATE_LIMITED");
-}
-if (!response.ok) {
-  throw new Error(
-    data?.results?.[0]?.message ||
-    data?.message ||
-    data?.code ||
-    `NEWSDATA_HTTP_${response.status}`
-  );
-}
-if (data?.status !== "success" || !Array.isArray(data?.results)) {
-  throw new Error(
-    data?.results?.[0]?.message ||
-    data?.message ||
-    data?.code ||
-    "NEWSDATA_INVALID_RESPONSE"
-  );
-}
-
-return data.results;
-}
-
-
 export default {
 async fetch(request, env) {
 const url = new URL(request.url);
@@ -604,7 +462,8 @@ const categories = [
 "science",
 "bible",
 "africa_nigeria",
-"current_affairs"
+"current_affairs",
+"news_quiz"
 ];
 
 const difficulties = [
@@ -930,47 +789,24 @@ questions: questions
 }
 
 if (category === "current_affairs") {
-let articles;
-try {
-  articles = await fetchCurrentAffairsArticles(env);
-} catch (error) {
-  const code = error instanceof Error ? error.message : "NEWSDATA_UNAVAILABLE";
-  const status =
-    code === "NEWSDATA_AUTH_FAILED" ? 401 :
-    code === "NEWSDATA_RATE_LIMITED" ? 429 :
-    code === "NEWSDATA_TIMEOUT" ? 504 :
-    code === "NEWSDATA_API_KEY_NOT_CONFIGURED" ? 500 : 503;
-
-  return json({
-    ok: false,
-    error: code,
-    message: "Current Affairs news source is unavailable right now.",
-    diagnostic: {
-      provider: "NewsData.io",
-      stage: "fetch",
-      detail: code
-    }
-  }, status, request);
-}
-
-const questions = buildCurrentAffairsQuestions(articles, difficulty);
-
-if (!questions.length) {
-  return json({
-    ok: false,
-    error: "NO_QUESTIONS",
-    message: "No usable Current Affairs questions were returned."
-  }, 404, request);
-}
-
 return json({
-  ok: true,
-  category: "current_affairs",
-  difficulty,
-  limit,
-  source: "NewsData.io",
-  questions: questions.slice(0, limit)
-}, 200, request);
+ok: false,
+error: "CURRENT_AFFAIRS_PHASE3_NOT_CONNECTED",
+message: "Current Affairs is temporarily disconnected from the NewsData provider while the fact-first question system is being implemented."
+}, 503, request);
+}
+
+if (category === "news_quiz") {
+try {
+const module = await import("./news-quiz/index.js");
+const result = await module.getNewsQuizQuestions(env, difficulty, limit);
+if (!result.questions.length) return json({ok:false,error:"NO_QUESTIONS",message:"No usable News Quiz questions were returned."},404,request);
+return json({ok:true,category:"news_quiz",difficulty,limit,source:result.source,questions:result.questions},200,request);
+} catch (error) {
+const code = error instanceof Error ? error.message : "NEWSDATA_UNAVAILABLE";
+const status = code === "NEWSDATA_AUTH_FAILED" ? 401 : code === "NEWSDATA_RATE_LIMITED" ? 429 : code === "NEWSDATA_TIMEOUT" ? 504 : code === "NEWSDATA_API_KEY_NOT_CONFIGURED" ? 500 : 503;
+return json({ok:false,error:code,message:"News Quiz news source is unavailable right now.",diagnostic:{provider:"NewsData.io",product:"news_quiz",stage:"fetch",detail:code}},status,request);
+}
 }
 
 if (category === "africa_nigeria") {
