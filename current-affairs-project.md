@@ -950,3 +950,26 @@ Phase 3C does **not** perform final factual validation, semantic duplicate detec
 **Phase 3C status: implementation complete.**
 
 Next: **Phase 3D — Distractor Generator**, followed by the quality validation and duplicate/family stages.
+
+
+## Phase 3D implementation checkpoint — 24 September 2026
+
+Phase 3D — **Distractor Generator** is now implemented in `worker/current-affairs/data/phase3d-distractor-generator.js`.
+
+The system generates exactly three distractor candidates for a Phase 3C draft by searching the verified fact pool and ranking candidates by semantic proximity: same attribute first, then same topic/domain where appropriate. It never manufactures unsupported factual answers when the verified pool is insufficient.
+
+### Distractor safety and efficiency
+
+- Correct answers are always excluded.
+- Duplicate options are removed deterministically.
+- Candidate provenance records the supporting fact ID and selection strategy.
+- Candidate type is matched to the question variant where the answer is an entity, value, number or date.
+- Relationship/comparison/scenario/multi-fact style questions require explicit candidate context instead of inferred relationships.
+- If fewer than three sufficiently supported distractors exist, generation fails safely rather than padding the question with weak or invented options.
+- Batch processing has an explicit cap for predictable Worker execution.
+
+Phase 3D only supplies distractor candidates; it does not decide final correctness, option quality, semantic uniqueness or activation. Phase 3E remains responsible for final quality validation.
+
+**Phase 3D status: implementation complete.**
+
+Next: **Phase 3E — Quality Validator.**
