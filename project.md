@@ -1,6 +1,6 @@
 # Daily Quiz & Challenge — Project Continuity Record
 
-**Last updated:** 22 September 2026  
+**Last updated:** 23 September 2026  
 **Stage:** V1.1.9 Android update-validation fix is implemented, **merged into `main` via PR #6**, and **in-place update testing PASSED**. The app now updates successfully over the previous installed release without requiring uninstall/reinstall, while the new app content loads correctly. Science, General Knowledge, and **Africa & Nigeria are integrated and verified**. The temporary V1.1.9 validation branch has been deleted. **Current focus: complete Bible and Current Affairs, then run the full V1 stabilization pass before major architectural, branding, or UI/UX changes. V2 remains paused.**
 
 ## Long-term product vision
@@ -23,9 +23,15 @@ Daily Quiz & Challenge is intended to become a **long-term, high-quality quiz sy
 
 **AdMob production transition:** the existing AdMob integration is unchanged. `src/adMob.ts` retains the tested lifecycle/recovery architecture and both test/production IDs. The Android **release workflow now explicitly builds with `VITE_ADMOB_TEST_MODE=false`**, so production APK/AAB builds select the real AdMob unit IDs. Debug builds continue to use test ads. Production ad fill remains subject to inventory, network, account, frequency and policy conditions.
 
-**Immediate next step:** finish Bible and Current Affairs, then run a full V1 stabilization pass before beginning the larger planned redesign, branding, native Android migration, account, and billing work.
+**Immediate next step:** finish Current Affairs, then run the full V1 stabilization pass. Bible source/licensing research is established, but the Bible UI/product experience is intentionally deferred to the future native Android migration so the current V1 interface is not forced to absorb the new product architecture.
 
 **UI/UX planning update:** a dedicated `ui-ux-project.md` has been created as the blueprint for the future redesign. It is intentionally separate from this file so this project record stays concise. The current UI remains functional but is **not the desired final experience**.
+
+**Future architecture decision — 23 September 2026:** V1 remains the existing React/Vite/Capacitor quiz application and is the stable reference implementation. The future app-wide navigation, Bible experience, and major UI/UX redesign will be designed independently and implemented as part of the planned native Android migration. Bible data/source research can continue now, but Bible UI implementation must not force the current V1 interface to accommodate the future product architecture. Android's Navigation component supports navigation graphs, nested destinations, back stacks, and patterns such as bottom navigation and drawers, which will be evaluated during the future native design phase. citeturn0search0
+
+**Bible V1 placeholder decision:** because the current V1 UI is intentionally not being redesigned for the full Bible experience, the existing Bible category may show a simple **Coming Soon / Bible Experience in Development** notice rather than attempting to implement Read Bible, Book/Chapter navigation, Bible Quiz modes, or voice reading inside the old category-card structure. This is a temporary product-state message, not the final Bible UI.
+
+**Bible voice-reading decision:** future Bible reading will not auto-play audio. The user must explicitly choose the listening action. Planned controls include **Play, Pause/Resume, Stop**, and later speed/voice controls as appropriate. Silent reading remains the default when a chapter is opened.
 
 ## 1. Project identity
 - App: Daily Quiz & Challenge
@@ -480,6 +486,8 @@ Questions should carry freshness metadata such as publishedAt, source, topic, an
 ### Bible — NEW PRODUCT EXPERIENCE
 Bible is no longer treated as only another category card.
 
+**V1 implementation status:** Bible is currently a **planned/future product experience**, not a full V1 UI implementation. The current V1 category entry should use a lightweight Coming Soon / In Development notice while source/data architecture continues separately. The full Bible navigation and reader will be implemented with the future native Android product architecture.
+
 Desired structure:
 - Read Bible
 - Old Testament / New Testament
@@ -499,7 +507,7 @@ Bible → Read Bible → Mark → Chapter 5 → Read → Quiz Me on This Chapter
 #### Bible translation decision
 NIV has been deliberately dropped because commercial/mobile/offline licensing is too restrictive for the current project.
 
-The intended Bible Library translation is now the **World English Bible (WEB), Catholic edition / Catholic book order where the selected source provides it**.
+The intended Bible Library translation is now the **World English Bible (WEB), Catholic edition / Catholic book order**, specifically WEBC (`eng-web-c`). Official eBible.org lists the edition as public domain and provides USFM, USFX, read-aloud plain-text chapter files, and other formats. The user has downloaded the official WEBC source packages needed for further inspection, including `eng-web-c_usfm.zip` and `eng-web-c_readaloud.zip`. citeturn0search1turn0search2
 
 The Bible Library is intended to:
 - work offline
@@ -525,8 +533,8 @@ The immediate objective is deliberately narrow: **finish the three remaining cat
 
 ### Remaining V1 categories
 - **Africa & Nigeria — COMPLETE / VERIFIED.**
-- **Bible — next remaining implementation target.** Use the planned Bible-specific content/licensing approach.
-- **Current Affairs — remaining implementation target.** Implement as fresh online content with provider/source strategy appropriate to changing information.
+- **Bible — source/licensing foundation established; full UI/product implementation deferred to the future native Android migration. V1 should show a lightweight Coming Soon / In Development state for the category.
+- **Current Affairs — ONLY remaining V1 content implementation target.** Implement as fresh online content with provider/source strategy appropriate to changing information.
 
 ### Provider principle for this milestone
 The provider's internal category structure does **not** need to mirror the app's user-facing categories. For V1, the goal is to obtain suitable usable questions/content and normalize them into the app's three remaining categories. We should not block completion merely because a provider labels content as Africa, Nigeria, History, Geography, Culture, Religion, or another narrower/broader taxonomy.
@@ -658,12 +666,12 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 
 ### Phase B — Backend implementation, one category at a time
 6. **Africa & Nigeria — COMPLETE / VERIFIED; no further implementation required for this checkpoint.**
-7. **Bible — next implementation focus:** verify source/licensing, implement the offline Bible Library, then the online Bible quiz.
-8. Android-test Bible reading offline and Bible quiz online.
-9. Implement Current Affairs through the Worker.
-10. Test Current Affairs freshness/source metadata.
-11. Integrate Current Affairs into the Question Engine.
-12. Android-test Current Affairs.
+7. **Current Affairs — next implementation focus:** finalize a free/usable provider strategy, implement the Worker endpoint, normalize freshness/source metadata, integrate with the Question Engine, and Android-test the category.
+8. Test Current Affairs freshness, duplicate avoidance, source metadata, and failure handling.
+9. **Bible — research/foundation only during V1:** preserve the verified WEBC source decision and source packages; do not build the full Bible UI into the current React/Vite app.
+10. Future native Android phase: implement the offline Bible Library, reader, explicit user-controlled voice reading, and online Bible Quiz.
+11. Android-test the future Bible experience when the native migration begins.
+12. Keep the current V1 Bible entry as a lightweight Coming Soon / In Development state until then.
 
 ### Phase C — Major UI/UX redesign
 13. Review ui-ux-project.md using the now-known product architecture.
@@ -672,7 +680,7 @@ V2 remains paused. Do not modify `v2-development` while V1.1 work is active.
 16. Define the reusable design system.
 17. Create high-fidelity screens/prototype.
 18. Test the design on the Oppo A56.
-19. Implement the redesign in React/Vite only after the design is stable.
+19. Implement the final redesigned product in the planned native Android application after the design and architecture are stable. The current React/Vite/Capacitor app remains the V1 reference implementation and is not the target for the full app-wide navigation redesign.
 
 ### Phase D — Reliability and regression
 20. Implement centralized connectivity monitoring.
