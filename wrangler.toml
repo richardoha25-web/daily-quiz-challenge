@@ -3,4 +3,4 @@ main = "worker/index.js"
 compatibility_date = "2026-09-17"
 
 [secrets]
-required = ["AFRICA_API_KEY"]
+required = ["AFRICA_API_KEY", "NEWSDATA_API_KEY"]
