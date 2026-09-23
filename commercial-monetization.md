@@ -1416,3 +1416,9 @@ Phase 2 rule: build the content system once and keep access control separable. D
 ## Current Affairs Phase 2 continuation — 23 September 2026
 
 The content layer now carries a future-only access-tier contract (free, premium, special_pack) while enforcement remains disabled. This preserves future monetization flexibility without coupling current quiz logic to billing. Additional institutional/economic facts are being added before question generation.
+
+## Current Affairs Phase 2 expansion checkpoint — 23 September 2026
+
+The Current Affairs knowledge layer has been expanded across Nigeria, Africa, World Geography, Economy, International Organizations, Sports, and Science & Technology before any Question Bank implementation. Future access tiers remain metadata-only; no premium enforcement, subscriptions, billing, or paywalls are being introduced during this content-expansion phase.
+
+The commercial architecture therefore remains a constraint on the data model, not an implementation dependency: future free/premium/special-pack classification can be added without changing the verified-facts source of truth.
