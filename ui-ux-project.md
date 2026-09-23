@@ -1,4 +1,10 @@
 # Daily Quiz & Challenge — UI/UX Project Blueprint
+## Current Affairs product-architecture checkpoint — 23 September 2026
+
+The future Current Affairs experience is broader than live news. It will cover structured current/general knowledge across **Nigeria, Africa, World, International Organizations, Economy & Business, Geography, Sports, and Science & Technology**. The current V1 UI should continue showing a single Current Affairs category card; the future native redesign may expose these domains/subcategories after the content system is stable.
+
+A separate future **News Quiz / Current Events** experience may use NewsData.io or another news provider for actual recent-news questions. It must remain a separate product experience and provider path rather than being mixed into Current Affairs.
+
 
 **File purpose:** Dedicated design workspace for the future UI/UX redesign.  
 **Important:** This file is separate from the main `project.md`. The main `project.md` remains the concise source of truth for app development status.
