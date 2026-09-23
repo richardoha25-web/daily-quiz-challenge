@@ -729,3 +729,11 @@ Next: continue expanding and verifying the eight-domain knowledge base, then com
 ## Current Affairs Phase 2 continuation — 23 September 2026
 
 The verified Current Affairs seed has been expanded with additional institutional and economic relationships and future-only access-tier metadata. No premium enforcement or quiz-generation integration has been added. Continue Phase 2 expansion and validation before Phase 3.
+
+## Current Affairs Phase 2 systematic expansion checkpoint — 23 September 2026
+
+The Current Affairs fact layer has been expanded across the remaining planned domains: Nigeria, Africa, World Geography, Economy, International Organizations, Sports, and Science & Technology. The work remains isolated from the existing NewsData integration, which remains reserved for the future News Quiz / Current Events product.
+
+No Question Bank or question-generation implementation has started. The immediate sequence is now: **complete Phase 2 expansion → audit/validate facts and sources → define update/supersession handling → Phase 3 question generation → later Question Bank architecture.**
+
+AdMob and the existing production quiz categories remain untouched by this Current Affairs content expansion.
