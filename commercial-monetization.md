@@ -1430,3 +1430,30 @@ The Phase 2 audit found that the earlier expansion pass was not yet complete: Sp
 ## Final Phase 2 audit — 23 September 2026
 
 Final structural audit completed after the expansion corrections. The Current Affairs fact dataset now contains 86 active records across all seven implemented expansion areas represented in the Phase 2 scope: Nigeria (48), Africa (9), Economy (9), Sports (6), World (5), International Organizations (3), and Science & Technology (6). Every fact contains the required core fields, no duplicate fact IDs were found, every referenced source ID resolves to the source registry, the JavaScript array/export structure is intact, and no future-dated verification metadata was detected. Current officeholder/institutional and dated-event facts remain subject to freshness review before serving. Phase 2 content expansion is therefore complete and the dataset is ready to move to the next controlled stage: Phase 3 question-generation design/implementation. The Question Bank remains a later stage and is not being mixed into this audit.
+
+## Current Affairs NewsData isolation and Phase 3 checkpoint — 24 September 2026
+
+NewsData.io is now explicitly reserved for the future **News Quiz / Current Events** product. It is no longer a provider for the V1 Current Affairs category.
+
+The separation supports the commercial architecture by keeping two different products/content models distinct:
+
+- **Current Affairs:** verified, structured knowledge with validity/freshness metadata.
+- **News Quiz / Current Events:** recent-news articles supplied by NewsData.io or a future news provider.
+
+NewsData-specific provider code is isolated under `worker/news-quiz/`. The V1 Current Affairs route must not depend on the NewsData credential, article parser, or headline-question generator.
+
+No billing, premium enforcement, or paywalls are introduced by this change.
+
+## Phase 3 commercial-architecture alignment
+
+The Phase 3 question system will retain future access-tier metadata such as:
+
+- `FREE`
+- `PREMIUM`
+- `SPECIAL_PACK`
+
+These are metadata contracts only at this stage. They do not grant or deny access.
+
+Question provenance, fact relationships, freshness, question-family identity and lifecycle status should be retained so future premium content can be selected centrally without duplicating provider logic.
+
+The commercial rule remains: premium content must meet the same factual, clarity, distractor, freshness and anti-duplication standards as free content.
