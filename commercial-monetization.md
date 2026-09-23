@@ -1,4 +1,10 @@
 # Daily Quiz & Challenge — Commercial & Monetization Plan
+## Current Affairs commercial/content checkpoint — 23 September 2026
+
+Current Affairs is being designed as a broad, fact-first knowledge category rather than a live-news headline feed. The commercial content architecture should therefore treat its verified facts, freshness requirements, provenance and update burden as first-class metadata. The existing NewsData integration is reserved for a future **News Quiz / Current Events** product and must remain isolated from the Current Affairs provider path.
+
+The eight Current Affairs domains are: Nigeria, Africa, World, International Organizations, Economy & Business, Geography, Sports, and Science & Technology. Future free/premium access can be applied at domain/topic/content level without coupling the content model to a specific provider.
+
 
 **File:** `commercial-monetization.md`  
 **Status:** Strategic product specification — planned, not yet fully implemented. Africa & Nigeria is production-verified; Current Affairs is the remaining V1 content implementation target. Bible commercial/product architecture is planned for the future native Android experience; commercial implementation remains deferred until the V1 foundation and later account/entitlement architecture are ready.  
