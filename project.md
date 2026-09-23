@@ -822,3 +822,14 @@ Added:
 Phase 3B remains deliberately separated from generation, distractor creation, semantic duplicate detection, quiz assembly and Worker integration. The verified fact database remains the source of truth, and Phase 3A remains the question/family data contract.
 
 **Current Affairs status: Phase 3B complete. Next: Phase 3C — Question Generator.**
+
+
+## Phase 3C implementation checkpoint — 24 September 2026
+
+Current Affairs **Question Generator** is implemented in `worker/current-affairs/data/phase3c-question-generator.js`.
+
+The generator is deterministic and fact-first: it transforms verified facts plus approved Phase 3B blueprints into bounded question drafts while preserving fact/source provenance, concept/family identity, difficulty and temporal context. It deliberately does not generate distractors, perform final validation, detect semantic duplicates or assemble quizzes.
+
+Safety/efficiency controls include blueprint compatibility checks, required-fact validation, bounded batch generation, conservative classification handling, explicit context requirements for relationship-based questions, and batch fingerprinting to prevent duplicate generated drafts.
+
+**Current Affairs status: Phase 3C complete. Next: Phase 3D — Distractor Generator.**
