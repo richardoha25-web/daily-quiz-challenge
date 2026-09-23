@@ -909,3 +909,44 @@ A blueprint may only use relationships supported by the verified fact model. It 
 **Phase 3B status: implementation complete.**
 
 Next: Phase 3C — Question Generator.
+
+
+## Phase 3C implementation checkpoint — 24 September 2026
+
+Phase 3C — **Question Generator** is now implemented as a deterministic, fact-first draft generator in:
+
+`worker/current-affairs/data/phase3c-question-generator.js`
+
+### Generator responsibilities
+
+The generator converts verified Phase 2 facts and approved Phase 3B blueprints into structured **question drafts**. Each draft carries:
+- verified `factIds` and `sourceIds`
+- stable `conceptId` and `questionFamilyId`
+- blueprint and variant type
+- difficulty
+- domain/topic
+- question text
+- correct answer
+- temporal context where relevant
+- generator version
+- future access-tier metadata
+
+### Efficiency and safety controls
+
+- Deterministic generation; no external API dependency.
+- Bounded batch generation through `maxDrafts`.
+- Blueprint/difficulty compatibility checks before generation.
+- Required fact-shape checks prevent incomplete facts from entering generation.
+- Direct/reverse/identification variants share the same underlying entity/attribute family identity.
+- Generic facts are not treated as classifications unless an explicit classification field such as `region` is present.
+- Batch-level fingerprinting prevents the generator itself from emitting the same question/answer/family combination more than once.
+- Relationship, comparison, matching, scenario, odd-one-out and multi-fact forms require explicit context rather than inventing relationships from unrelated facts.
+- No distractors are generated in Phase 3C; `options` remains null until Phase 3D.
+
+### Deliberate boundary
+
+Phase 3C does **not** perform final factual validation, semantic duplicate detection, distractor generation, quiz assembly or Worker integration. A generated draft is not automatically trusted or activated.
+
+**Phase 3C status: implementation complete.**
+
+Next: **Phase 3D — Distractor Generator**, followed by the quality validation and duplicate/family stages.
