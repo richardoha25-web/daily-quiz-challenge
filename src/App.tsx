@@ -251,7 +251,13 @@ function App() {
                 <span>{c.icon}</span>
                 <div>
                   <b>{c.name}</b>
-                  <small>{c.name === 'Science' || c.name === 'General Knowledge' ? 'Online questions' : 'Online source coming next'}</small>
+                  <small>{
+  c.name === 'Science' || c.name === 'General Knowledge' || c.name === 'Africa & Nigeria'
+    ? 'Online questions'
+    : c.name === 'Current Affairs'
+      ? 'Fresh news questions'
+      : 'Coming soon'
+}</small>
                 </div>
                 <strong>›</strong>
               </button>
