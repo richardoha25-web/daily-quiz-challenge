@@ -745,3 +745,65 @@ The Phase 2 audit found that the earlier expansion pass was not yet complete: Sp
 ## Final Phase 2 audit — 23 September 2026
 
 Final structural audit completed after the expansion corrections. The Current Affairs fact dataset now contains 86 active records across all seven implemented expansion areas represented in the Phase 2 scope: Nigeria (48), Africa (9), Economy (9), Sports (6), World (5), International Organizations (3), and Science & Technology (6). Every fact contains the required core fields, no duplicate fact IDs were found, every referenced source ID resolves to the source registry, the JavaScript array/export structure is intact, and no future-dated verification metadata was detected. Current officeholder/institutional and dated-event facts remain subject to freshness review before serving. Phase 2 content expansion is therefore complete and the dataset is ready to move to the next controlled stage: Phase 3 question-generation design/implementation. The Question Bank remains a later stage and is not being mixed into this audit.
+
+## NewsData isolation completed — 24 September 2026
+
+The NewsData integration has now been isolated from V1 Current Affairs.
+
+Completed changes:
+- Removed NewsData URL/fetching/article-generation code from `worker/index.js`.
+- `current_affairs` no longer uses NewsData.
+- Added a separate future `news_quiz` route.
+- Moved NewsData-specific provider, validation, generation and module entrypoint into `worker/news-quiz/`.
+- Kept `NEWSDATA_API_KEY` as a future News Quiz Worker secret; it is no longer used by Current Affairs.
+- Current Affairs is intentionally temporarily unavailable at the Worker route until its fact-first Phase 3 question system is connected.
+
+This preserves the existing Science, General Knowledge, Africa & Nigeria and AdMob architecture while creating a clean boundary between **Current Affairs knowledge** and the future **News Quiz / Current Events** product.
+
+## Phase 3 Current Affairs question-system architecture — planning checkpoint
+
+Phase 3 is now formally planned after Phase 2 content expansion and NewsData isolation.
+
+Architecture:
+
+```text
+Verified Facts
+    ↓
+Fact Relationship Map
+    ↓
+Question Blueprints
+    ↓
+Question + Distractor Generation
+    ↓
+Quality Validation
+    ↓
+Validated Question Pool
+    ↓
+Quiz Assembly
+    ↓
+Existing Quiz Engine
+```
+
+The core identity chain is:
+
+```text
+Fact → Concept → Question Family → Question Variants
+```
+
+A question family represents the underlying knowledge relationship. Different wording does not automatically make a different question. Only one variant from a family may appear in the same 10-question quiz, with longer family cooldowns considered across user history.
+
+Planned stages:
+- **3A:** Question data model, concepts and question families.
+- **3B:** Question blueprints/templates.
+- **3C:** Question generator.
+- **3D:** Distractor generator.
+- **3E:** Quality validator.
+- **3F:** Exact/semantic duplicate and family detection.
+- **3G:** 10-question quiz assembler.
+- **3H:** Worker integration.
+- **3I:** Android Debug/end-to-end regression testing.
+
+The Question Bank remains separate from user recent history and must never block quiz generation. Future access-tier metadata can support commercial expansion without implementing billing or premium enforcement during this phase.
+
+**Immediate implementation order:** build Phase 3A first. Do not begin Phase 3 generator code until the data model and family/relationship model are documented and validated.
+
