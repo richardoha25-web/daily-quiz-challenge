@@ -1016,3 +1016,36 @@ The module also provides a deterministic eligible-question filter and a Question
 **Phase 3F status: implementation complete.**
 
 Next: **Phase 3G — Quiz Assembler.**
+
+
+## Phase 3G implementation checkpoint — 24 September 2026
+
+Phase 3G — **Quiz Assembler** is now implemented in:
+
+worker/current-affairs/data/phase3g-quiz-assembler.js
+
+The assembler builds a playable quiz from serving-safe Question Bank records while keeping content generation, validation and user history separate. Its default target is exactly 10 questions.
+
+### Assembly rules
+- Only active Question Bank records are eligible for serving. Generated/unvalidated drafts cannot bypass the quality pipeline.
+- Recent user history is filtered before selection using question ID, question-family ID and concept ID cooldowns.
+- A question family can appear only once in a quiz.
+- The same concept is blocked by default within one quiz.
+- Difficulty is targeted at Easy 4 / Medium 4 / Hard 2 by default, while allowing configurable targets.
+- Domain, topic and question-variant concentration are limited so one area does not dominate a quiz.
+- Selection uses deterministic seeded ordering, making tests reproducible while still allowing different seeds for different sessions.
+- If distribution limits prevent completion, the assembler may relax only distribution limits; family/concept anti-repetition rules are never relaxed.
+- If fewer than the requested number of eligible questions remain, the assembler fails explicitly instead of serving a shorter or unsafe quiz.
+
+### Phase 3G boundary
+Phase 3G does not generate questions, generate distractors, validate facts, persist the Question Bank, write user history, enforce billing, or connect the Worker route. Those responsibilities remain separate.
+
+The intended serving pipeline is now:
+
+Verified Facts → Generation → Distractors → Quality Validation → Duplicate/Family Detection → Question Bank → Quiz Assembler → Quiz → User History
+
+The Question Bank remains a dedicated content-management layer and is not being replaced by the assembler.
+
+**Phase 3G status: implementation complete.**
+
+Next: **Phase 3H — Worker integration.**
