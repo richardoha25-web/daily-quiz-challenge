@@ -951,3 +951,19 @@ The Current Affairs architecture now includes a dedicated Question Bank as a pla
 The future UI should consume curated validated question records, not generated drafts or user history. Question records will retain stable identity, family/concept relationships, difficulty, explanations, provenance-aware metadata and future FREE/PREMIUM/SPECIAL_PACK access metadata.
 
 Worker integration is intentionally postponed until the Question Bank layer is implemented and audited. No UI redesign is required for this backend checkpoint.
+
+## Current Affairs Phase 3H UI/UX architecture checkpoint — 24 September 2026
+
+Phase 3H Question Bank Storage & Management is complete through 3H-E. The UI/UX layer remains intentionally decoupled from Question Bank storage and generation.
+
+The future Current Affairs experience can therefore consume a clean serving layer without exposing internal fact IDs, source records, generator metadata or Question Bank lifecycle details to users.
+
+UI/UX implications preserved for later implementation:
+- Quiz screens receive playable question records only.
+- Access-tier metadata can later support free/premium/special-pack presentation without hard-coding billing into question components.
+- Explanations and future source attribution can be surfaced after answers where appropriate.
+- Dynamic/current facts may require clear date/context presentation in the final question or explanation.
+- Loading, empty-bank, insufficient-question, stale-content and network/error states should be designed before Worker integration is exposed to users.
+- The existing UI redesign remains deferred until the functional Current Affairs pipeline is stable.
+
+**Phase 3H status: complete. Next functional stage: Worker integration, then debug/end-to-end testing.**
