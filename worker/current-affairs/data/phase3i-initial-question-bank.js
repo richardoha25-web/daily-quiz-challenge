@@ -51,19 +51,19 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "sourceIds": [
       "inec-state-offices"
     ],
-    "variantType": "direct",
-    "blueprintId": "direct_attribute",
+    "variantType": "reverse",
+    "blueprintId": "reverse_attribute",
     "difficulty": "easy",
     "domain": "nigeria",
     "topic": "geography",
-    "question": "What is the capital of Anambra State?",
+    "question": "Which Nigerian state has Awka as its capital?",
     "options": [
-      "Awka",
-      "Umuahia",
-      "Enugu",
-      "Owerri"
+      "Anambra State",
+      "Abia State",
+      "Kano State",
+      "Lagos State"
     ],
-    "correctAnswer": "Awka",
+    "correctAnswer": "Anambra State",
     "explanation": "Verified fact: ng-state-anambra — Awka. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
@@ -85,19 +85,19 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "sourceIds": [
       "inec-state-offices"
     ],
-    "variantType": "direct",
-    "blueprintId": "direct_attribute",
+    "variantType": "reverse",
+    "blueprintId": "reverse_attribute",
     "difficulty": "easy",
     "domain": "nigeria",
     "topic": "geography",
-    "question": "What is the capital of Kano State?",
+    "question": "Which Nigerian state has Kano as its capital?",
     "options": [
-      "Kano",
-      "Kaduna",
-      "Sokoto",
-      "Katsina"
+      "Kano State",
+      "Kaduna State",
+      "Katsina State",
+      "Sokoto State"
     ],
-    "correctAnswer": "Kano",
+    "correctAnswer": "Kano State",
     "explanation": "Verified fact: ng-state-kano — Kano. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
@@ -119,19 +119,19 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "sourceIds": [
       "inec-state-offices"
     ],
-    "variantType": "direct",
-    "blueprintId": "direct_attribute",
+    "variantType": "identification",
+    "blueprintId": "identification",
     "difficulty": "easy",
     "domain": "nigeria",
     "topic": "geography",
-    "question": "What is the capital of Lagos State?",
+    "question": "Which Nigerian state is associated with the capital city Ikeja?",
     "options": [
-      "Ikeja",
-      "Abeokuta",
-      "Ibadan",
-      "Akure"
+      "Lagos State",
+      "Ogun State",
+      "Oyo State",
+      "Ondo State"
     ],
-    "correctAnswer": "Ikeja",
+    "correctAnswer": "Lagos State",
     "explanation": "Verified fact: ng-state-lagos — Ikeja. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
@@ -153,19 +153,19 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "sourceIds": [
       "inec-state-offices"
     ],
-    "variantType": "direct",
-    "blueprintId": "direct_attribute",
+    "variantType": "identification",
+    "blueprintId": "identification",
     "difficulty": "easy",
     "domain": "nigeria",
     "topic": "geography",
-    "question": "What is the capital of Rivers State?",
+    "question": "Which Nigerian state is associated with the capital city Port Harcourt?",
     "options": [
-      "Port Harcourt",
-      "Calabar",
-      "Asaba",
-      "Benin City"
+      "Rivers State",
+      "Cross River State",
+      "Delta State",
+      "Bayelsa State"
     ],
-    "correctAnswer": "Port Harcourt",
+    "correctAnswer": "Rivers State",
     "explanation": "Verified fact: ng-state-rivers — Port Harcourt. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
@@ -875,19 +875,19 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "sourceIds": [
       "who-about"
     ],
-    "variantType": "direct",
-    "blueprintId": "direct_attribute",
+    "variantType": "reverse",
+    "blueprintId": "reverse_attribute",
     "difficulty": "medium",
     "domain": "international-organizations",
     "topic": "health",
-    "question": "What is the verified headquarters associated with World Health Organization?",
+    "question": "Which organization has its headquarters in Geneva, Switzerland?",
     "options": [
-      "Geneva, Switzerland",
-      "New York, United States",
-      "Paris, France",
-      "Rome, Italy"
+      "World Health Organization",
+      "International Monetary Fund",
+      "African Union",
+      "United Nations"
     ],
-    "correctAnswer": "Geneva, Switzerland",
+    "correctAnswer": "World Health Organization",
     "explanation": "Verified fact: world-who-headquarters — Geneva, Switzerland. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
@@ -909,19 +909,19 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "sourceIds": [
       "fifa-world-cup-2026"
     ],
-    "variantType": "direct",
-    "blueprintId": "direct_attribute",
+    "variantType": "reverse",
+    "blueprintId": "reverse_attribute",
     "difficulty": "medium",
     "domain": "sports",
     "topic": "football",
-    "question": "What is the verified final location associated with FIFA World Cup 2026?",
+    "question": "Which tournament has its 2026 final location recorded as New York/New Jersey?",
     "options": [
-      "New York/New Jersey",
-      "Los Angeles",
-      "Mexico City",
-      "Toronto"
+      "FIFA World Cup 2026",
+      "Olympic Games",
+      "Africa Cup of Nations",
+      "UEFA European Championship"
     ],
-    "correctAnswer": "New York/New Jersey",
+    "correctAnswer": "FIFA World Cup 2026",
     "explanation": "Verified fact: sports-fifa-2026-final — New York/New Jersey. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
@@ -943,19 +943,19 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "sourceIds": [
       "nasa"
     ],
-    "variantType": "direct",
-    "blueprintId": "direct_attribute",
+    "variantType": "identification",
+    "blueprintId": "identification",
     "difficulty": "medium",
     "domain": "science-technology",
     "topic": "space",
-    "question": "What is the verified mission type associated with Artemis II?",
+    "question": "Which mission is recorded as a crewed lunar flyby?",
     "options": [
-      "Crewed lunar flyby",
-      "Uncrewed Mars orbiter",
-      "Earth observation mission",
-      "Space station resupply"
+      "Artemis II",
+      "International Space Station",
+      "FIFA World Cup 2026",
+      "Apollo 11"
     ],
-    "correctAnswer": "Crewed lunar flyby",
+    "correctAnswer": "Artemis II",
     "explanation": "Verified fact: science-artemis-ii-type — Crewed lunar flyby. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
@@ -977,19 +977,19 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "sourceIds": [
       "nasa"
     ],
-    "variantType": "direct",
-    "blueprintId": "direct_attribute",
+    "variantType": "identification",
+    "blueprintId": "identification",
     "difficulty": "medium",
     "domain": "science-technology",
     "topic": "space",
-    "question": "What is the verified mission duration associated with Artemis II?",
+    "question": "Which mission is recorded as lasting 9 days, 1 hour, and 32 minutes?",
     "options": [
-      "9 days, 1 hour, 32 minutes",
-      "7 days, 12 hours",
-      "14 days, 6 hours",
-      "3 days, 18 hours"
+      "Artemis II",
+      "Artemis I",
+      "International Space Station",
+      "Apollo 13"
     ],
-    "correctAnswer": "9 days, 1 hour, 32 minutes",
+    "correctAnswer": "Artemis II",
     "explanation": "Verified fact: science-artemis-ii-duration — 9 days, 1 hour, 32 minutes. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
