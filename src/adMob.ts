@@ -24,9 +24,12 @@ const REWARDED_ID = IS_TESTING ? TEST.rewarded : PROD.rewarded;
 const APP_OPEN_ID = IS_TESTING ? TEST.appOpen : PROD.appOpen;
 const REWARDED_INTERSTITIAL_ID = IS_TESTING ? TEST.rewardedInterstitial : PROD.rewardedInterstitial;
 
+// These are freshness/replacement limits, not presentation limits.
+// Google documents approximately 1 hour for interstitial/rewarded ads and
+// 4 hours for app-open ads. We refresh before those limits rather than
+// allowing a stale cached ad to be shown.
 const MAX_AGE = 55 * 60 * 1000;
 const APP_OPEN_MAX_AGE = 3.5 * 60 * 60 * 1000;
-const APP_OPEN_GAP = 15 * 60 * 1000;
 
 let initPromise: Promise<void> | null = null;
 let interstitialPromise: Promise<boolean> | null = null;
@@ -35,12 +38,13 @@ let rewardedInterstitialPromise: Promise<boolean> | null = null;
 let appOpenPromise: Promise<boolean> | null = null;
 let interstitialReady = false, rewardedReady = false, rewardedInterstitialReady = false, appOpenReady = false;
 let interstitialAt = 0, rewardedAt = 0, rewardedInterstitialAt = 0, appOpenAt = 0;
-let lastAppOpen = Number(localStorage.getItem('dq-last-app-open') || 0);
 let bannerShown = false;
 let bannerPosition: BannerAdPosition | null = null;
 let appOpenShowing = false;
+let fullScreenAdShowing = false;
 let retryTimers: Record<string, ReturnType<typeof setTimeout> | null> = { i: null, r: null, ri: null, ao: null, b: null };
 let retryDelay: Record<string, number> = { i: 2000, r: 2000, ri: 2000, ao: 3000, b: 10000 };
+let maintenanceTimer: ReturnType<typeof setInterval> | null = null;
 
 const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
 const fresh = (ready: boolean, at: number, age: number) => ready && at > 0 && Date.now() - at < age;
@@ -128,7 +132,7 @@ export async function preloadInterstitial(force = false) {
 }
 
 export async function showInterstitial() {
-  if (!Capacitor.isNativePlatform()) return false;
+  if (!Capacitor.isNativePlatform() || fullScreenAdShowing) return false;
   try {
     await initAds();
     const deadline = Date.now() + 8000;
@@ -137,6 +141,8 @@ export async function showInterstitial() {
       if (!fresh(interstitialReady, interstitialAt, MAX_AGE)) await sleep(500);
     }
     if (!fresh(interstitialReady, interstitialAt, MAX_AGE)) return false;
+
+    fullScreenAdShowing = true;
     await AdMob.showInterstitial();
     interstitialReady = false; interstitialAt = 0; retryDelay.i = 2000;
     void preloadInterstitial(true);
@@ -146,6 +152,8 @@ export async function showInterstitial() {
     console.error('[AdMob] interstitial show', e);
     retry('i', () => void preloadInterstitial(true));
     return false;
+  } finally {
+    fullScreenAdShowing = false;
   }
 }
 
@@ -174,7 +182,7 @@ export async function preloadRewarded(force = false) {
 }
 
 export async function showRewarded() {
-  if (!Capacitor.isNativePlatform()) return false;
+  if (!Capacitor.isNativePlatform() || fullScreenAdShowing) return false;
   try {
     await initAds();
     const deadline = Date.now() + 10000;
@@ -183,6 +191,8 @@ export async function showRewarded() {
       if (!fresh(rewardedReady, rewardedAt, MAX_AGE)) await sleep(500);
     }
     if (!fresh(rewardedReady, rewardedAt, MAX_AGE)) return false;
+
+    fullScreenAdShowing = true;
     const reward = await AdMob.showRewardVideoAd();
     rewardedReady = false; rewardedAt = 0; retryDelay.r = 2000;
     void preloadRewarded(true);
@@ -192,6 +202,8 @@ export async function showRewarded() {
     console.error('[AdMob] rewarded show', e);
     retry('r', () => void preloadRewarded(true));
     return false;
+  } finally {
+    fullScreenAdShowing = false;
   }
 }
 
@@ -220,7 +232,7 @@ export async function preloadRewardedInterstitial(force = false) {
 }
 
 export async function showRewardedInterstitial() {
-  if (!Capacitor.isNativePlatform()) return false;
+  if (!Capacitor.isNativePlatform() || fullScreenAdShowing) return false;
   try {
     await initAds();
     const deadline = Date.now() + 10000;
@@ -229,6 +241,8 @@ export async function showRewardedInterstitial() {
       if (!fresh(rewardedInterstitialReady, rewardedInterstitialAt, MAX_AGE)) await sleep(500);
     }
     if (!fresh(rewardedInterstitialReady, rewardedInterstitialAt, MAX_AGE)) return false;
+
+    fullScreenAdShowing = true;
     const reward = await AdMob.showRewardInterstitialAd();
     rewardedInterstitialReady = false; rewardedInterstitialAt = 0; retryDelay.ri = 2000;
     void preloadRewardedInterstitial(true);
@@ -238,6 +252,8 @@ export async function showRewardedInterstitial() {
     console.error('[AdMob] rewarded interstitial show', e);
     retry('ri', () => void preloadRewardedInterstitial(true));
     return false;
+  } finally {
+    fullScreenAdShowing = false;
   }
 }
 
@@ -266,8 +282,7 @@ export async function preloadAppOpen(force = false) {
 }
 
 export async function showAppOpenIfAppropriate(maxWaitMs = 0) {
-  if (!Capacitor.isNativePlatform() || appOpenShowing) return false;
-  if (Date.now() - lastAppOpen < APP_OPEN_GAP) return false;
+  if (!Capacitor.isNativePlatform() || appOpenShowing || fullScreenAdShowing) return false;
 
   try {
     await initAds();
@@ -290,13 +305,12 @@ export async function showAppOpenIfAppropriate(maxWaitMs = 0) {
     }
 
     appOpenShowing = true;
+    fullScreenAdShowing = true;
     await AdMob.showAppOpen({ adId: APP_OPEN_ID });
-    lastAppOpen = Date.now();
-    localStorage.setItem('dq-last-app-open', String(lastAppOpen));
     appOpenReady = false;
     appOpenAt = 0;
 
-    // Preload the next App Open ad after the current one is consumed.
+    // Preload the next App Open ad immediately after the current one is consumed.
     void preloadAppOpen(true);
     return true;
   } catch (e) {
@@ -307,15 +321,38 @@ export async function showAppOpenIfAppropriate(maxWaitMs = 0) {
     return false;
   } finally {
     appOpenShowing = false;
+    fullScreenAdShowing = false;
+  }
+}
+
+/**
+ * Keeps the ad inventory active throughout a long-running app session.
+ * It does not force ads to display; it only makes sure each format is
+ * continuously refreshed and ready when the app reaches an appropriate
+ * presentation point.
+ */
+export function maintainAds() {
+  if (!Capacitor.isNativePlatform()) return;
+  void initAds().then(() => {
+    void preloadInterstitial();
+    void preloadRewarded();
+    void preloadRewardedInterstitial();
+    void preloadAppOpen();
+  }).catch(() => undefined);
+
+  if (!maintenanceTimer) {
+    maintenanceTimer = setInterval(() => {
+      void preloadInterstitial();
+      void preloadRewarded();
+      void preloadRewardedInterstitial();
+      void preloadAppOpen();
+    }, 5 * 60 * 1000);
   }
 }
 
 export function recoverAds() {
   void initAds().then(() => {
     void showBanner('bottom');
-    void preloadInterstitial();
-    void preloadRewarded();
-    void preloadRewardedInterstitial();
-    void preloadAppOpen();
+    maintainAds();
   }).catch(() => undefined);
 }
