@@ -30,7 +30,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "North East"
     ],
     "correctAnswer": "South East",
-    "explanation": "Verified fact: ng-state-abia — Umuahia. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is Umuahia.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -64,7 +64,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "North East"
     ],
     "correctAnswer": "South East",
-    "explanation": "Verified fact: ng-state-anambra — Awka. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is Awka.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -98,7 +98,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Sokoto State"
     ],
     "correctAnswer": "Kano State",
-    "explanation": "Verified fact: ng-state-kano — Kano. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is Kano.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -132,7 +132,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Ondo State"
     ],
     "correctAnswer": "Lagos State",
-    "explanation": "Verified fact: ng-state-lagos — Ikeja. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is Ikeja.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -166,7 +166,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Bayelsa State"
     ],
     "correctAnswer": "Rivers State",
-    "explanation": "Verified fact: ng-state-rivers — Port Harcourt. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is Port Harcourt.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -200,7 +200,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Non-member"
     ],
     "correctAnswer": "Member state",
-    "explanation": "Verified fact: af-au-nigeria-member — Member state. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is Member state.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -235,7 +235,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Dakar, Senegal"
     ],
     "correctAnswer": "Abuja, Nigeria",
-    "explanation": "Verified fact: af-ecowas-headquarters — Abuja, Nigeria. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is Abuja, Nigeria.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -269,7 +269,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "ESA and Roscosmos only"
     ],
     "correctAnswer": "NASA, Roscosmos, JAXA, ESA and the Canadian Space Agency",
-    "explanation": "Verified fact: science-iss-partners — NASA, Roscosmos, JAXA, ESA and the Canadian Space Agency. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is NASA, Roscosmos, JAXA, ESA and the Canadian Space Agency.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -303,7 +303,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       60
     ],
     "correctAnswer": 55,
-    "explanation": "Verified fact: af-au-member-count — 55. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is 55.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -337,7 +337,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       10
     ],
     "correctAnswer": 12,
-    "explanation": "Verified fact: af-ecowas-member-count — 12. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is 12.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -372,7 +372,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Tajudeen Abbas"
     ],
     "correctAnswer": "Bola Ahmed Tinubu",
-    "explanation": "Verified fact: ng-president — Bola Ahmed Tinubu. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is Bola Ahmed Tinubu.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -407,7 +407,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Benjamin Kalu"
     ],
     "correctAnswer": "Kashim Shettima",
-    "explanation": "Verified fact: ng-vice-president — Kashim Shettima. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is Kashim Shettima.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -442,7 +442,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Kashim Shettima"
     ],
     "correctAnswer": "Godswill Akpabio",
-    "explanation": "Verified fact: ng-senate-president — Godswill Akpabio. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is Godswill Akpabio.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -477,7 +477,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Bola Ahmed Tinubu"
     ],
     "correctAnswer": "Tajudeen Abbas",
-    "explanation": "Verified fact: ng-house-speaker — Tajudeen Abbas. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is Tajudeen Abbas.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -512,7 +512,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Kashim Shettima"
     ],
     "correctAnswer": "Olayemi Cardoso",
-    "explanation": "Verified fact: ng-cbn-governor — Olayemi Cardoso. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is Olayemi Cardoso.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -547,7 +547,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       1963
     ],
     "correctAnswer": 2002,
-    "explanation": "Verified fact: af-au-founded — 2002. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is 2002.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -581,7 +581,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       1963
     ],
     "correctAnswer": 1948,
-    "explanation": "Verified fact: world-who-founded — 1948. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is 1948.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -615,7 +615,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       2002
     ],
     "correctAnswer": 1944,
-    "explanation": "Verified fact: world-imf-founded — 1944. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is 1944.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -649,7 +649,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "2027-04-01"
     ],
     "correctAnswer": "2026-04-01",
-    "explanation": "Verified fact: science-artemis-ii-launch — 2026-04-01. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is 2026-04-01.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -684,7 +684,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Ibadan"
     ],
     "correctAnswer": "Abuja",
-    "explanation": "Verified fact: ng-fct-capital — Abuja. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is Abuja.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -718,7 +718,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       824
     ],
     "correctAnswer": 774,
-    "explanation": "Verified fact: ng-lga-count — 774. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is 774.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -752,7 +752,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       64
     ],
     "correctAnswer": 48,
-    "explanation": "Verified fact: sports-fifa-2026-teams — 48. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is 48.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -786,7 +786,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "France, Germany and Italy"
     ],
     "correctAnswer": "Canada, Mexico and the United States",
-    "explanation": "Verified fact: sports-fifa-2026-hosts — Canada, Mexico and the United States. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is Canada, Mexico and the United States.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -820,7 +820,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "December 2010"
     ],
     "correctAnswer": "November 2000",
-    "explanation": "Verified fact: science-iss-continuous-occupation — November 2000. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is November 2000.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -854,7 +854,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       191
     ],
     "correctAnswer": 194,
-    "explanation": "Verified fact: world-who-member-count — 194. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is 194.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -888,7 +888,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "United Nations"
     ],
     "correctAnswer": "World Health Organization",
-    "explanation": "Verified fact: world-who-headquarters — Geneva, Switzerland. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is Geneva, Switzerland.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -922,7 +922,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "UEFA European Championship"
     ],
     "correctAnswer": "FIFA World Cup 2026",
-    "explanation": "Verified fact: sports-fifa-2026-final — New York/New Jersey. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is New York/New Jersey.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -956,7 +956,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Apollo 11"
     ],
     "correctAnswer": "Artemis II",
-    "explanation": "Verified fact: science-artemis-ii-type — Crewed lunar flyby. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is Crewed lunar flyby.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -990,7 +990,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Apollo 13"
     ],
     "correctAnswer": "Artemis II",
-    "explanation": "Verified fact: science-artemis-ii-duration — 9 days, 1 hour, 32 minutes. Source: Phase 2 verified fact record.",
+    "explanation": "The correct answer is 9 days, 1 hour, 32 minutes.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
