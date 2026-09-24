@@ -45,6 +45,12 @@ const POLITICAL_TERMS = [
 const GENERIC_BAD_PATTERNS = [
   /\b(according to me|in my opinion|obviously|everyone knows)\b/i,
   /\b(best|worst|greatest)\b/i,
+  /\b(verified function or responsibility)\b/i,
+  /\b(function or responsibility is associated with)\b/i,
+  /\b(milestone described by the verified fact)\b/i,
+  /\b(described by the verified fact)\b/i,
+  /\b(which entity has the)\b/i,
+  /\b(what verified)\b/i,
 ];
 
 const QUESTION_ENDING_PATTERN = /[?؟]$/;
