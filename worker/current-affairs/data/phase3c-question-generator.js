@@ -154,13 +154,24 @@ function createBaseDraft(fact, blueprint, question, correctAnswer, difficulty) {
 }
 
 function generateDirect(fact, blueprint, difficulty) {
-  const attribute = labelForAttribute(fact.attribute);
+  const attribute = String(fact.attribute || "").toLowerCase();
   const temporal = getTemporalContext(fact);
+
+  let question;
+  if (attribute === "capital") {
+    question = `What is the capital of ${fact.entity}${temporal}?`;
+  } else if (attribute === "members" || attribute === "membershipcount") {
+    question = `How many member states does ${fact.entity}${temporal} have?`;
+  } else if (attribute === "headquarters") {
+    question = `Where is the headquarters of ${fact.entity}${temporal}?`;
+  } else {
+    question = `What is the ${labelForAttribute(fact.attribute)} of ${fact.entity}${temporal}?`;
+  }
 
   return createBaseDraft(
     fact,
     blueprint,
-    `What is the ${attribute} of ${fact.entity}${temporal}?`,
+    question,
     fact.value,
     difficulty
   );
