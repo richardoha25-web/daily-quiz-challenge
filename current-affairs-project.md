@@ -1049,3 +1049,35 @@ The Question Bank remains a dedicated content-management layer and is not being 
 **Phase 3G status: implementation complete.**
 
 Next: **Phase 3H — Worker integration.**
+
+## Phase 3 Question Bank checkpoint — 24 September 2026
+
+A sequencing correction is now recorded: **Phase 3G — Quiz Assembler is complete, but the actual persistent Question Bank storage/management layer is not yet implemented.**
+
+Phase 3G consumes the Question Bank conceptually, but it does not create, persist, populate or manage the bank. Therefore the project must complete the Question Bank layer **before Worker integration**.
+
+### Correct Phase 3 sequence
+
+- Phase 3A — Question data model & concept/family model — complete
+- Phase 3B — Question blueprint/template system — complete
+- Phase 3C — Question generator — complete
+- Phase 3D — Distractor generator — complete
+- Phase 3E — Quality validator — complete
+- Phase 3F — Duplicate/family detection — complete
+- Phase 3G — Quiz assembler — complete
+- **Phase 3H — Question Bank Storage & Management — next**
+- Phase 3I — Worker integration — pending
+- Phase 3J — Android/debug testing — pending
+- Phase 3K — Stabilization — pending
+
+### Required serving architecture
+
+Verified Facts → Question Generation → Distractors → Quality Validation → Duplicate/Family Detection → Question Bank → Quiz Assembler → Worker → Android App → User History
+
+The Question Bank must remain separate from `recent_history`. It is the application's curated content store; `recent_history` belongs to individual users and records what they have seen.
+
+### Phase 3H planning boundary
+
+The next stage will first plan the Question Bank storage and management layer before implementation. Planning must determine the canonical storage format and location, promotion rules for validated questions, stable IDs and versioning, active/retired/superseded lifecycle handling, provenance and source retention, freshness/revalidation handling for dynamic facts, family/concept indexing for anti-repetition, audit/integrity checks, safe population from the existing 86 verified Phase 2 facts and Phase 3 pipeline, future access-tier metadata without billing implementation, and maintainability without making the bank a runtime bottleneck.
+
+No Current Affairs Worker route should consume this bank until the Question Bank stage has been implemented and audited.
