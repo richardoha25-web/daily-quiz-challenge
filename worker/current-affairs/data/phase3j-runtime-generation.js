@@ -1,4 +1,4 @@
-/**
+/** 
  * Phase 3J — Current Affairs runtime generation (Step A).
  *
  * Purpose:
@@ -126,7 +126,6 @@ function toActiveRecord(draft, distractors, now) {
     question: draft.question,
     options,
     correctAnswer: draft.correctAnswer,
-    // Keep internal provenance out of the player-facing explanation.
     explanation: draft.explanation || "",
     status: "active",
     accessTier: draft.accessTier || "FREE",
@@ -186,8 +185,6 @@ function enrichRecentHistory(recentHistory, knownQuestions) {
       };
     }
 
-    // Runtime-generated IDs encode the stable family slug so Step A can keep
-    // family cooldowns even before D1 stores full history metadata.
     const match = String(history.questionId || "").match(
       /^ca-runtime:([^:]+):/
     );
@@ -201,6 +198,30 @@ function enrichRecentHistory(recentHistory, knownQuestions) {
   });
 }
 
+function incrementCount(counts, key) {
+  const normalized = String(key || "unknown");
+  counts[normalized] = (counts[normalized] || 0) + 1;
+}
+
+function recordRejection(rejectionsByReason, reason) {
+  if (Array.isArray(reason)) {
+    for (const item of reason) {
+      recordRejection(rejectionsByReason, item);
+    }
+    return;
+  }
+
+  if (reason && typeof reason === "object") {
+    const nested = reason.reason || reason.code || reason.type;
+    if (nested) {
+      recordRejection(rejectionsByReason, nested);
+      return;
+    }
+  }
+
+  incrementCount(rejectionsByReason, reason || "unknown");
+}
+
 function buildGeneratedCandidates({
   facts,
   recentHistory,
@@ -210,6 +231,9 @@ function buildGeneratedCandidates({
   const generated = [];
   const rejected = [];
   const seenIds = new Set();
+  const rejectionsByReason = {};
+  const generatedByDifficulty = {};
+  const draftsByDifficulty = {};
   const enrichedHistory = enrichRecentHistory(recentHistory, existingQuestions);
 
   const orderedFacts = deterministicOrder(
@@ -233,14 +257,14 @@ function buildGeneratedCandidates({
       if (generated.length >= MAX_GENERATED_CANDIDATES) break;
 
       processedDrafts += 1;
+      incrementCount(draftsByDifficulty, draft.difficulty);
 
       const questionId = stableQuestionId(draft);
 
-      // Exact generated IDs are stable across requests. This lets the Android
-      // recent-history list block a previously served generated question even
-      // before Step B adds persistent family/concept metadata.
       if (recentHistoryHasQuestionId(questionId, enrichedHistory)) {
-        rejected.push({ questionId, reason: "question_cooldown" });
+        const reason = "question_cooldown";
+        rejected.push({ questionId, reason });
+        recordRejection(rejectionsByReason, reason);
         continue;
       }
 
@@ -254,11 +278,13 @@ function buildGeneratedCandidates({
       });
 
       if (duplicate.duplicate) {
+        const reason = duplicate.type;
         rejected.push({
           questionId,
-          reason: duplicate.type,
+          reason,
           matches: duplicate.matches,
         });
+        recordRejection(rejectionsByReason, reason);
         continue;
       }
 
@@ -270,10 +296,12 @@ function buildGeneratedCandidates({
       });
 
       if (!distractors.ok) {
+        const reason = distractors.reason;
         rejected.push({
           questionId,
-          reason: distractors.reason,
+          reason,
         });
+        recordRejection(rejectionsByReason, reason);
         continue;
       }
 
@@ -296,11 +324,13 @@ function buildGeneratedCandidates({
       });
 
       if (!quality.ok) {
+        const reasons = quality.rejectionReasons;
         rejected.push({
           questionId,
-          reason: quality.rejectionReasons,
+          reason: reasons,
           errors: quality.errors,
         });
+        recordRejection(rejectionsByReason, reasons);
         continue;
       }
 
@@ -312,25 +342,30 @@ function buildGeneratedCandidates({
         updatedAt: now,
       };
 
-      if (seenIds.has(activeRecord.questionId)) continue;
+      if (seenIds.has(activeRecord.questionId)) {
+        const reason = "generated_id_duplicate";
+        recordRejection(rejectionsByReason, reason);
+        continue;
+      }
 
-      // Guard against family/concept history supplied in future client
-      // versions. Current V1 sends question IDs, so this is additive.
       const cooldown = isQuestionOnCooldown({
         candidate: activeRecord,
         recentHistory,
       });
 
       if (cooldown.onCooldown) {
+        const reason = cooldown.reason;
         rejected.push({
           questionId,
-          reason: cooldown.reason,
+          reason,
         });
+        recordRejection(rejectionsByReason, reason);
         continue;
       }
 
       generated.push(activeRecord);
       seenIds.add(activeRecord.questionId);
+      incrementCount(generatedByDifficulty, activeRecord.difficulty);
     }
   }
 
@@ -342,6 +377,9 @@ function buildGeneratedCandidates({
       draftsProcessed: processedDrafts,
       generatedCount: generated.length,
       rejectedCount: rejected.length,
+      draftsByDifficulty,
+      generatedByDifficulty,
+      rejectionsByReason,
     },
   };
 }
@@ -360,10 +398,6 @@ function hasRequestedDifficultyCoverage(quiz) {
   );
 }
 
-/**
- * Generate/assemble a Current Affairs quiz using the Question Bank first,
- * then verified-fact runtime generation when needed.
- */
 export function getCurrentAffairsQuestionsWithRuntimeGeneration({
   quizSize = 10,
   recentHistory = [],
@@ -371,7 +405,6 @@ export function getCurrentAffairsQuestionsWithRuntimeGeneration({
 } = {}) {
   const bank = CURRENT_AFFAIRS_QUESTION_BANK;
 
-  // First pass: preserve the existing audited bank behavior.
   const bankOnly = assembleCurrentAffairsQuiz({
     questionBank: bank,
     recentHistory,
@@ -393,8 +426,6 @@ export function getCurrentAffairsQuestionsWithRuntimeGeneration({
     };
   }
 
-  // Second pass: generate only when the bank cannot provide a fresh complete
-  // quiz. This is the Step A bridge from facts -> validated questions.
   const runtime = buildGeneratedCandidates({
     facts: CURRENT_AFFAIRS_INITIAL_FACTS,
     recentHistory,
