@@ -119,8 +119,6 @@ export const CURRENT_AFFAIRS_SOURCES = {
     url: "https://www.nasa.gov/",
     priority: "primary",
   },
-};
-
   worldBankNigeria: {
     id: "world-bank-nigeria",
     name: "World Bank — Nigeria Overview",
@@ -175,6 +173,7 @@ export const CURRENT_AFFAIRS_SOURCES = {
     url: "https://boundarycommission.gov.ng/about-us/",
     priority: "primary",
   },
+};
 
 const verifiedOn = "2026-09-23";
 
