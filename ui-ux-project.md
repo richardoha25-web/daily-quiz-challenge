@@ -967,3 +967,22 @@ UI/UX implications preserved for later implementation:
 - The existing UI redesign remains deferred until the functional Current Affairs pipeline is stable.
 
 **Phase 3H status: complete. Next functional stage: Worker integration, then debug/end-to-end testing.**
+
+
+## Current Affairs Phase 3I-A / 3I-B UX alignment checkpoint — 24 September 2026
+
+The Current Affairs backend now has a real Worker serving boundary and a bounded Question Bank seed.
+
+The future UI should treat the Worker as the source of a complete quiz session rather than requesting individual difficulty groups independently. This preserves global family, concept, recent-history and difficulty rules.
+
+The UI must handle these backend states cleanly:
+- complete 10-question response;
+- no eligible questions after recent-history filtering;
+- Question Bank not populated/temporarily unavailable;
+- invalid or failed Worker response;
+- network failure;
+- future premium/special-pack access restrictions.
+
+No internal Question Bank IDs, family IDs, source IDs, generator versions or lifecycle metadata should be shown during normal gameplay.
+
+The major UI redesign remains deferred. The next UI-relevant work is end-to-end debug testing of the existing app against the real Current Affairs Worker path.
