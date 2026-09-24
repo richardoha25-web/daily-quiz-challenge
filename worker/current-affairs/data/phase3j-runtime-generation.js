@@ -157,12 +157,36 @@ function deterministicOrder(values, seed = "") {
   return output;
 }
 
-function recentHistoryHasQuestionId(questionId, recentHistory) {
-  return recentHistory.some((item) => {
+function enrichRecentHistory(recentHistory, knownQuestions) {
+  return recentHistory.map((item) => {
     const history = typeof item === "string"
       ? { questionId: item }
       : item || {};
-    return history.questionId === questionId;
+
+    const known = knownQuestions.find(
+      (question) => question?.questionId === history.questionId
+    );
+
+    if (known) {
+      return {
+        ...history,
+        questionFamilyId: history.questionFamilyId || known.questionFamilyId,
+        conceptId: history.conceptId || known.conceptId,
+      };
+    }
+
+    // Runtime-generated IDs encode the stable family slug so Step A can keep
+    // family cooldowns even before D1 stores full history metadata.
+    const match = String(history.questionId || "").match(
+      /^ca-runtime:([^:]+):/
+    );
+
+    return {
+      ...history,
+      questionFamilyId:
+        history.questionFamilyId ||
+        (match ? match[1] : undefined),
+    };
   });
 }
 
@@ -175,6 +199,7 @@ function buildGeneratedCandidates({
   const generated = [];
   const rejected = [];
   const seenIds = new Set();
+  const enrichedHistory = enrichRecentHistory(recentHistory, existingQuestions);
 
   const orderedFacts = deterministicOrder(
     facts.filter((fact) => fact?.status === "active").slice(0, MAX_FACTS_TO_SCAN),
@@ -203,7 +228,7 @@ function buildGeneratedCandidates({
       // Exact generated IDs are stable across requests. This lets the Android
       // recent-history list block a previously served generated question even
       // before Step B adds persistent family/concept metadata.
-      if (recentHistoryHasQuestionId(questionId, recentHistory)) {
+      if (recentHistoryHasQuestionId(questionId, enrichedHistory)) {
         rejected.push({ questionId, reason: "question_cooldown" });
         continue;
       }
