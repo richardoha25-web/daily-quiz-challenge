@@ -1482,3 +1482,11 @@ The Current Affairs Quiz Assembler now accepts configurable access tiers while k
 The assembler treats access tier as a content eligibility attribute, not as proof of purchase or subscription. No billing, payment, subscription, entitlement or paywall code was added in Phase 3G.
 
 Commercial rule remains: access control must never bypass factual validation, freshness checks, provenance, or anti-repetition protections.
+
+## Current Affairs Question Bank checkpoint — 24 September 2026
+
+The Current Affairs Question Bank is a **content-management layer**, not the billing or entitlement layer. Phase 3A already defines future FREE, PREMIUM, and SPECIAL_PACK metadata, but these fields do not currently enforce payment access.
+
+Before Worker integration, the project will implement Question Bank storage and management while keeping content records separate from billing. The bank will preserve question identity, family/concept relationships, validation status, provenance, freshness metadata and future access-tier metadata.
+
+**No billing implementation is being added in this stage.** The immediate goal is a reliable, auditable Question Bank that can later support monetized content without redesigning the underlying question records.
