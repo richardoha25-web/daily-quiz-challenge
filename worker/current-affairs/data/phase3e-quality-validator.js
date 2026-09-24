@@ -50,7 +50,8 @@ const GENERIC_BAD_PATTERNS = [
   /\b(milestone described by the verified fact)\b/i,
   /\b(described by the verified fact)\b/i,
   /\b(which entity has the)\b/i,
-  /\b(what verified)\b/i,\n  /\bverified\b/i,
+  /\b(what verified)\b/i,
+  /\bverified\b/i,
 ];
 
 const QUESTION_ENDING_PATTERN = /[?؟]$/;
