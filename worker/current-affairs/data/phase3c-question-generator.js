@@ -282,10 +282,25 @@ function generateChronology(fact, blueprint, difficulty) {
     return null;
   }
 
+  const attribute = String(fact.attribute || "").toLowerCase();
+  let question;
+
+  if (attribute === "founded") {
+    question = `When was ${fact.entity} founded?`;
+  } else if (attribute === "established") {
+    question = `When was ${fact.entity} established?`;
+  } else if (attribute === "created") {
+    question = `When was ${fact.entity} created?`;
+  } else if (attribute === "launched" || attribute === "launchdate") {
+    question = `When was ${fact.entity} launched?`;
+  } else {
+    question = `When did ${fact.entity} ${labelForAttribute(fact.attribute)} occur?`;
+  }
+
   return createBaseDraft(
     fact,
     blueprint,
-    `When did ${fact.entity} reach the milestone described by the verified fact?`,
+    question,
     fact.value,
     difficulty
   );
