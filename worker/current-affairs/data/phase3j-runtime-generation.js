@@ -185,7 +185,7 @@ function enrichRecentHistory(recentHistory, knownQuestions) {
       ...history,
       questionFamilyId:
         history.questionFamilyId ||
-        (match ? match[1] : undefined),
+        (match ? `ca-family:${match[1]}` : undefined),
     };
   });
 }
