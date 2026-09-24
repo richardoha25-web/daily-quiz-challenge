@@ -42,7 +42,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "updatedAt": "2026-09-24"
   },
   {
-    "questionId": "ca:ng-state-anambra:direct:easy",
+    "questionId": "ca:ng-state-anambra:reverse:easy",
     "questionFamilyId": "ca-family:entity-geography:anambra-state-ng-state-anambra",
     "conceptId": "ca:entity:ng-state-anambra",
     "factIds": [
@@ -76,7 +76,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "updatedAt": "2026-09-24"
   },
   {
-    "questionId": "ca:ng-state-kano:direct:easy",
+    "questionId": "ca:ng-state-kano:reverse:easy",
     "questionFamilyId": "ca-family:entity-geography:kano-state-ng-state-kano",
     "conceptId": "ca:entity:ng-state-kano",
     "factIds": [
@@ -110,7 +110,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "updatedAt": "2026-09-24"
   },
   {
-    "questionId": "ca:ng-state-lagos:direct:easy",
+    "questionId": "ca:ng-state-lagos:identification:easy",
     "questionFamilyId": "ca-family:entity-geography:lagos-state-ng-state-lagos",
     "conceptId": "ca:entity:ng-state-lagos",
     "factIds": [
@@ -144,7 +144,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "updatedAt": "2026-09-24"
   },
   {
-    "questionId": "ca:ng-state-rivers:direct:easy",
+    "questionId": "ca:ng-state-rivers:identification:easy",
     "questionFamilyId": "ca-family:entity-geography:rivers-state-ng-state-rivers",
     "conceptId": "ca:entity:ng-state-rivers",
     "factIds": [
@@ -866,7 +866,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "updatedAt": "2026-09-24"
   },
   {
-    "questionId": "ca:world-who-headquarters:direct:medium",
+    "questionId": "ca:world-who-headquarters:reverse:medium",
     "questionFamilyId": "ca-family:health:world-health-organization-world-who-headquarters",
     "conceptId": "ca:entity:world-who-headquarters",
     "factIds": [
@@ -900,7 +900,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "updatedAt": "2026-09-24"
   },
   {
-    "questionId": "ca:sports-fifa-2026-final:direct:medium",
+    "questionId": "ca:sports-fifa-2026-final:reverse:medium",
     "questionFamilyId": "ca-family:football:fifa-world-cup-2026-sports-fifa-2026-final",
     "conceptId": "ca:entity:sports-fifa-2026-final",
     "factIds": [
@@ -934,7 +934,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "updatedAt": "2026-09-24"
   },
   {
-    "questionId": "ca:science-artemis-ii-type:direct:medium",
+    "questionId": "ca:science-artemis-ii-type:identification:medium",
     "questionFamilyId": "ca-family:space:artemis-ii-science-artemis-ii-type",
     "conceptId": "ca:entity:science-artemis-ii-type",
     "factIds": [
@@ -968,7 +968,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "updatedAt": "2026-09-24"
   },
   {
-    "questionId": "ca:science-artemis-ii-duration:direct:medium",
+    "questionId": "ca:science-artemis-ii-duration:identification:medium",
     "questionFamilyId": "ca-family:space:artemis-ii-science-artemis-ii-duration",
     "conceptId": "ca:entity:science-artemis-ii-duration",
     "factIds": [
