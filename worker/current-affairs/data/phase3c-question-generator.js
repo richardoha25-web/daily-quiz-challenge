@@ -34,7 +34,6 @@ const ATTRIBUTE_LABELS = {
   capital: "capital",
   currentHolder: "current holder",
   federalUnits: "number of federal units",
-  localGovernmentAreas: "number of local government areas",
   members: "number of members",
   membershipCount: "number of members",
   localGovernmentAreas: "local government areas",
@@ -157,11 +156,18 @@ function createBaseDraft(fact, blueprint, question, correctAnswer, difficulty) {
           : String(fact.attribute || "").toLowerCase() === "members" ||
               String(fact.attribute || "").toLowerCase() === "membershipcount"
             ? `${fact.entity} has ${fact.value} member states.`
-            : String(fact.attribute || "").toLowerCase() === "founded"
-              ? `${fact.entity} was founded in ${fact.value}.`
-              : String(fact.attribute || "").toLowerCase() === "established"
-                ? `${fact.entity} was established in ${fact.value}.`
-                : "",
+            : String(fact.attribute || "").toLowerCase() === "localgovernmentareas"
+              ? `${fact.entity} has ${fact.value} local government areas.`
+              : String(fact.attribute || "").toLowerCase() === "teams" ||
+                  String(fact.attribute || "").toLowerCase() === "participatingteams"
+                ? `${fact.entity} will feature ${fact.value} teams.`
+                : String(fact.attribute || "").toLowerCase() === "hostcountries"
+                  ? `${fact.entity} will be hosted by ${fact.value}.`
+                  : String(fact.attribute || "").toLowerCase() === "founded"
+                    ? `${fact.entity} was founded in ${fact.value}.`
+                    : String(fact.attribute || "").toLowerCase() === "established"
+                      ? `${fact.entity} was established in ${fact.value}.`
+                      : "",
     accessTier: "FREE",
     status: "generated",
     temporalContext: getTemporalContext(fact),
