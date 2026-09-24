@@ -896,3 +896,26 @@ The Question Bank remains separate from user `recent_history`. No billing, AdMob
 The current implementation is storage-independent; no new paid database infrastructure has been introduced. This preserves the option to add persistent storage later without changing the question contract.
 
 **Current Affairs Phase 3 status: 3A–3H complete. Next: 3I Worker Integration, followed by 3J Debug Testing and 3K Stabilization.**
+
+
+## Current Affairs Phase 3I-A / 3I-B checkpoint — 24 September 2026
+
+Worker integration and the first real Current Affairs Question Bank serving population are now connected.
+
+3I-A:
+- `worker/current-affairs/index.js` is the dedicated Current Affairs Worker boundary.
+- `worker/index.js` routes `current_affairs` into that boundary.
+- The Worker consumes active Question Bank records through Phase 3G rather than generating questions at request time.
+- The public response exposes only playable quiz fields.
+- NewsData remains isolated from Current Affairs.
+
+3I-B:
+- The first bounded serving Question Bank contains 29 active FREE records.
+- Distribution is 12 Easy / 13 Medium / 4 Hard.
+- Stable IDs, families, concepts, provenance, freshness and lifecycle metadata are retained.
+- Variant diversity was balanced so Phase 3G can produce its intended 10-question distribution.
+- A real-bank audit/readiness test now covers Question Bank contract integrity and 3G assembly.
+
+The bank is deliberately not described as the final 86-fact population. It is the first controlled serving population for end-to-end testing.
+
+**Current Affairs Phase 3 status: 3A–3H complete; 3I-A complete; 3I-B serving seed/readiness complete. Next: 3J Debug APK Testing → 3K Stabilization.**
