@@ -200,13 +200,24 @@ function generateReverse(fact, blueprint, difficulty) {
 }
 
 function generateIdentification(fact, blueprint, difficulty) {
-  const attribute = labelForAttribute(fact.attribute);
+  const attribute = String(fact.attribute || "").toLowerCase();
   const temporal = getTemporalContext(fact);
+  let question;
+
+  if (attribute === "capital") {
+    question = `Which state has ${fact.value} as its capital${temporal}?`;
+  } else if (attribute === "headquarters") {
+    question = `Which organization has its headquarters in ${fact.value}${temporal}?`;
+  } else if (attribute === "members" || attribute === "membershipcount") {
+    question = `Which organization has ${fact.value} member states${temporal}?`;
+  } else {
+    question = `Which entity has the ${labelForAttribute(fact.attribute)} of ${fact.value}${temporal}?`;
+  }
 
   return createBaseDraft(
     fact,
     blueprint,
-    `Which entity has the ${attribute} of ${fact.value}${temporal}?`,
+    question,
     fact.entity,
     difficulty
   );
