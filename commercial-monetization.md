@@ -1490,3 +1490,17 @@ The Current Affairs Question Bank is a **content-management layer**, not the bil
 Before Worker integration, the project will implement Question Bank storage and management while keeping content records separate from billing. The bank will preserve question identity, family/concept relationships, validation status, provenance, freshness metadata and future access-tier metadata.
 
 **No billing implementation is being added in this stage.** The immediate goal is a reliable, auditable Question Bank that can later support monetized content without redesigning the underlying question records.
+
+## Current Affairs Phase 3H commercial-alignment checkpoint — 24 September 2026
+
+Phase 3H Question Bank Storage & Management is complete through 3H-E. The Question Bank preserves future `FREE`, `PREMIUM` and `SPECIAL_PACK` access-tier metadata without implementing billing, subscriptions, purchases or entitlement enforcement.
+
+The Question Bank manager treats access tier as content metadata. Phase 3G can filter eligible tiers, but tier eligibility is not proof of purchase and must later be supplied by the centralized entitlement architecture.
+
+Commercial protections remain unchanged:
+- Premium questions must pass the same factual, freshness, provenance, distractor and anti-duplication standards as free questions.
+- Billing logic must not be embedded in Question Bank records or generation code.
+- The storage-independent design avoids unnecessary paid infrastructure at this stage.
+- Future persistent storage or entitlement services can be introduced without changing the core question identity/provenance contract.
+
+**Commercial status: Phase 3H alignment complete; billing and entitlement implementation remain future work.**
