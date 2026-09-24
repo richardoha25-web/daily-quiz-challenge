@@ -938,6 +938,164 @@ export function populateQuestionBank({
   };
 }
 
+/**
+ * Phase 3H-D — Question Bank audit system.
+ * Read-only: it never silently repairs or activates questions.
+ */
+function auditFreshness(record, factsById) {
+  const issues = [];
+  for (const factId of record.factIds || []) {
+    const fact = factsById.get(factId);
+    if (!fact) {
+      issues.push({ type: "missing_fact_reference", factId });
+      continue;
+    }
+    if (fact.status !== "active") {
+      issues.push({ type: "inactive_fact_dependency", factId });
+    }
+    const dynamic =
+      fact.attribute === "currentHolder" ||
+      fact.attribute === "currentOfficeholder" ||
+      fact.attribute === "currentDirectorGeneral" ||
+      fact.validFrom || fact.validTo || fact.referencePeriod || fact.datasetVintage;
+    if (dynamic && !(
+      fact.lastVerified || fact.referencePeriod || fact.datasetVintage ||
+      fact.validFrom || fact.validTo
+    )) {
+      issues.push({ type: "missing_freshness_metadata", factId });
+    }
+  }
+  return issues;
+}
+
+function auditReferences(record, factsById, sourceIds) {
+  const issues = [];
+  for (const factId of record.factIds || []) {
+    if (!factsById.has(factId)) issues.push({ type: "missing_fact_reference", factId });
+  }
+  for (const sourceId of record.sourceIds || []) {
+    if (sourceIds.size && !sourceIds.has(sourceId)) {
+      issues.push({ type: "missing_source_reference", sourceId });
+    }
+  }
+  if (!record.factIds?.length) issues.push({ type: "missing_fact_provenance" });
+  if (!record.sourceIds?.length) issues.push({ type: "missing_source_provenance" });
+  return issues;
+}
+
+/**
+ * Audit a Question Bank without mutating it.
+ *
+ * facts is strongly recommended. sources is optional because the source
+ * registry is not owned by the Question Bank layer.
+ */
+export function auditQuestionBankRecords({
+  records = [],
+  facts = [],
+  sources = [],
+  checkDuplicates = true,
+  wordingThreshold = 0.82,
+} = {}) {
+  const issues = [];
+  const factsById = new Map(facts.filter(Boolean).map((fact) => [fact.id, fact]));
+  const sourceIds = new Set(
+    sources.filter(Boolean).map((source) => source.id).filter(Boolean)
+  );
+  const seenIds = new Set();
+  const familyMap = new Map();
+
+  for (const record of records) {
+    const validation = validateQuestionBankRecord(record);
+    if (!validation.valid) {
+      issues.push({
+        questionId: record?.questionId || null,
+        category: "contract",
+        errors: validation.errors,
+      });
+    }
+
+    if (record?.questionId) {
+      if (seenIds.has(record.questionId)) {
+        issues.push({
+          questionId: record.questionId,
+          category: "identity",
+          errors: ["duplicate_question_id"],
+        });
+      }
+      seenIds.add(record.questionId);
+    }
+
+    for (const issue of auditReferences(record, factsById, sourceIds)) {
+      issues.push({
+        questionId: record?.questionId || null,
+        category: "provenance",
+        ...issue,
+      });
+    }
+
+    for (const issue of auditFreshness(record, factsById)) {
+      issues.push({
+        questionId: record?.questionId || null,
+        category: "freshness",
+        ...issue,
+      });
+    }
+
+    if (record?.questionFamilyId) {
+      if (!familyMap.has(record.questionFamilyId)) familyMap.set(record.questionFamilyId, []);
+      familyMap.get(record.questionFamilyId).push(record.questionId);
+    }
+  }
+
+  for (const [familyId, questionIds] of familyMap) {
+    if (questionIds.length > 1) {
+      issues.push({
+        questionId: questionIds[0],
+        category: "family",
+        familyId,
+        relatedQuestionIds: questionIds,
+        errors: ["multiple_questions_in_same_family"],
+      });
+    }
+  }
+
+  if (checkDuplicates && records.length > 1) {
+    const duplicateAudit = auditQuestionBank({
+      questions: records,
+      wordingThreshold,
+    });
+    for (const duplicate of duplicateAudit.duplicates) {
+      issues.push({
+        questionId: duplicate.questionId,
+        category: "duplicate",
+        errors: [duplicate.type],
+        matches: duplicate.matches,
+      });
+    }
+    for (const possible of duplicateAudit.possibleDuplicates) {
+      issues.push({
+        questionId: possible.questionId,
+        category: "possible_duplicate",
+        errors: ["possible_semantic_duplicate"],
+        matches: possible.matches,
+        similarity: possible.similarity,
+      });
+    }
+  }
+
+  const byCategory = {};
+  for (const issue of issues) {
+    byCategory[issue.category] = (byCategory[issue.category] || 0) + 1;
+  }
+
+  return {
+    valid: issues.length === 0,
+    counts: { records: records.length, issues: issues.length },
+    byCategory,
+    issues,
+  };
+}
+
 export default {
   QUESTION_BANK_VERSION,
   QUESTION_BANK_LIFECYCLE,
