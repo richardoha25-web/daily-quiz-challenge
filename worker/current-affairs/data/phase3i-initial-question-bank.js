@@ -1,12 +1,10 @@
 /**
  * Phase 3I-B — audited Current Affairs serving Question Bank seed.
  *
- * These records are the first controlled serving population for 3I-A.
- * They are derived only from Phase 2 verified facts and carry provenance,
- * temporal metadata and explicit lifecycle/access metadata.
- *
- * This is a deliberately bounded seed. Phase 3I-B can expand it with the
- * remaining Phase 2 facts after the same generation/quality/duplicate gates.
+ * Bounded first serving population derived from Phase 2 verified facts.
+ * Each record carries stable identity, provenance, freshness metadata,
+ * lifecycle state and access-tier metadata required by the Question Bank
+ * contract. NewsData is not involved.
  */
 export const CURRENT_AFFAIRS_QUESTION_BANK = [
   {
@@ -24,7 +22,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "easy",
     "domain": "nigeria",
     "topic": "geography",
-    "question": "What is the verified value associated with Abia State?",
+    "question": "What is the capital of Abia State?",
     "options": [
       "Umuahia",
       "Awka",
@@ -32,7 +30,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Uyo"
     ],
     "correctAnswer": "Umuahia",
-    "explanation": "Verified fact: Abia State — Umuahia. Source record: ng-state-abia.",
+    "explanation": "Verified fact: ng-state-abia — Umuahia. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -58,7 +56,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "easy",
     "domain": "nigeria",
     "topic": "geography",
-    "question": "What is the verified value associated with Anambra State?",
+    "question": "What is the capital of Anambra State?",
     "options": [
       "Awka",
       "Umuahia",
@@ -66,7 +64,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Owerri"
     ],
     "correctAnswer": "Awka",
-    "explanation": "Verified fact: Anambra State — Awka. Source record: ng-state-anambra.",
+    "explanation": "Verified fact: ng-state-anambra — Awka. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -92,7 +90,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "easy",
     "domain": "nigeria",
     "topic": "geography",
-    "question": "What is the verified value associated with Kano State?",
+    "question": "What is the capital of Kano State?",
     "options": [
       "Kano",
       "Kaduna",
@@ -100,7 +98,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Katsina"
     ],
     "correctAnswer": "Kano",
-    "explanation": "Verified fact: Kano State — Kano. Source record: ng-state-kano.",
+    "explanation": "Verified fact: ng-state-kano — Kano. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -126,7 +124,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "easy",
     "domain": "nigeria",
     "topic": "geography",
-    "question": "What is the verified value associated with Lagos State?",
+    "question": "What is the capital of Lagos State?",
     "options": [
       "Ikeja",
       "Abeokuta",
@@ -134,7 +132,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Akure"
     ],
     "correctAnswer": "Ikeja",
-    "explanation": "Verified fact: Lagos State — Ikeja. Source record: ng-state-lagos.",
+    "explanation": "Verified fact: ng-state-lagos — Ikeja. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -160,7 +158,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "easy",
     "domain": "nigeria",
     "topic": "geography",
-    "question": "What is the verified value associated with Rivers State?",
+    "question": "What is the capital of Rivers State?",
     "options": [
       "Port Harcourt",
       "Calabar",
@@ -168,7 +166,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Benin City"
     ],
     "correctAnswer": "Port Harcourt",
-    "explanation": "Verified fact: Rivers State — Port Harcourt. Source record: ng-state-rivers.",
+    "explanation": "Verified fact: ng-state-rivers — Port Harcourt. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -194,7 +192,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "easy",
     "domain": "africa",
     "topic": "international-organizations",
-    "question": "What is the verified value associated with Nigeria?",
+    "question": "What is Nigeria's status in the African Union?",
     "options": [
       "Member state",
       "Observer state",
@@ -202,7 +200,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Non-member"
     ],
     "correctAnswer": "Member state",
-    "explanation": "Verified fact: Nigeria — Member state. Source record: af-au-nigeria-member.",
+    "explanation": "Verified fact: af-au-nigeria-member — Member state. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -229,7 +227,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "easy",
     "domain": "africa",
     "topic": "international-organizations",
-    "question": "What is the verified value associated with ECOWAS?",
+    "question": "Where is the headquarters of ECOWAS located?",
     "options": [
       "Abuja, Nigeria",
       "Accra, Ghana",
@@ -237,7 +235,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Dakar, Senegal"
     ],
     "correctAnswer": "Abuja, Nigeria",
-    "explanation": "Verified fact: ECOWAS — Abuja, Nigeria. Source record: af-ecowas-headquarters.",
+    "explanation": "Verified fact: af-ecowas-headquarters — Abuja, Nigeria. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -263,7 +261,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "easy",
     "domain": "science-technology",
     "topic": "space",
-    "question": "What is the verified value associated with International Space Station?",
+    "question": "Which group of organizations is listed as international partners of the International Space Station?",
     "options": [
       "NASA, Roscosmos, JAXA, ESA and the Canadian Space Agency",
       "NASA, ESA and ISRO only",
@@ -271,7 +269,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "ESA and Roscosmos only"
     ],
     "correctAnswer": "NASA, Roscosmos, JAXA, ESA and the Canadian Space Agency",
-    "explanation": "Verified fact: International Space Station — NASA, Roscosmos, JAXA, ESA and the Canadian Space Agency. Source record: science-iss-partners.",
+    "explanation": "Verified fact: science-iss-partners — NASA, Roscosmos, JAXA, ESA and the Canadian Space Agency. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -297,7 +295,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "medium",
     "domain": "africa",
     "topic": "international-organizations",
-    "question": "Which verified fact is associated with African Union?",
+    "question": "How many member states does the African Union have?",
     "options": [
       55,
       48,
@@ -305,7 +303,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       60
     ],
     "correctAnswer": 55,
-    "explanation": "Verified fact: African Union — 55. Source record: af-au-member-count.",
+    "explanation": "Verified fact: af-au-member-count — 55. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -331,7 +329,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "medium",
     "domain": "africa",
     "topic": "international-organizations",
-    "question": "Which verified fact is associated with ECOWAS?",
+    "question": "How many member states does ECOWAS have according to the verified 2025 membership record?",
     "options": [
       12,
       15,
@@ -339,45 +337,11 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       10
     ],
     "correctAnswer": 12,
-    "explanation": "Verified fact: ECOWAS — 12. Source record: af-ecowas-member-count.",
+    "explanation": "Verified fact: af-ecowas-member-count — 12. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
       "validFrom": "2025-01-29",
-      "lastVerified": "2026-09-23"
-    },
-    "generatorVersion": "3I-B.1",
-    "lastValidated": "2026-09-24",
-    "createdAt": "2026-09-24",
-    "updatedAt": "2026-09-24"
-  },
-  {
-    "questionId": "ca:af-ecowas-headquarters:direct:medium",
-    "questionFamilyId": "ca-family:entity-international-organizations:ecowas-af-ecowas-headquarters",
-    "conceptId": "ca:entity:af-ecowas-headquarters",
-    "factIds": [
-      "af-ecowas-headquarters"
-    ],
-    "sourceIds": [
-      "ecowas-member-states"
-    ],
-    "variantType": "direct",
-    "blueprintId": "direct_attribute",
-    "difficulty": "medium",
-    "domain": "africa",
-    "topic": "international-organizations",
-    "question": "Which verified fact is associated with ECOWAS?",
-    "options": [
-      "Abuja, Nigeria",
-      "Accra, Ghana",
-      "Lagos, Nigeria",
-      "Dakar, Senegal"
-    ],
-    "correctAnswer": "Abuja, Nigeria",
-    "explanation": "Verified fact: ECOWAS — Abuja, Nigeria. Source record: af-ecowas-headquarters.",
-    "status": "active",
-    "accessTier": "FREE",
-    "temporalContext": {
       "lastVerified": "2026-09-23"
     },
     "generatorVersion": "3I-B.1",
@@ -400,7 +364,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "medium",
     "domain": "nigeria",
     "topic": "government",
-    "question": "Which verified fact is associated with President of Nigeria?",
+    "question": "Who is the current President of Nigeria according to the fact verified on 23 September 2026?",
     "options": [
       "Bola Ahmed Tinubu",
       "Kashim Shettima",
@@ -408,7 +372,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Tajudeen Abbas"
     ],
     "correctAnswer": "Bola Ahmed Tinubu",
-    "explanation": "Verified fact: President of Nigeria — Bola Ahmed Tinubu. Source record: ng-president.",
+    "explanation": "Verified fact: ng-president — Bola Ahmed Tinubu. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -435,7 +399,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "medium",
     "domain": "nigeria",
     "topic": "government",
-    "question": "Which verified fact is associated with Vice President of Nigeria?",
+    "question": "Who is the current Vice President of Nigeria according to the fact verified on 23 September 2026?",
     "options": [
       "Kashim Shettima",
       "Bola Ahmed Tinubu",
@@ -443,7 +407,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Benjamin Kalu"
     ],
     "correctAnswer": "Kashim Shettima",
-    "explanation": "Verified fact: Vice President of Nigeria — Kashim Shettima. Source record: ng-vice-president.",
+    "explanation": "Verified fact: ng-vice-president — Kashim Shettima. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -470,7 +434,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "medium",
     "domain": "nigeria",
     "topic": "national-assembly",
-    "question": "Which verified fact is associated with President of the Senate?",
+    "question": "Who is the current President of the Senate of Nigeria according to the fact verified on 23 September 2026?",
     "options": [
       "Godswill Akpabio",
       "Tajudeen Abbas",
@@ -478,7 +442,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Kashim Shettima"
     ],
     "correctAnswer": "Godswill Akpabio",
-    "explanation": "Verified fact: President of the Senate — Godswill Akpabio. Source record: ng-senate-president.",
+    "explanation": "Verified fact: ng-senate-president — Godswill Akpabio. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -505,7 +469,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "medium",
     "domain": "nigeria",
     "topic": "national-assembly",
-    "question": "Which verified fact is associated with Speaker of the House of Representatives?",
+    "question": "Who is the current Speaker of the House of Representatives according to the fact verified on 23 September 2026?",
     "options": [
       "Tajudeen Abbas",
       "Godswill Akpabio",
@@ -513,7 +477,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Bola Ahmed Tinubu"
     ],
     "correctAnswer": "Tajudeen Abbas",
-    "explanation": "Verified fact: Speaker of the House of Representatives — Tajudeen Abbas. Source record: ng-house-speaker.",
+    "explanation": "Verified fact: ng-house-speaker — Tajudeen Abbas. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -540,7 +504,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "medium",
     "domain": "nigeria",
     "topic": "economy",
-    "question": "Which verified fact is associated with Governor of the Central Bank of Nigeria?",
+    "question": "Who is the current Governor of the Central Bank of Nigeria according to the fact verified on 23 September 2026?",
     "options": [
       "Olayemi Cardoso",
       "Godswill Akpabio",
@@ -548,7 +512,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "Kashim Shettima"
     ],
     "correctAnswer": "Olayemi Cardoso",
-    "explanation": "Verified fact: Governor of the Central Bank of Nigeria — Olayemi Cardoso. Source record: ng-cbn-governor.",
+    "explanation": "Verified fact: ng-cbn-governor — Olayemi Cardoso. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -575,7 +539,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "hard",
     "domain": "africa",
     "topic": "international-organizations",
-    "question": "When was the milestone associated with African Union recorded?",
+    "question": "In what year was the African Union founded?",
     "options": [
       2002,
       1948,
@@ -583,7 +547,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       1963
     ],
     "correctAnswer": 2002,
-    "explanation": "Verified fact: African Union — 2002. Source record: af-au-founded.",
+    "explanation": "Verified fact: af-au-founded — 2002. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -609,7 +573,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "hard",
     "domain": "international-organizations",
     "topic": "health",
-    "question": "When was the milestone associated with World Health Organization recorded?",
+    "question": "In what year was the World Health Organization founded?",
     "options": [
       1948,
       1944,
@@ -617,7 +581,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       1963
     ],
     "correctAnswer": 1948,
-    "explanation": "Verified fact: World Health Organization — 1948. Source record: world-who-founded.",
+    "explanation": "Verified fact: world-who-founded — 1948. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -643,7 +607,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "hard",
     "domain": "economy",
     "topic": "international-organizations",
-    "question": "When was the milestone associated with International Monetary Fund recorded?",
+    "question": "In what year was the International Monetary Fund established?",
     "options": [
       1944,
       1948,
@@ -651,7 +615,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       2002
     ],
     "correctAnswer": 1944,
-    "explanation": "Verified fact: International Monetary Fund — 1944. Source record: world-imf-founded.",
+    "explanation": "Verified fact: world-imf-founded — 1944. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
@@ -677,7 +641,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "hard",
     "domain": "science-technology",
     "topic": "space",
-    "question": "When was the milestone associated with Artemis II recorded?",
+    "question": "What is the verified launch date recorded for Artemis II?",
     "options": [
       "2026-04-01",
       "2026-03-01",
@@ -685,7 +649,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
       "2027-04-01"
     ],
     "correctAnswer": "2026-04-01",
-    "explanation": "Verified fact: Artemis II — 2026-04-01. Source record: science-artemis-ii-launch.",
+    "explanation": "Verified fact: science-artemis-ii-launch — 2026-04-01. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
     "temporalContext": {
