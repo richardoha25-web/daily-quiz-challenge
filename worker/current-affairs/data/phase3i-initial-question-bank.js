@@ -1,8 +1,8 @@
 /**
  * Phase 3I-B — audited Current Affairs serving Question Bank seed.
  *
- * Bounded first serving population derived from Phase 2 verified facts.
- * Each record carries stable identity, provenance, freshness metadata,
+ * Bounded serving population derived from Phase 2 verified facts.
+ * Every record carries stable identity, provenance, freshness metadata,
  * lifecycle state and access-tier metadata required by the Question Bank
  * contract. NewsData is not involved.
  */
@@ -654,6 +654,346 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "accessTier": "FREE",
     "temporalContext": {
       "validFrom": "2026-04-01",
+      "lastVerified": "2026-09-23"
+    },
+    "generatorVersion": "3I-B.1",
+    "lastValidated": "2026-09-24",
+    "createdAt": "2026-09-24",
+    "updatedAt": "2026-09-24"
+  },
+  {
+    "questionId": "ca:ng-fct-capital:direct:easy",
+    "questionFamilyId": "ca-family:geography:federal-capital-territory-ng-fct-capital",
+    "conceptId": "ca:entity:ng-fct-capital",
+    "factIds": [
+      "ng-fct-capital"
+    ],
+    "sourceIds": [
+      "inec-state-offices"
+    ],
+    "variantType": "direct",
+    "blueprintId": "direct_attribute",
+    "difficulty": "easy",
+    "domain": "nigeria",
+    "topic": "geography",
+    "question": "What is the verified capital associated with Federal Capital Territory?",
+    "options": [
+      "Abuja",
+      "Lagos",
+      "Kano",
+      "Ibadan"
+    ],
+    "correctAnswer": "Abuja",
+    "explanation": "Verified fact: ng-fct-capital — Abuja. Source: Phase 2 verified fact record.",
+    "status": "active",
+    "accessTier": "FREE",
+    "temporalContext": {
+      "lastVerified": "2026-09-23"
+    },
+    "generatorVersion": "3I-B.1",
+    "lastValidated": "2026-09-24",
+    "createdAt": "2026-09-24",
+    "updatedAt": "2026-09-24"
+  },
+  {
+    "questionId": "ca:ng-lga-count:direct:easy",
+    "questionFamilyId": "ca-family:government:nigeria-ng-lga-count",
+    "conceptId": "ca:entity:ng-lga-count",
+    "factIds": [
+      "ng-lga-count"
+    ],
+    "sourceIds": [
+      "inec-state-offices"
+    ],
+    "variantType": "direct",
+    "blueprintId": "direct_attribute",
+    "difficulty": "easy",
+    "domain": "nigeria",
+    "topic": "government",
+    "question": "What is the verified local government areas associated with Nigeria?",
+    "options": [
+      774,
+      810,
+      738,
+      824
+    ],
+    "correctAnswer": 774,
+    "explanation": "Verified fact: ng-lga-count — 774. Source: Phase 2 verified fact record.",
+    "status": "active",
+    "accessTier": "FREE",
+    "temporalContext": {
+      "lastVerified": "2026-09-23"
+    },
+    "generatorVersion": "3I-B.1",
+    "lastValidated": "2026-09-24",
+    "createdAt": "2026-09-24",
+    "updatedAt": "2026-09-24"
+  },
+  {
+    "questionId": "ca:sports-fifa-2026-teams:direct:easy",
+    "questionFamilyId": "ca-family:football:fifa-world-cup-2026-sports-fifa-2026-teams",
+    "conceptId": "ca:entity:sports-fifa-2026-teams",
+    "factIds": [
+      "sports-fifa-2026-teams"
+    ],
+    "sourceIds": [
+      "fifa-world-cup-2026"
+    ],
+    "variantType": "direct",
+    "blueprintId": "direct_attribute",
+    "difficulty": "easy",
+    "domain": "sports",
+    "topic": "football",
+    "question": "What is the verified participating teams associated with FIFA World Cup 2026?",
+    "options": [
+      48,
+      32,
+      40,
+      64
+    ],
+    "correctAnswer": 48,
+    "explanation": "Verified fact: sports-fifa-2026-teams — 48. Source: Phase 2 verified fact record.",
+    "status": "active",
+    "accessTier": "FREE",
+    "temporalContext": {
+      "lastVerified": "2026-09-23"
+    },
+    "generatorVersion": "3I-B.1",
+    "lastValidated": "2026-09-24",
+    "createdAt": "2026-09-24",
+    "updatedAt": "2026-09-24"
+  },
+  {
+    "questionId": "ca:sports-fifa-2026-hosts:direct:easy",
+    "questionFamilyId": "ca-family:football:fifa-world-cup-2026-sports-fifa-2026-hosts",
+    "conceptId": "ca:entity:sports-fifa-2026-hosts",
+    "factIds": [
+      "sports-fifa-2026-hosts"
+    ],
+    "sourceIds": [
+      "fifa-world-cup-2026"
+    ],
+    "variantType": "direct",
+    "blueprintId": "direct_attribute",
+    "difficulty": "easy",
+    "domain": "sports",
+    "topic": "football",
+    "question": "What is the verified host countries associated with FIFA World Cup 2026?",
+    "options": [
+      "Canada, Mexico and the United States",
+      "Brazil, Argentina and Chile",
+      "Spain, Portugal and Morocco",
+      "France, Germany and Italy"
+    ],
+    "correctAnswer": "Canada, Mexico and the United States",
+    "explanation": "Verified fact: sports-fifa-2026-hosts — Canada, Mexico and the United States. Source: Phase 2 verified fact record.",
+    "status": "active",
+    "accessTier": "FREE",
+    "temporalContext": {
+      "lastVerified": "2026-09-23"
+    },
+    "generatorVersion": "3I-B.1",
+    "lastValidated": "2026-09-24",
+    "createdAt": "2026-09-24",
+    "updatedAt": "2026-09-24"
+  },
+  {
+    "questionId": "ca:science-iss-continuous-occupation:direct:easy",
+    "questionFamilyId": "ca-family:space:international-space-station-science-iss-continuous-occupation",
+    "conceptId": "ca:entity:science-iss-continuous-occupation",
+    "factIds": [
+      "science-iss-continuous-occupation"
+    ],
+    "sourceIds": [
+      "nasa"
+    ],
+    "variantType": "direct",
+    "blueprintId": "direct_attribute",
+    "difficulty": "easy",
+    "domain": "science-technology",
+    "topic": "space",
+    "question": "What is the verified continuous human occupation since associated with International Space Station?",
+    "options": [
+      "November 2000",
+      "January 1998",
+      "July 2005",
+      "December 2010"
+    ],
+    "correctAnswer": "November 2000",
+    "explanation": "Verified fact: science-iss-continuous-occupation — November 2000. Source: Phase 2 verified fact record.",
+    "status": "active",
+    "accessTier": "FREE",
+    "temporalContext": {
+      "lastVerified": "2026-09-23"
+    },
+    "generatorVersion": "3I-B.1",
+    "lastValidated": "2026-09-24",
+    "createdAt": "2026-09-24",
+    "updatedAt": "2026-09-24"
+  },
+  {
+    "questionId": "ca:world-who-member-count:direct:medium",
+    "questionFamilyId": "ca-family:health:world-health-organization-world-who-member-count",
+    "conceptId": "ca:entity:world-who-member-count",
+    "factIds": [
+      "world-who-member-count"
+    ],
+    "sourceIds": [
+      "who-about"
+    ],
+    "variantType": "direct",
+    "blueprintId": "direct_attribute",
+    "difficulty": "medium",
+    "domain": "international-organizations",
+    "topic": "health",
+    "question": "What is the verified member states associated with World Health Organization?",
+    "options": [
+      194,
+      193,
+      195,
+      191
+    ],
+    "correctAnswer": 194,
+    "explanation": "Verified fact: world-who-member-count — 194. Source: Phase 2 verified fact record.",
+    "status": "active",
+    "accessTier": "FREE",
+    "temporalContext": {
+      "lastVerified": "2026-09-23"
+    },
+    "generatorVersion": "3I-B.1",
+    "lastValidated": "2026-09-24",
+    "createdAt": "2026-09-24",
+    "updatedAt": "2026-09-24"
+  },
+  {
+    "questionId": "ca:world-who-headquarters:direct:medium",
+    "questionFamilyId": "ca-family:health:world-health-organization-world-who-headquarters",
+    "conceptId": "ca:entity:world-who-headquarters",
+    "factIds": [
+      "world-who-headquarters"
+    ],
+    "sourceIds": [
+      "who-about"
+    ],
+    "variantType": "direct",
+    "blueprintId": "direct_attribute",
+    "difficulty": "medium",
+    "domain": "international-organizations",
+    "topic": "health",
+    "question": "What is the verified headquarters associated with World Health Organization?",
+    "options": [
+      "Geneva, Switzerland",
+      "New York, United States",
+      "Paris, France",
+      "Rome, Italy"
+    ],
+    "correctAnswer": "Geneva, Switzerland",
+    "explanation": "Verified fact: world-who-headquarters — Geneva, Switzerland. Source: Phase 2 verified fact record.",
+    "status": "active",
+    "accessTier": "FREE",
+    "temporalContext": {
+      "lastVerified": "2026-09-23"
+    },
+    "generatorVersion": "3I-B.1",
+    "lastValidated": "2026-09-24",
+    "createdAt": "2026-09-24",
+    "updatedAt": "2026-09-24"
+  },
+  {
+    "questionId": "ca:sports-fifa-2026-final:direct:medium",
+    "questionFamilyId": "ca-family:football:fifa-world-cup-2026-sports-fifa-2026-final",
+    "conceptId": "ca:entity:sports-fifa-2026-final",
+    "factIds": [
+      "sports-fifa-2026-final"
+    ],
+    "sourceIds": [
+      "fifa-world-cup-2026"
+    ],
+    "variantType": "direct",
+    "blueprintId": "direct_attribute",
+    "difficulty": "medium",
+    "domain": "sports",
+    "topic": "football",
+    "question": "What is the verified final location associated with FIFA World Cup 2026?",
+    "options": [
+      "New York/New Jersey",
+      "Los Angeles",
+      "Mexico City",
+      "Toronto"
+    ],
+    "correctAnswer": "New York/New Jersey",
+    "explanation": "Verified fact: sports-fifa-2026-final — New York/New Jersey. Source: Phase 2 verified fact record.",
+    "status": "active",
+    "accessTier": "FREE",
+    "temporalContext": {
+      "lastVerified": "2026-09-23"
+    },
+    "generatorVersion": "3I-B.1",
+    "lastValidated": "2026-09-24",
+    "createdAt": "2026-09-24",
+    "updatedAt": "2026-09-24"
+  },
+  {
+    "questionId": "ca:science-artemis-ii-type:direct:medium",
+    "questionFamilyId": "ca-family:space:artemis-ii-science-artemis-ii-type",
+    "conceptId": "ca:entity:science-artemis-ii-type",
+    "factIds": [
+      "science-artemis-ii-type"
+    ],
+    "sourceIds": [
+      "nasa"
+    ],
+    "variantType": "direct",
+    "blueprintId": "direct_attribute",
+    "difficulty": "medium",
+    "domain": "science-technology",
+    "topic": "space",
+    "question": "What is the verified mission type associated with Artemis II?",
+    "options": [
+      "Crewed lunar flyby",
+      "Uncrewed Mars orbiter",
+      "Earth observation mission",
+      "Space station resupply"
+    ],
+    "correctAnswer": "Crewed lunar flyby",
+    "explanation": "Verified fact: science-artemis-ii-type — Crewed lunar flyby. Source: Phase 2 verified fact record.",
+    "status": "active",
+    "accessTier": "FREE",
+    "temporalContext": {
+      "lastVerified": "2026-09-23"
+    },
+    "generatorVersion": "3I-B.1",
+    "lastValidated": "2026-09-24",
+    "createdAt": "2026-09-24",
+    "updatedAt": "2026-09-24"
+  },
+  {
+    "questionId": "ca:science-artemis-ii-duration:direct:medium",
+    "questionFamilyId": "ca-family:space:artemis-ii-science-artemis-ii-duration",
+    "conceptId": "ca:entity:science-artemis-ii-duration",
+    "factIds": [
+      "science-artemis-ii-duration"
+    ],
+    "sourceIds": [
+      "nasa"
+    ],
+    "variantType": "direct",
+    "blueprintId": "direct_attribute",
+    "difficulty": "medium",
+    "domain": "science-technology",
+    "topic": "space",
+    "question": "What is the verified mission duration associated with Artemis II?",
+    "options": [
+      "9 days, 1 hour, 32 minutes",
+      "7 days, 12 hours",
+      "14 days, 6 hours",
+      "3 days, 18 hours"
+    ],
+    "correctAnswer": "9 days, 1 hour, 32 minutes",
+    "explanation": "Verified fact: science-artemis-ii-duration — 9 days, 1 hour, 32 minutes. Source: Phase 2 verified fact record.",
+    "status": "active",
+    "accessTier": "FREE",
+    "temporalContext": {
       "lastVerified": "2026-09-23"
     },
     "generatorVersion": "3I-B.1",
