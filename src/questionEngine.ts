@@ -251,6 +251,89 @@ export async function getQuizQuestions(
   }
 
   const recent = await readRecentIds(category).catch(() => new Set<string>());
+
+  // Current Affairs is assembled as one complete quiz by the Worker.
+  // This keeps family/concept/difficulty constraints global across all 10
+  // questions instead of making three independent difficulty requests.
+  if (category === 'current_affairs') {
+    const params = new URLSearchParams();
+    params.set('category', category);
+    params.set('difficulty', 'medium');
+    params.set('limit', String(count));
+    params.set('recentHistory', JSON.stringify(Array.from(recent)));
+
+    const url = workerUrlForCategory(category) + '/api/questions?' + params.toString();
+    const response = await fetch(url, {
+      headers: { Accept: 'application/json' },
+    });
+
+    const contentType = response.headers.get('content-type') || 'unknown';
+    const body = await response.text();
+    const preview = body.slice(0, 180).replace(/\s+/g, ' ').trim();
+
+    if (!response.ok) {
+      throw new Error(
+        'Question API returned ' +
+        response.status +
+        ' (' +
+        contentType +
+        ')' +
+        (preview ? ': ' + preview : '')
+      );
+    }
+
+    let data: any;
+    try {
+      data = JSON.parse(body);
+    } catch {
+      throw new Error(
+        'Question API returned non-JSON (' +
+        response.status +
+        ', ' +
+        contentType +
+        ')' +
+        (preview ? ': ' + preview : '')
+      );
+    }
+
+    if (!data?.ok || !Array.isArray(data.questions)) {
+      throw new Error('Question API returned an invalid response format.');
+    }
+
+    const finalQuestions = data.questions
+      .filter((q: any) =>
+        q &&
+        typeof q.id === 'string' &&
+        q.category === 'current_affairs' &&
+        typeof q.question === 'string' &&
+        Array.isArray(q.options) &&
+        q.options.length === 4 &&
+        typeof q.correctAnswer === 'string' &&
+        q.options.includes(q.correctAnswer)
+      )
+      .map((q: any) => ({
+        id: q.id,
+        category: 'current_affairs',
+        difficulty: q.difficulty,
+        question: q.question,
+        options: [...q.options],
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation || '',
+        source: q.source || 'Current Affairs Question Bank',
+        sourceId: q.id,
+        isRemote: true,
+        createdAt: q.createdAt || new Date().toISOString(),
+        updatedAt: q.updatedAt || new Date().toISOString(),
+      }));
+
+    if (finalQuestions.length < count) {
+      throw new Error('NOT_ENOUGH_FRESH_QUESTIONS:' + category);
+    }
+
+    await recordHistory(category, finalQuestions);
+    return finalQuestions.slice(0, count);
+  }
+
   const difficulties = ['easy', 'medium', 'hard'] as const;
   const wanted: Record<QuizQuestion['difficulty'], number> = {
     easy: 3,
