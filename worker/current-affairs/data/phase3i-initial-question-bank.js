@@ -364,7 +364,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "medium",
     "domain": "nigeria",
     "topic": "government",
-    "question": "Who is the current President of Nigeria according to the fact verified on 23 September 2026?",
+    "question": "Who is the current President of Nigeria as of 23 September 2026?",
     "options": [
       "Bola Ahmed Tinubu",
       "Kashim Shettima",
@@ -399,7 +399,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "medium",
     "domain": "nigeria",
     "topic": "government",
-    "question": "Who is the current Vice President of Nigeria according to the fact verified on 23 September 2026?",
+    "question": "Who is the current Vice President of Nigeria as of 23 September 2026?",
     "options": [
       "Kashim Shettima",
       "Bola Ahmed Tinubu",
@@ -434,7 +434,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "medium",
     "domain": "nigeria",
     "topic": "national-assembly",
-    "question": "Who is the current President of the Senate of Nigeria according to the fact verified on 23 September 2026?",
+    "question": "Who is the current President of the Senate of Nigeria as of 23 September 2026?",
     "options": [
       "Godswill Akpabio",
       "Tajudeen Abbas",
@@ -469,7 +469,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "medium",
     "domain": "nigeria",
     "topic": "national-assembly",
-    "question": "Who is the current Speaker of the House of Representatives according to the fact verified on 23 September 2026?",
+    "question": "Who is the current Speaker of the House of Representatives as of 23 September 2026?",
     "options": [
       "Tajudeen Abbas",
       "Godswill Akpabio",
@@ -504,7 +504,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "medium",
     "domain": "nigeria",
     "topic": "economy",
-    "question": "Who is the current Governor of the Central Bank of Nigeria according to the fact verified on 23 September 2026?",
+    "question": "Who is the current Governor of the Central Bank of Nigeria as of 23 September 2026?",
     "options": [
       "Olayemi Cardoso",
       "Godswill Akpabio",
