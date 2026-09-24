@@ -329,7 +329,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "medium",
     "domain": "africa",
     "topic": "international-organizations",
-    "question": "How many member states does ECOWAS have according to the verified 2025 membership record?",
+    "question": "How many member states did ECOWAS have in 2025?",
     "options": [
       12,
       15,
