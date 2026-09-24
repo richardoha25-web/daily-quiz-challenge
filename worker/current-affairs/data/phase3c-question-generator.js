@@ -34,9 +34,12 @@ const ATTRIBUTE_LABELS = {
   capital: "capital",
   currentHolder: "current holder",
   federalUnits: "number of federal units",
-  localGovernmentAreas: "number of local government areas",
   members: "number of members",
   membershipCount: "number of members",
+  localGovernmentAreas: "local government areas",
+  teams: "teams",
+  participatingTeams: "participating teams",
+  hostCountries: "host countries",
   founded: "founding date",
   established: "establishment date",
   created: "creation date",
@@ -92,7 +95,7 @@ function getTemporalContext(fact) {
   }
   if (fact.validFrom) return ` from ${fact.validFrom}`;
 
-  return ` (verified ${fact.lastVerified || "date not specified"})`;
+  return ` (information checked ${fact.lastVerified || "date not specified"})`;
 }
 
 function assertFactShape(fact) {
@@ -145,7 +148,26 @@ function createBaseDraft(fact, blueprint, question, correctAnswer, difficulty) {
     question,
     correctAnswer: normalizeText(correctAnswer),
     options: null,
-    explanation: "",
+    explanation:
+      String(fact.attribute || "").toLowerCase() === "capital"
+        ? `The capital of ${fact.entity} is ${fact.value}.`
+        : String(fact.attribute || "").toLowerCase() === "headquarters"
+          ? `${fact.entity} has its headquarters in ${fact.value}.`
+          : String(fact.attribute || "").toLowerCase() === "members" ||
+              String(fact.attribute || "").toLowerCase() === "membershipcount"
+            ? `${fact.entity} has ${fact.value} member states.`
+            : String(fact.attribute || "").toLowerCase() === "localgovernmentareas"
+              ? `${fact.entity} has ${fact.value} local government areas.`
+              : String(fact.attribute || "").toLowerCase() === "teams" ||
+                  String(fact.attribute || "").toLowerCase() === "participatingteams"
+                ? `${fact.entity} will feature ${fact.value} teams.`
+                : String(fact.attribute || "").toLowerCase() === "hostcountries"
+                  ? `${fact.entity} will be hosted by ${fact.value}.`
+                  : String(fact.attribute || "").toLowerCase() === "founded"
+                    ? `${fact.entity} was founded in ${fact.value}.`
+                    : String(fact.attribute || "").toLowerCase() === "established"
+                      ? `${fact.entity} was established in ${fact.value}.`
+                      : "",
     accessTier: "FREE",
     status: "generated",
     temporalContext: getTemporalContext(fact),
@@ -154,39 +176,76 @@ function createBaseDraft(fact, blueprint, question, correctAnswer, difficulty) {
 }
 
 function generateDirect(fact, blueprint, difficulty) {
-  const attribute = labelForAttribute(fact.attribute);
+  const attribute = String(fact.attribute || "").toLowerCase();
   const temporal = getTemporalContext(fact);
+
+  let question;
+  if (attribute === "capital") {
+    question = `What is the capital of ${fact.entity}${temporal}?`;
+  } else if (attribute === "members" || attribute === "membershipcount") {
+    question = `How many member states does ${fact.entity}${temporal} have?`;
+  } else if (attribute === "localgovernmentareas") {
+    question = `How many local government areas are there in ${fact.entity}${temporal}?`;
+  } else if (attribute === "teams" || attribute === "participatingteams") {
+    question = `How many teams will compete in ${fact.entity}${temporal}?`;
+  } else if (attribute === "hostcountries") {
+    question = `Which countries will host ${fact.entity}${temporal}?`;
+  } else if (attribute === "headquarters") {
+    question = `Where is the headquarters of ${fact.entity}${temporal}?`;
+  } else {
+    question = `What is the ${labelForAttribute(fact.attribute)} of ${fact.entity}${temporal}?`;
+  }
 
   return createBaseDraft(
     fact,
     blueprint,
-    `What is the ${attribute} of ${fact.entity}${temporal}?`,
+    question,
     fact.value,
     difficulty
   );
 }
 
 function generateReverse(fact, blueprint, difficulty) {
-  const attribute = labelForAttribute(fact.attribute);
+  const attribute = String(fact.attribute || "").toLowerCase();
   const temporal = getTemporalContext(fact);
+  let question = null;
+
+  if (attribute === "capital") {
+    question = `Which state has ${fact.value} as its capital${temporal}?`;
+  } else if (attribute === "headquarters") {
+    question = `Which organization has its headquarters in ${fact.value}${temporal}?`;
+  }
+
+  if (!question) return null;
 
   return createBaseDraft(
     fact,
     blueprint,
-    `${fact.value} is the ${attribute} of which entity${temporal}?`,
+    question,
     fact.entity,
     difficulty
   );
 }
 
 function generateIdentification(fact, blueprint, difficulty) {
-  const attribute = labelForAttribute(fact.attribute);
+  const attribute = String(fact.attribute || "").toLowerCase();
   const temporal = getTemporalContext(fact);
+  let question;
+
+  if (attribute === "capital") {
+    question = `Which state has ${fact.value} as its capital${temporal}?`;
+  } else if (attribute === "headquarters") {
+    question = `Which organization has its headquarters in ${fact.value}${temporal}?`;
+  } else if (attribute === "members" || attribute === "membershipcount") {
+    question = `Which organization has ${fact.value} member states${temporal}?`;
+  } else {
+    question = `Which entity has the ${labelForAttribute(fact.attribute)} of ${fact.value}${temporal}?`;
+  }
 
   return createBaseDraft(
     fact,
     blueprint,
-    `Which entity has the ${attribute} of ${fact.value}${temporal}?`,
+    question,
     fact.entity,
     difficulty
   );
@@ -198,20 +257,39 @@ function generateClassification(fact, blueprint, difficulty) {
   }
 
   const classification = fact.region;
-  return createBaseDraft(
+  const draft = createBaseDraft(
     fact,
     blueprint,
     `Which classification or group is ${fact.entity} associated with?`,
     classification,
     difficulty
   );
+
+  draft.explanation = `${fact.entity} is part of the ${classification} geopolitical zone.`;
+
+  return draft;
 }
 
 function generateInstitutionFunction(fact, blueprint, difficulty) {
+  const functionAttributes = new Set([
+    "function",
+    "functions",
+    "responsibility",
+    "responsibilities",
+    "role",
+    "purpose",
+    "mandate",
+    "mandates",
+  ]);
+
+  if (!functionAttributes.has(String(fact.attribute || "").toLowerCase())) {
+    return null;
+  }
+
   return createBaseDraft(
     fact,
     blueprint,
-    `What verified function or responsibility is associated with ${fact.entity}?`,
+    `What is the function, responsibility or purpose of ${fact.entity}?`,
     fact.value,
     difficulty
   );
@@ -222,13 +300,20 @@ function generateNumberCount(fact, blueprint, difficulty) {
     return null;
   }
 
-  return createBaseDraft(
-    fact,
-    blueprint,
-    `What is the ${labelForAttribute(fact.attribute)} of ${fact.entity}${getTemporalContext(fact)}?`,
-    fact.value,
-    difficulty
-  );
+  const attribute = String(fact.attribute || "").toLowerCase();
+  let question;
+
+  if (attribute === "localgovernmentareas") {
+    question = `How many local government areas are there in ${fact.entity}${getTemporalContext(fact)}?`;
+  } else if (attribute === "teams" || attribute === "participatingteams") {
+    question = `How many teams will compete in ${fact.entity}${getTemporalContext(fact)}?`;
+  } else if (attribute === "members" || attribute === "membershipcount") {
+    question = `How many member states does ${fact.entity}${getTemporalContext(fact)} have?`;
+  } else {
+    question = `What is the ${labelForAttribute(fact.attribute)} of ${fact.entity}${getTemporalContext(fact)}?`;
+  }
+
+  return createBaseDraft(fact, blueprint, question, fact.value, difficulty);
 }
 
 function generateChronology(fact, blueprint, difficulty) {
@@ -236,10 +321,25 @@ function generateChronology(fact, blueprint, difficulty) {
     return null;
   }
 
+  const attribute = String(fact.attribute || "").toLowerCase();
+  let question;
+
+  if (attribute === "founded") {
+    question = `When was ${fact.entity} founded?`;
+  } else if (attribute === "established") {
+    question = `When was ${fact.entity} established?`;
+  } else if (attribute === "created") {
+    question = `When was ${fact.entity} created?`;
+  } else if (attribute === "launched" || attribute === "launchdate") {
+    question = `When was ${fact.entity} launched?`;
+  } else {
+    question = `When did ${fact.entity} ${labelForAttribute(fact.attribute)} occur?`;
+  }
+
   return createBaseDraft(
     fact,
     blueprint,
-    `When did ${fact.entity} reach the milestone described by the verified fact?`,
+    question,
     fact.value,
     difficulty
   );
