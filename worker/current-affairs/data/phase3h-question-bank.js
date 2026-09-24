@@ -385,6 +385,288 @@ export function validateQuestionBankCollection(records = []) {
   };
 }
 
+
+/**
+ * Phase 3H-B — In-memory Question Bank manager.
+ *
+ * The manager is the controlled API around the 3H-A contract. It deliberately
+ * keeps persistence implementation-neutral: the current repository can use
+ * version-controlled data, while a later D1/KV-backed implementation can keep
+ * the same manager contract.
+ */
+
+function cloneRecord(record) {
+  if (!record) return record;
+  return {
+    ...record,
+    factIds: Array.isArray(record.factIds) ? [...record.factIds] : [],
+    sourceIds: Array.isArray(record.sourceIds) ? [...record.sourceIds] : [],
+    options: Array.isArray(record.options) ? [...record.options] : [],
+    temporalContext:
+      record.temporalContext && typeof record.temporalContext === "object"
+        ? { ...record.temporalContext }
+        : record.temporalContext,
+  };
+}
+
+export function createQuestionBankManager(initialRecords = []) {
+  const records = new Map();
+
+  const result = validateQuestionBankCollection(initialRecords);
+  if (!result.valid) {
+    throw new Error(
+      `Invalid initial Question Bank: ${JSON.stringify(result.errors)}`
+    );
+  }
+
+  for (const record of initialRecords) {
+    records.set(record.questionId, cloneRecord(record));
+  }
+
+  function get(questionId) {
+    return cloneRecord(records.get(questionId) || null);
+  }
+
+  function list({
+    status = null,
+    accessTier = null,
+    difficulty = null,
+    domain = null,
+    topic = null,
+    variantType = null,
+    questionFamilyId = null,
+    conceptId = null,
+  } = {}) {
+    return [...records.values()]
+      .filter((record) => !status || record.status === status)
+      .filter((record) => !accessTier || record.accessTier === accessTier)
+      .filter((record) => !difficulty || record.difficulty === difficulty)
+      .filter((record) => !domain || record.domain === domain)
+      .filter((record) => !topic || record.topic === topic)
+      .filter((record) => !variantType || record.variantType === variantType)
+      .filter(
+        (record) =>
+          !questionFamilyId || record.questionFamilyId === questionFamilyId
+      )
+      .filter((record) => !conceptId || record.conceptId === conceptId)
+      .map(cloneRecord);
+  }
+
+  function add(record) {
+    const validation = validateQuestionBankRecord(record);
+
+    if (!validation.valid) {
+      return { success: false, record: null, errors: validation.errors };
+    }
+
+    if (records.has(record.questionId)) {
+      return {
+        success: false,
+        record: null,
+        errors: ["question_id_already_exists"],
+      };
+    }
+
+    records.set(record.questionId, cloneRecord(record));
+
+    return { success: true, record: cloneRecord(record), errors: [] };
+  }
+
+  function promote(questionId, { validatedAt = null, updatedAt = null } = {}) {
+    const current = records.get(questionId);
+
+    if (!current) {
+      return { success: false, record: null, errors: ["question_not_found"] };
+    }
+
+    if (current.status !== "validated") {
+      return {
+        success: false,
+        record: null,
+        errors: ["only_validated_questions_can_be_promoted"],
+      };
+    }
+
+    const result = promoteQuestionBankRecord(current, {
+      validatedAt,
+      updatedAt,
+    });
+
+    if (!result.success) {
+      return result;
+    }
+
+    records.set(questionId, cloneRecord(result.record));
+    return { success: true, record: cloneRecord(result.record), errors: [] };
+  }
+
+  function update(questionId, patch = {}) {
+    const current = records.get(questionId);
+
+    if (!current) {
+      return { success: false, record: null, errors: ["question_not_found"] };
+    }
+
+    if (!patch || typeof patch !== "object" || Array.isArray(patch)) {
+      return { success: false, record: null, errors: ["invalid_update_patch"] };
+    }
+
+    // Identity fields are immutable. Replacement should create a new question
+    // identity and use supersedeQuestion/supersedeQuestionBankRecord instead.
+    for (const field of ["questionId", "questionFamilyId", "conceptId"]) {
+      if (Object.prototype.hasOwnProperty.call(patch, field)) {
+        return {
+          success: false,
+          record: null,
+          errors: [`immutable_identity_field:${field}`],
+        };
+      }
+    }
+
+    const candidate = { ...current, ...patch, updatedAt: patch.updatedAt ?? current.updatedAt };
+    const validation = validateQuestionBankRecord(candidate);
+
+    if (!validation.valid) {
+      return { success: false, record: null, errors: validation.errors };
+    }
+
+    records.set(questionId, cloneRecord(candidate));
+    return { success: true, record: cloneRecord(candidate), errors: [] };
+  }
+
+  function retire(questionId, { updatedAt = null } = {}) {
+    const current = records.get(questionId);
+
+    if (!current) {
+      return { success: false, record: null, errors: ["question_not_found"] };
+    }
+
+    const result = retireQuestionBankRecord(current, { updatedAt });
+    records.set(questionId, cloneRecord(result.record));
+
+    return { success: true, record: cloneRecord(result.record), errors: [] };
+  }
+
+  function supersede(
+    questionId,
+    replacementRecord,
+    { updatedAt = null } = {}
+  ) {
+    const current = records.get(questionId);
+
+    if (!current) {
+      return { success: false, record: null, errors: ["question_not_found"] };
+    }
+
+    if (!replacementRecord?.questionId) {
+      return {
+        success: false,
+        record: null,
+        errors: ["replacement_question_required"],
+      };
+    }
+
+    if (records.has(replacementRecord.questionId)) {
+      return {
+        success: false,
+        record: null,
+        errors: ["replacement_question_id_already_exists"],
+      };
+    }
+
+    const replacementValidation =
+      validateQuestionBankRecord(replacementRecord);
+
+    if (!replacementValidation.valid) {
+      return {
+        success: false,
+        record: null,
+        errors: replacementValidation.errors,
+      };
+    }
+
+    const superseded = supersedeQuestionBankRecord(current, {
+      replacementQuestionId: replacementRecord.questionId,
+      updatedAt,
+    });
+
+    records.set(questionId, cloneRecord(superseded.record));
+    records.set(
+      replacementRecord.questionId,
+      cloneRecord(replacementRecord)
+    );
+
+    return {
+      success: true,
+      record: cloneRecord(superseded.record),
+      replacementRecord: cloneRecord(replacementRecord),
+      errors: [],
+    };
+  }
+
+  function findByFactId(factId) {
+    return [...records.values()]
+      .filter((record) => record.factIds.includes(factId))
+      .map(cloneRecord);
+  }
+
+  function findBySourceId(sourceId) {
+    return [...records.values()]
+      .filter((record) => record.sourceIds.includes(sourceId))
+      .map(cloneRecord);
+  }
+
+  function getStats() {
+    const stats = {
+      total: records.size,
+      byStatus: {},
+      byDifficulty: {},
+      byDomain: {},
+      byAccessTier: {},
+    };
+
+    for (const record of records.values()) {
+      for (const [bucket, value] of [
+        ["byStatus", record.status],
+        ["byDifficulty", record.difficulty],
+        ["byDomain", record.domain],
+        ["byAccessTier", record.accessTier],
+      ]) {
+        stats[bucket][value] = (stats[bucket][value] || 0) + 1;
+      }
+    }
+
+    return stats;
+  }
+
+  function audit() {
+    const collection = validateQuestionBankCollection([...records.values()]);
+    return {
+      ...collection,
+      stats: getStats(),
+    };
+  }
+
+  function snapshot() {
+    return [...records.values()].map(cloneRecord);
+  }
+
+  return {
+    get,
+    list,
+    add,
+    promote,
+    update,
+    retire,
+    supersede,
+    findByFactId,
+    findBySourceId,
+    getStats,
+    audit,
+    snapshot,
+  };
+}
+
 export default {
   QUESTION_BANK_VERSION,
   QUESTION_BANK_LIFECYCLE,
@@ -398,6 +680,7 @@ export default {
   supersedeQuestionBankRecord,
   retireQuestionBankRecord,
   validateQuestionBankCollection,
+  createQuestionBankManager,
   QUESTION_ACCESS_TIERS,
   QUESTION_DIFFICULTIES,
   QUESTION_STATUSES,
