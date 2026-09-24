@@ -257,13 +257,17 @@ function generateClassification(fact, blueprint, difficulty) {
   }
 
   const classification = fact.region;
-  return createBaseDraft(
+  const draft = createBaseDraft(
     fact,
     blueprint,
     `Which classification or group is ${fact.entity} associated with?`,
     classification,
     difficulty
   );
+
+  draft.explanation = `${fact.entity} is part of the ${classification} geopolitical zone.`;
+
+  return draft;
 }
 
 function generateInstitutionFunction(fact, blueprint, difficulty) {
