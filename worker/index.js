@@ -1,3 +1,5 @@
+import { getCurrentAffairsQuestions } from "./current-affairs/index.js";
+
 // Preview rebuild trigger: Africa API Worker-secret configuration is verified outside the repository.
 
 const OPEN_TRIVIA_URL = "https://opentdb.com/api.php";
