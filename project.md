@@ -919,3 +919,21 @@ Worker integration and the first real Current Affairs Question Bank serving popu
 The bank is deliberately not described as the final 86-fact population. It is the first controlled serving population for end-to-end testing.
 
 **Current Affairs Phase 3 status: 3A–3H complete; 3I-A complete; 3I-B serving seed/readiness complete. Next: 3J Debug APK Testing → 3K Stabilization.**
+
+## Current Affairs Phase 3J Step A checkpoint — 24 September 2026
+
+Current Affairs now has the missing runtime generation bridge.
+
+When the audited Question Bank cannot provide a complete fresh quiz because recent history has blocked its records, the Worker now falls back to the verified Phase 2 fact database and runs the existing generation/quality pipeline:
+
+Verified Facts → 3C → 3D → 3E → 3F → runtime serving pool → 3G assembler
+
+This preserves the intended architecture: the fact database is the source of truth, while the Question Bank acts as a seed/cache/library rather than a hard ceiling.
+
+Step A is request-scoped. Cloudflare D1 persistence is explicitly reserved for Step B and has not been added yet.
+
+A new runtime integration test forces all current bank IDs into recent history and verifies a fresh 10-question 4/4/2 quiz can be assembled from the verified-fact generation path.
+
+NewsData remains isolated from Current Affairs, and AdMob was not modified.
+
+Current Affairs status: Step A implemented; Worker deployment + new debug end-to-end verification is the next test checkpoint.
