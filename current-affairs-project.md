@@ -1175,3 +1175,19 @@ Access tiers remain metadata-only. No billing, subscriptions, premium enforcemen
 A dedicated Step A integration test now forces the audited bank into recent history and verifies that the runtime path can produce a fresh 10-question quiz with the required 4 Easy / 4 Medium / 2 Hard distribution.
 
 Phase 3J Step A status: IMPLEMENTED — deployment and debug end-to-end verification pending.
+
+
+## Worker Preview deployment checkpoint — 24 September 2026
+
+The Current Affairs runtime-coverage branch is now prepared for isolated Cloudflare Worker Preview testing.
+
+Preview/deployment configuration checkpoint:
+- Branch: `fix/current-affairs-runtime-coverage`.
+- Production branch remains `main`; no production deployment or merge is part of this checkpoint.
+- `package.json` includes Wrangler `^4.135.0`, satisfying the Worker Preview requirement.
+- `wrangler.toml` contains the `[previews]` configuration block.
+- Cloudflare Worker Previews has been enabled for the connected Worker.
+- Preview variables/secrets were configured separately from production, including the Preview Africa API secret required by the existing Africa category path.
+- The Preview command is `npx wrangler preview`; the existing production deploy command is intentionally unchanged.
+
+The purpose of this checkpoint is to trigger and verify an isolated Preview deployment of the Phase 3J runtime-coverage changes before any production release. Current Affairs application logic is unchanged by this documentation checkpoint.
