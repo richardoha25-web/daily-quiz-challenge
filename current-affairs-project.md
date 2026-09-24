@@ -1137,3 +1137,41 @@ A dedicated real-bank audit/serving-readiness test is implemented at `worker/cur
 The 3I-B population is intentionally a bounded first serving population, not a claim that all 86 Phase 2 facts have already become Question Bank records. Further bank expansion can continue through the existing 3C → 3D → 3E → 3F → 3H pipeline.
 
 **Current Affairs status: 3I-A complete; 3I-B serving seed + audit/readiness work complete. Next: 3J debug APK/end-to-end testing, followed by 3K stabilization.**
+
+## Phase 3J Step A runtime-generation checkpoint — 24 September 2026
+
+Step A is now implemented as the runtime bridge between the verified-fact database and the existing quiz assembler.
+
+The Current Affairs serving flow is now:
+
+Worker request → Audited Question Bank → enough fresh eligible questions?
+
+YES → assemble
+NO → Verified facts → 3C generation → 3D distractors → 3E validation → 3F duplicate gate → Runtime serving pool → 3G quiz assembly
+
+### Step A rules
+
+- The 86 verified facts remain the primary source of truth.
+- The Question Bank is a repository/cache/seed, not a hard ceiling.
+- Recent history can exhaust the current bank without making the category unavailable.
+- Runtime-generated questions are validated before they can enter the serving pool.
+- Multiple validated variants may share a question family in storage/generation; Phase 3G still allows only one family member per quiz.
+- Exact/canonical duplicates remain blocked.
+- Player-facing explanations do not expose internal fact IDs or source IDs.
+- Step A does not persist runtime-generated questions across Worker requests.
+
+### Step B boundary
+
+Cloudflare D1 is the planned persistent Question Bank layer. It is intentionally not added in Step A. Step B will persist validated runtime questions and allow the same generation/selection contract to reuse them across requests without changing the fact-first architecture.
+
+### NewsData and monetization
+
+NewsData remains isolated to the future News Quiz / Current Events product. No NewsData dependency was added to Current Affairs.
+
+Access tiers remain metadata-only. No billing, subscriptions, premium enforcement or paywalls were added.
+
+### Testing
+
+A dedicated Step A integration test now forces the audited bank into recent history and verifies that the runtime path can produce a fresh 10-question quiz with the required 4 Easy / 4 Medium / 2 Hard distribution.
+
+Phase 3J Step A status: IMPLEMENTED — deployment and debug end-to-end verification pending.
