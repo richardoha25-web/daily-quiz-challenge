@@ -879,3 +879,20 @@ The assembler is designed to consume active Question Bank records, but it does n
 Current sequence: **3A model → 3B blueprints → 3C generator → 3D distractors → 3E validator → 3F duplicate/family detection → 3G assembler → 3H Question Bank Storage & Management → 3I Worker Integration → 3J Debug Testing → 3K Stabilization.**
 
 The Question Bank remains separate from user recent_history. It is the application's curated validated content layer; user history records what an individual user has seen. No AdMob, existing category logic, or NewsData isolation should be disturbed during this stage.
+
+## Current Affairs Phase 3H general checkpoint — 24 September 2026
+
+Phase 3H — **Question Bank Storage & Management** is complete through 3H-A to 3H-E.
+
+Completed:
+- **3H-A:** canonical Question Bank contract with stable identity, provenance, lifecycle, freshness and future access-tier metadata.
+- **3H-B:** storage-independent Question Bank manager with controlled add/list/get/promote/update/retire/supersede operations.
+- **3H-C:** bounded fact-to-question population pipeline through 3C → 3D → 3E → 3F → Question Bank.
+- **3H-D:** read-only Question Bank audit covering contract integrity, provenance, freshness, family collisions and duplicate signals.
+- **3H-E:** deterministic integration tests proving compatibility between the Question Bank and Phase 3G assembler.
+
+The Question Bank remains separate from user `recent_history`. No billing, AdMob, Android UI, unrelated category logic or NewsData dependency was introduced.
+
+The current implementation is storage-independent; no new paid database infrastructure has been introduced. This preserves the option to add persistent storage later without changing the question contract.
+
+**Current Affairs Phase 3 status: 3A–3H complete. Next: 3I Worker Integration, followed by 3J Debug Testing and 3K Stabilization.**
