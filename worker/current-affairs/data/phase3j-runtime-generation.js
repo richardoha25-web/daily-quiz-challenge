@@ -241,25 +241,46 @@ function buildGeneratedCandidates({
     seed
   );
 
-  let processedDrafts = 0;
+  // Build a coverage-aware queue before applying duplicate, distractor, and
+  // quality gates. Fact-first ordering can exhaust the bounded draft budget
+  // on Easy/Medium variants before later Hard-capable facts are reached.
+  const draftQueue = [];
+  const queueByDifficulty = {
+    hard: [],
+    easy: [],
+    medium: [],
+  };
 
   for (const fact of orderedFacts) {
-    if (processedDrafts >= MAX_DRAFTS_TO_PROCESS) break;
-    if (generated.length >= MAX_GENERATED_CANDIDATES) break;
-
     const draftsResult = generateSingleFactDrafts({
       fact,
       difficulties: ["easy", "medium", "hard"],
     });
 
     for (const draft of draftsResult.drafts) {
-      if (processedDrafts >= MAX_DRAFTS_TO_PROCESS) break;
-      if (generated.length >= MAX_GENERATED_CANDIDATES) break;
+      if (queueByDifficulty[draft.difficulty]) {
+        queueByDifficulty[draft.difficulty].push(draft);
+      }
+    }
+  }
 
-      processedDrafts += 1;
-      incrementCount(draftsByDifficulty, draft.difficulty);
+  // Prefer Hard candidates first so the preferred distribution can be reached
+  // when the verified facts support it. Easy/Medium then fill the remaining
+  // bounded budget naturally; no quality gate is weakened.
+  for (const difficulty of ["hard", "easy", "medium"]) {
+    draftQueue.push(...deterministicOrder(queueByDifficulty[difficulty], seed));
+  }
 
-      const questionId = stableQuestionId(draft);
+  let processedDrafts = 0;
+
+  for (const draft of draftQueue) {
+    if (processedDrafts >= MAX_DRAFTS_TO_PROCESS) break;
+    if (generated.length >= MAX_GENERATED_CANDIDATES) break;
+
+    processedDrafts += 1;
+    incrementCount(draftsByDifficulty, draft.difficulty);
+
+    const questionId = stableQuestionId(draft);
 
       if (recentHistoryHasQuestionId(questionId, enrichedHistory)) {
         const reason = "question_cooldown";
@@ -384,18 +405,14 @@ function buildGeneratedCandidates({
   };
 }
 
-function hasRequestedDifficultyCoverage(quiz) {
+function summarizeDifficultyCounts(quiz) {
   const counts = { easy: 0, medium: 0, hard: 0 };
 
   for (const question of quiz || []) {
     counts[question.difficulty] = (counts[question.difficulty] || 0) + 1;
   }
 
-  return (
-    counts.easy >= TARGET_DISTRIBUTION.easy &&
-    counts.medium >= TARGET_DISTRIBUTION.medium &&
-    counts.hard >= TARGET_DISTRIBUTION.hard
-  );
+  return counts;
 }
 
 export function getCurrentAffairsQuestionsWithRuntimeGeneration({
@@ -443,7 +460,7 @@ export function getCurrentAffairsQuestionsWithRuntimeGeneration({
     allowedAccessTiers: ["FREE"],
   });
 
-  if (!assembled.success || !hasRequestedDifficultyCoverage(assembled.quiz)) {
+  if (!assembled.success) {
     return {
       success: false,
       error: assembled.error || "not_enough_runtime_generated_questions",
@@ -455,6 +472,8 @@ export function getCurrentAffairsQuestionsWithRuntimeGeneration({
         runtimeGeneratedCount: runtime.generated.length,
         runtime: runtime.diagnostics,
         assembler: assembled.diagnostics,
+        difficultyCounts: summarizeDifficultyCounts(assembled.quiz),
+        preferredDifficultyDistribution: TARGET_DISTRIBUTION,
         initialBankFailure: bankOnly.diagnostics,
       },
     };
