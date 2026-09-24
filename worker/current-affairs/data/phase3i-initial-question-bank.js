@@ -8,7 +8,7 @@
  */
 export const CURRENT_AFFAIRS_QUESTION_BANK = [
   {
-    "questionId": "ca:ng-state-abia:direct:easy",
+    "questionId": "ca:ng-state-abia:classification:easy",
     "questionFamilyId": "ca-family:entity-geography:abia-state-ng-state-abia",
     "conceptId": "ca:entity:ng-state-abia",
     "factIds": [
@@ -17,19 +17,19 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "sourceIds": [
       "inec-state-offices"
     ],
-    "variantType": "direct",
-    "blueprintId": "direct_attribute",
+    "variantType": "classification",
+    "blueprintId": "classification",
     "difficulty": "easy",
     "domain": "nigeria",
     "topic": "geography",
-    "question": "What is the capital of Abia State?",
+    "question": "Which geopolitical zone includes Abia State?",
     "options": [
-      "Umuahia",
-      "Awka",
-      "Yola",
-      "Uyo"
+      "South East",
+      "South West",
+      "North Central",
+      "North East"
     ],
-    "correctAnswer": "Umuahia",
+    "correctAnswer": "South East",
     "explanation": "Verified fact: ng-state-abia — Umuahia. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
@@ -42,7 +42,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "updatedAt": "2026-09-24"
   },
   {
-    "questionId": "ca:ng-state-anambra:reverse:easy",
+    "questionId": "ca:ng-state-anambra:classification:medium",
     "questionFamilyId": "ca-family:entity-geography:anambra-state-ng-state-anambra",
     "conceptId": "ca:entity:ng-state-anambra",
     "factIds": [
@@ -51,19 +51,19 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "sourceIds": [
       "inec-state-offices"
     ],
-    "variantType": "reverse",
-    "blueprintId": "reverse_attribute",
-    "difficulty": "easy",
+    "variantType": "classification",
+    "blueprintId": "classification",
+    "difficulty": "medium",
     "domain": "nigeria",
     "topic": "geography",
-    "question": "Which Nigerian state has Awka as its capital?",
+    "question": "Which geopolitical zone includes Anambra State?",
     "options": [
-      "Anambra State",
-      "Abia State",
-      "Kano State",
-      "Lagos State"
+      "South East",
+      "South West",
+      "North Central",
+      "North East"
     ],
-    "correctAnswer": "Anambra State",
+    "correctAnswer": "South East",
     "explanation": "Verified fact: ng-state-anambra — Awka. Source: Phase 2 verified fact record.",
     "status": "active",
     "accessTier": "FREE",
