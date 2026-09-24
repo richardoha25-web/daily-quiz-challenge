@@ -4,22 +4,22 @@
  * Boundary:
  *   Worker request
  *     -> Question Bank
- *     -> access-tier filter
  *     -> recent-history cooldown
+ *     -> if needed: verified facts -> 3C -> 3D -> 3E -> 3F
  *     -> Phase 3G quiz assembler
  *     -> public quiz response
  *
- * This module does not generate questions, call NewsData, mutate history,
- * enforce billing, or expose internal Question Bank metadata to the client.
+ * Step A generation is request-scoped. Step B will persist validated records
+ * in Cloudflare D1. NewsData remains isolated in the future News Quiz route.
  */
 
 import { CURRENT_AFFAIRS_QUESTION_BANK } from "./data/phase3i-question-bank.js";
 import {
-  assembleCurrentAffairsQuiz,
-} from "./data/phase3g-quiz-assembler.js";
-import {
   validateQuestionBankCollection,
 } from "./data/phase3h-question-bank.js";
+import {
+  getCurrentAffairsQuestionsWithRuntimeGeneration,
+} from "./data/phase3j-runtime-generation.js";
 
 function normalizeRecentHistory(value) {
   if (!value) return [];
@@ -53,7 +53,7 @@ function toPublicQuestion(record) {
     options: [...record.options],
     correctAnswer: record.correctAnswer,
     explanation: record.explanation || "",
-    source: "Current Affairs Question Bank",
+    source: "Current Affairs verified fact system",
     isRemote: true,
     createdAt: record.createdAt || new Date().toISOString(),
     updatedAt: record.updatedAt || new Date().toISOString(),
@@ -88,37 +88,26 @@ export function getCurrentAffairsQuestions({
     };
   }
 
-  if (CURRENT_AFFAIRS_QUESTION_BANK.length === 0) {
-    return {
-      success: false,
-      error: "CURRENT_AFFAIRS_QUESTION_BANK_NOT_POPULATED",
-      status: 503,
-      questions: [],
-    };
-  }
-
-  const assembled = assembleCurrentAffairsQuiz({
-    questionBank: CURRENT_AFFAIRS_QUESTION_BANK,
-    recentHistory,
+  const result = getCurrentAffairsQuestionsWithRuntimeGeneration({
     quizSize,
+    recentHistory,
     seed,
-    allowedAccessTiers: ["FREE"],
   });
 
-  if (!assembled.success) {
+  if (!result.success) {
     return {
       success: false,
-      error: assembled.error,
-      status: assembled.error === "not_enough_eligible_questions" ? 404 : 503,
+      error: result.error,
+      status: result.status || 503,
       questions: [],
-      diagnostics: assembled.diagnostics,
+      diagnostics: result.diagnostics,
     };
   }
 
   return {
     success: true,
-    questions: assembled.quiz.map(toPublicQuestion),
-    diagnostics: assembled.diagnostics,
+    questions: result.questions.map(toPublicQuestion),
+    diagnostics: result.diagnostics,
   };
 }
 
