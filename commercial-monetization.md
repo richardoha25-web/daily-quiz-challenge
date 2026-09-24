@@ -1533,3 +1533,30 @@ The Question Bank remains a content-management layer, while future Cloudflare D1
 No subscriptions, payments, premium locks, entitlement checks or paywalls were added in Step A.
 
 Commercial rule remains unchanged: future premium content must pass the same factual, freshness, provenance, distractor, quality and anti-repetition standards as free content.
+
+
+## Current Affairs implementation-complete checkpoint — 24 September 2026
+
+The V1 **Current Affairs category implementation is now complete for the current stabilization milestone**.
+
+Completed implementation chain:
+- Verified fact-first Current Affairs knowledge base and source/provenance model.
+- Phase 3A–3H question model, blueprints, generation, distractors, quality validation, duplicate/family detection, quiz assembly, and Question Bank management.
+- Phase 3I Worker integration and version-controlled serving Question Bank.
+- Phase 3J runtime generation/coverage path for recovery when recent-history filtering exhausts the seeded bank.
+- Current Affairs remains isolated from NewsData; NewsData is reserved for the future News Quiz / Current Events product.
+- Recent-history exhaustion testing successfully returned a complete 10-question quiz without re-serving the 20 supplied recent-history IDs.
+- Runtime exhaustion recovery is therefore considered functionally established for this V1 milestone.
+- The preferred 4 Easy / 4 Medium / 2 Hard distribution may relax when the available eligible pool is constrained by recent-history/exhaustion rules; anti-repeat protections remain in force.
+- Known Question Bank explanation/content cleanup items observed during testing are recorded as a later cleanup task and are **not** being changed in this checkpoint.
+
+### Next controlled release steps
+
+1. Merge the completed Current Affairs implementation pull request into `main`.
+2. Confirm the merged `main` state and production Worker deployment.
+3. Build the Android **Debug APK** from the merged state.
+4. Install/update the Debug APK on the test phone.
+5. Run end-to-end V1 category testing, with Current Affairs included, while protecting the already-confirmed Science, General Knowledge, Africa & Nigeria and AdMob behavior.
+6. Record any findings as stabilization fixes only; do not begin the major native Android/UI redesign during this test cycle.
+
+**Current milestone:** Current Affairs implementation complete → PR merge → Debug APK validation → V1 stabilization.
