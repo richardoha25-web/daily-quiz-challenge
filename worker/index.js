@@ -788,11 +788,58 @@ questions: questions
 }
 
 if (category === "current_affairs") {
+const recentHistory = url.searchParams.get("recentHistory");
+const seed = url.searchParams.get("seed") || crypto.randomUUID();
+
+let parsedRecentHistory = [];
+
+if (recentHistory) {
+try {
+const parsed = JSON.parse(recentHistory);
+if (!Array.isArray(parsed)) {
 return json({
 ok: false,
-error: "CURRENT_AFFAIRS_PHASE3_NOT_CONNECTED",
-message: "Current Affairs is temporarily disconnected from the NewsData provider while the fact-first question system is being implemented."
-}, 503, request);
+error: "INVALID_REQUEST",
+message: "recentHistory must be a JSON array."
+}, 400, request);
+}
+parsedRecentHistory = parsed;
+} catch {
+return json({
+ok: false,
+error: "INVALID_REQUEST",
+message: "recentHistory must contain valid JSON."
+}, 400, request);
+}
+}
+
+const result = getCurrentAffairsQuestions({
+quizSize: limit,
+recentHistory: parsedRecentHistory,
+seed,
+});
+
+if (!result.success) {
+return json({
+ok: false,
+error: result.error,
+message:
+result.error === "CURRENT_AFFAIRS_QUESTION_BANK_NOT_POPULATED"
+? "Current Affairs Question Bank is not populated yet."
+: result.error === "not_enough_eligible_questions"
+? "There are not enough eligible Current Affairs questions for a complete quiz."
+: "Current Affairs could not assemble a safe quiz.",
+diagnostics: result.diagnostics,
+}, result.status || 503, request);
+}
+
+return json({
+ok: true,
+category: "current_affairs",
+limit,
+source: "Current Affairs Question Bank",
+questions: result.questions,
+}, 200, request);
 }
 
 if (category === "news_quiz") {
