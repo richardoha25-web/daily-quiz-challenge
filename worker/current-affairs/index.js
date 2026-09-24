@@ -46,12 +46,12 @@ function normalizeRecentHistory(value) {
 
 function toPublicQuestion(record) {
   return {
-    id: record.questionId,
+    id: String(record.questionId),
     category: "current_affairs",
     difficulty: record.difficulty,
     question: record.question,
-    options: [...record.options],
-    correctAnswer: record.correctAnswer,
+    options: record.options.map((option) => String(option)),
+    correctAnswer: String(record.correctAnswer),
     explanation: record.explanation || "",
     source: "Current Affairs verified fact system",
     isRemote: true,
