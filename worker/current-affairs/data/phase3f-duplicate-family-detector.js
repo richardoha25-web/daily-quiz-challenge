@@ -131,6 +131,7 @@ export function detectQuestionDuplicate({
   candidate,
   existingQuestions = [],
   wordingThreshold = 0.82,
+  allowSameFamilyVariants = false,
 }) {
   if (!candidate?.question) {
     return {
@@ -164,7 +165,7 @@ export function detectQuestionDuplicate({
   }
 
   const familyMatches = index.family.get(makeFamilyKey(candidate)) || [];
-  if (familyMatches.length) {
+  if (familyMatches.length && !allowSameFamilyVariants) {
     return {
       duplicate: true,
       type: "family_duplicate",
