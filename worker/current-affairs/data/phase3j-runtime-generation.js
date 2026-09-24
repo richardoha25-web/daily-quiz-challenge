@@ -309,7 +309,7 @@ function buildGeneratedCandidates({
         continue;
       }
 
-      const sourceFact = fact;
+      const sourceFact = facts.find((candidateFact) => candidateFact.id === draft.factIds?.[0]);
       const distractors = attachDistractors({
         draft,
         sourceFact,
@@ -388,7 +388,6 @@ function buildGeneratedCandidates({
       seenIds.add(activeRecord.questionId);
       incrementCount(generatedByDifficulty, activeRecord.difficulty);
     }
-  }
 
   return {
     generated,
