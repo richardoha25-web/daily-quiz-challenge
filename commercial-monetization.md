@@ -1521,3 +1521,15 @@ The architecture deliberately keeps:
 The commercial architecture therefore remains ready for future PREMIUM and SPECIAL_PACK content without embedding payment logic into question records.
 
 **Commercial status: 3I alignment complete; billing/entitlement implementation remains future work.**
+
+## Current Affairs Phase 3J Step A commercial-alignment checkpoint — 24 September 2026
+
+The Current Affairs runtime generation bridge is now fact-first and commercial-aware without implementing monetization.
+
+Validated runtime-generated questions retain the existing future access-tier contract (FREE, PREMIUM, SPECIAL_PACK). Step A serves FREE content only, and access-tier metadata is not treated as proof of purchase.
+
+The Question Bank remains a content-management layer, while future Cloudflare D1 persistence is planned as Step B. D1 persistence will store validated question records without embedding billing or entitlement decisions into generation logic.
+
+No subscriptions, payments, premium locks, entitlement checks or paywalls were added in Step A.
+
+Commercial rule remains unchanged: future premium content must pass the same factual, freshness, provenance, distractor, quality and anti-repetition standards as free content.
