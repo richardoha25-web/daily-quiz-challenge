@@ -943,3 +943,11 @@ The design system must therefore be built for **long-term scalability**, not jus
 The Current Affairs Quiz Assembler establishes the functional rules that the future UI/UX must represent clearly: a standard 10-question session, balanced difficulty, varied content, no same-family repeats, recent-question avoidance, and a clear insufficient-content/error state when a safe full quiz cannot be assembled.
 
 These are backend/content-selection constraints, not visual decisions. The major UI redesign remains deferred until the functional V1 foundation is stable.
+
+## Current Affairs Question Bank checkpoint — 24 September 2026
+
+The Current Affairs architecture now includes a dedicated Question Bank as a planned content layer, but **the persistent Question Bank storage/management implementation is not yet complete**.
+
+The future UI should consume curated validated question records, not generated drafts or user history. Question records will retain stable identity, family/concept relationships, difficulty, explanations, provenance-aware metadata and future FREE/PREMIUM/SPECIAL_PACK access metadata.
+
+Worker integration is intentionally postponed until the Question Bank layer is implemented and audited. No UI redesign is required for this backend checkpoint.
