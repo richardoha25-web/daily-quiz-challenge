@@ -145,7 +145,19 @@ function createBaseDraft(fact, blueprint, question, correctAnswer, difficulty) {
     question,
     correctAnswer: normalizeText(correctAnswer),
     options: null,
-    explanation: "",
+    explanation:
+      String(fact.attribute || "").toLowerCase() === "capital"
+        ? `The capital of ${fact.entity} is ${fact.value}.`
+        : String(fact.attribute || "").toLowerCase() === "headquarters"
+          ? `${fact.entity} has its headquarters in ${fact.value}.`
+          : String(fact.attribute || "").toLowerCase() === "members" ||
+              String(fact.attribute || "").toLowerCase() === "membershipcount"
+            ? `${fact.entity} has ${fact.value} member states.`
+            : String(fact.attribute || "").toLowerCase() === "founded"
+              ? `${fact.entity} was founded in ${fact.value}.`
+              : String(fact.attribute || "").toLowerCase() === "established"
+                ? `${fact.entity} was established in ${fact.value}.`
+                : "",
     accessTier: "FREE",
     status: "generated",
     temporalContext: getTemporalContext(fact),
