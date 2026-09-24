@@ -667,6 +667,277 @@ export function createQuestionBankManager(initialRecords = []) {
   };
 }
 
+/**
+ * Phase 3H-C — Question Bank population pipeline.
+ *
+ * Controlled flow:
+ *   Phase 2 facts
+ *     -> 3C draft
+ *     -> 3D verified distractors
+ *     -> 3E quality validation
+ *     -> 3F duplicate/family gate
+ *     -> 3H-B manager.add()
+ *
+ * This stage populates a repository/in-memory bank only. It does not connect
+ * the Android app, Worker route, NewsData or billing.
+ */
+
+import {
+  generateSingleFactDrafts,
+} from "./phase3c-question-generator.js";
+import {
+  attachDistractors,
+} from "./phase3d-distractor-generator.js";
+import {
+  validateAndPromoteQuestion,
+} from "./phase3e-quality-validator.js";
+import {
+  detectQuestionDuplicate,
+} from "./phase3f-duplicate-family-detector.js";
+
+function normalize(value) {
+  return String(value ?? "").trim().toLowerCase().replace(/\\s+/g, " ");
+}
+
+function slugify(value) {
+  return normalize(value)
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function stableQuestionId(draft) {
+  return [
+    "ca",
+    slugify(draft.questionFamilyId),
+    slugify(draft.variantType),
+    slugify(draft.difficulty),
+    slugify(draft.question),
+  ].join(":");
+}
+
+function buildTemporalContext(fact) {
+  if (!fact) return null;
+
+  const context = {};
+  for (const field of [
+    "referenceYear",
+    "referencePeriod",
+    "validFrom",
+    "validTo",
+    "datasetVintage",
+    "lastVerified",
+  ]) {
+    if (fact[field] !== undefined && fact[field] !== null) {
+      context[field] = fact[field];
+    }
+  }
+
+  return Object.keys(context).length ? context : null;
+}
+
+function completeRecord(draft, distractors) {
+  const options = [
+    draft.correctAnswer,
+    ...distractors,
+  ];
+
+  return {
+    ...draft,
+    questionId: stableQuestionId(draft),
+    options,
+    explanation: draft.explanation || "",
+    temporalContext:
+      draft.temporalContext && typeof draft.temporalContext === "object"
+        ? draft.temporalContext
+        : null,
+    status: "generated",
+  };
+}
+
+function deterministicShuffle(values, seed) {
+  const output = [...values];
+  let state = 0;
+
+  for (const char of String(seed)) {
+    state = (state * 31 + char.charCodeAt(0)) >>> 0;
+  }
+
+  for (let i = output.length - 1; i > 0; i -= 1) {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    const j = state % (i + 1);
+    [output[i], output[j]] = [output[j], output[i]];
+  }
+
+  return output;
+}
+
+/**
+ * Populate a Question Bank from verified facts.
+ *
+ * By default only one variant is accepted per question family. This prevents
+ * the initial bank from filling with direct/reverse/identification variants
+ * that Phase 3G would never allow in the same quiz anyway.
+ */
+export function populateQuestionBank({
+  facts = [],
+  existingRecords = [],
+  maxProcessedFacts = 1000,
+  maxAccepted = 500,
+  difficulties = ["easy", "medium"],
+  blueprintIds = [
+    "direct_attribute",
+    "reverse_attribute",
+    "identification",
+    "classification",
+    "institution_function",
+    "number_count",
+    "chronology",
+  ],
+  oneVariantPerFamily = true,
+  timestamp = null,
+} = {}) {
+  const manager = createQuestionBankManager(existingRecords);
+  const accepted = [];
+  const rejected = [];
+  const seenFamilies = new Set(
+    existingRecords
+      .filter((record) => record?.status === "active" || record?.status === "validated")
+      .map((record) => record.questionFamilyId)
+      .filter(Boolean)
+  );
+
+  let processedFacts = 0;
+
+  for (const fact of facts) {
+    if (processedFacts >= maxProcessedFacts || accepted.length >= maxAccepted) {
+      break;
+    }
+
+    processedFacts += 1;
+
+    const generated = generateSingleFactDrafts({
+      fact,
+      difficulties,
+      blueprintIds,
+    });
+
+    const candidates = generated.drafts;
+
+    for (const draft of candidates) {
+      if (accepted.length >= maxAccepted) break;
+
+      if (oneVariantPerFamily && seenFamilies.has(draft.questionFamilyId)) {
+        rejected.push({
+          questionId: null,
+          factIds: draft.factIds,
+          reason: "family_already_populated",
+          questionFamilyId: draft.questionFamilyId,
+        });
+        continue;
+      }
+
+      const sourceFact =
+        facts.find((candidate) => candidate.id === draft.factIds?.[0]) || fact;
+
+      const distractors = attachDistractors({
+        draft,
+        sourceFact,
+        candidateFacts: facts,
+      });
+
+      if (!distractors.ok) {
+        rejected.push({
+          questionId: null,
+          factIds: draft.factIds || [],
+          reason: distractors.reason,
+        });
+        continue;
+      }
+
+      const record = completeRecord(draft, distractors.distractors);
+
+      // Give every completed record deterministic option ordering. The correct
+      // answer remains explicitly stored and is always present in the options.
+      record.options = deterministicShuffle(
+        record.options,
+        record.questionId
+      );
+
+      const quality = validateAndPromoteQuestion({
+        record,
+        facts,
+      });
+
+      if (!quality.ok) {
+        rejected.push({
+          questionId: record.questionId,
+          factIds: record.factIds,
+          reason: "quality_validation_failed",
+          rejectionReasons: quality.rejectionReasons,
+          errors: quality.errors,
+        });
+        continue;
+      }
+
+      const duplicate = detectQuestionDuplicate({
+        candidate: quality.record,
+        existingQuestions: [
+          ...manager.snapshot(),
+          ...accepted,
+        ],
+      });
+
+      if (duplicate.duplicate) {
+        rejected.push({
+          questionId: quality.record.questionId,
+          factIds: quality.record.factIds,
+          reason: duplicate.type,
+          matches: duplicate.matches,
+        });
+        continue;
+      }
+
+      const candidate = {
+        ...quality.record,
+        status: "validated",
+        generatorVersion: record.generatorVersion || "3C.1",
+        blueprintId: record.blueprintId,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      };
+
+      const addResult = manager.add(candidate);
+
+      if (!addResult.success) {
+        rejected.push({
+          questionId: candidate.questionId,
+          factIds: candidate.factIds,
+          reason: "question_bank_add_failed",
+          errors: addResult.errors,
+        });
+        continue;
+      }
+
+      accepted.push(addResult.record);
+      seenFamilies.add(candidate.questionFamilyId);
+    }
+  }
+
+  return {
+    bank: manager.snapshot(),
+    accepted,
+    rejected,
+    counts: {
+      inputFacts: facts.length,
+      processedFacts,
+      accepted: accepted.length,
+      rejected: rejected.length,
+      finalBankSize: manager.snapshot().length,
+    },
+    pipelineVersion: "3H-C.1",
+  };
+}
+
 export default {
   QUESTION_BANK_VERSION,
   QUESTION_BANK_LIFECYCLE,
