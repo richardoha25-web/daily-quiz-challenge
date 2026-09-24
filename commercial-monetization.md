@@ -1504,3 +1504,20 @@ Commercial protections remain unchanged:
 - Future persistent storage or entitlement services can be introduced without changing the core question identity/provenance contract.
 
 **Commercial status: Phase 3H alignment complete; billing and entitlement implementation remain future work.**
+
+
+## Phase 3I-A / 3I-B commercial-alignment checkpoint — 24 September 2026
+
+The Current Affairs Worker and first serving Question Bank are now connected, but access remains **FREE-only** for this V1 testing path.
+
+The 29-record serving seed carries access-tier metadata and is filtered by the Worker/assembler boundary. This is content eligibility metadata only; it is not proof of purchase and does not implement subscriptions, payments, entitlements or paywalls.
+
+The architecture deliberately keeps:
+- Question Bank content management separate from billing;
+- access-tier filtering separate from entitlement verification;
+- NewsData isolated from the Current Affairs product;
+- AdMob untouched.
+
+The commercial architecture therefore remains ready for future PREMIUM and SPECIAL_PACK content without embedding payment logic into question records.
+
+**Commercial status: 3I alignment complete; billing/entitlement implementation remains future work.**
