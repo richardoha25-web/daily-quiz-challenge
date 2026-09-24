@@ -641,7 +641,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "hard",
     "domain": "science-technology",
     "topic": "space",
-    "question": "What is the verified launch date recorded for Artemis II?",
+    "question": "When was Artemis II launched?",
     "options": [
       "2026-04-01",
       "2026-03-01",
@@ -676,7 +676,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "easy",
     "domain": "nigeria",
     "topic": "geography",
-    "question": "What is the verified capital associated with Federal Capital Territory?",
+    "question": "What is the capital of the Federal Capital Territory?",
     "options": [
       "Abuja",
       "Lagos",
@@ -710,7 +710,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "easy",
     "domain": "nigeria",
     "topic": "government",
-    "question": "What is the verified local government areas associated with Nigeria?",
+    "question": "How many local government areas are there in Nigeria?",
     "options": [
       774,
       810,
@@ -744,7 +744,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "easy",
     "domain": "sports",
     "topic": "football",
-    "question": "What is the verified participating teams associated with FIFA World Cup 2026?",
+    "question": "How many teams will compete in the FIFA World Cup 2026?",
     "options": [
       48,
       32,
@@ -778,7 +778,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "easy",
     "domain": "sports",
     "topic": "football",
-    "question": "What is the verified host countries associated with FIFA World Cup 2026?",
+    "question": "Which countries will host the FIFA World Cup 2026?",
     "options": [
       "Canada, Mexico and the United States",
       "Brazil, Argentina and Chile",
@@ -812,7 +812,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "easy",
     "domain": "science-technology",
     "topic": "space",
-    "question": "What is the verified continuous human occupation since associated with International Space Station?",
+    "question": "Since when has the International Space Station been continuously occupied?",
     "options": [
       "November 2000",
       "January 1998",
@@ -846,7 +846,7 @@ export const CURRENT_AFFAIRS_QUESTION_BANK = [
     "difficulty": "medium",
     "domain": "international-organizations",
     "topic": "health",
-    "question": "What is the verified member states associated with World Health Organization?",
+    "question": "How many member states does the World Health Organization have?",
     "options": [
       194,
       193,
