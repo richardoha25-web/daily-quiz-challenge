@@ -95,7 +95,7 @@ function getTemporalContext(fact) {
   }
   if (fact.validFrom) return ` from ${fact.validFrom}`;
 
-  return ` (verified ${fact.lastVerified || "date not specified"})`;
+  return ` (information checked ${fact.lastVerified || "date not specified"})`;
 }
 
 function assertFactShape(fact) {
