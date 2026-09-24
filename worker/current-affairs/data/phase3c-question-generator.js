@@ -37,6 +37,10 @@ const ATTRIBUTE_LABELS = {
   localGovernmentAreas: "number of local government areas",
   members: "number of members",
   membershipCount: "number of members",
+  localGovernmentAreas: "local government areas",
+  teams: "teams",
+  participatingTeams: "participating teams",
+  hostCountries: "host countries",
   founded: "founding date",
   established: "establishment date",
   created: "creation date",
@@ -174,6 +178,12 @@ function generateDirect(fact, blueprint, difficulty) {
     question = `What is the capital of ${fact.entity}${temporal}?`;
   } else if (attribute === "members" || attribute === "membershipcount") {
     question = `How many member states does ${fact.entity}${temporal} have?`;
+  } else if (attribute === "localgovernmentareas") {
+    question = `How many local government areas are there in ${fact.entity}${temporal}?`;
+  } else if (attribute === "teams" || attribute === "participatingteams") {
+    question = `How many teams will compete in ${fact.entity}${temporal}?`;
+  } else if (attribute === "hostcountries") {
+    question = `Which countries will host ${fact.entity}${temporal}?`;
   } else if (attribute === "headquarters") {
     question = `Where is the headquarters of ${fact.entity}${temporal}?`;
   } else {
@@ -280,13 +290,20 @@ function generateNumberCount(fact, blueprint, difficulty) {
     return null;
   }
 
-  return createBaseDraft(
-    fact,
-    blueprint,
-    `What is the ${labelForAttribute(fact.attribute)} of ${fact.entity}${getTemporalContext(fact)}?`,
-    fact.value,
-    difficulty
-  );
+  const attribute = String(fact.attribute || "").toLowerCase();
+  let question;
+
+  if (attribute === "localgovernmentareas") {
+    question = `How many local government areas are there in ${fact.entity}${getTemporalContext(fact)}?`;
+  } else if (attribute === "teams" || attribute === "participatingteams") {
+    question = `How many teams will compete in ${fact.entity}${getTemporalContext(fact)}?`;
+  } else if (attribute === "members" || attribute === "membershipcount") {
+    question = `How many member states does ${fact.entity}${getTemporalContext(fact)} have?`;
+  } else {
+    question = `What is the ${labelForAttribute(fact.attribute)} of ${fact.entity}${getTemporalContext(fact)}?`;
+  }
+
+  return createBaseDraft(fact, blueprint, question, fact.value, difficulty);
 }
 
 function generateChronology(fact, blueprint, difficulty) {
