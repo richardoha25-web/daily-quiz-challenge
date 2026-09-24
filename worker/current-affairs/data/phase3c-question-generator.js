@@ -208,10 +208,25 @@ function generateClassification(fact, blueprint, difficulty) {
 }
 
 function generateInstitutionFunction(fact, blueprint, difficulty) {
+  const functionAttributes = new Set([
+    "function",
+    "functions",
+    "responsibility",
+    "responsibilities",
+    "role",
+    "purpose",
+    "mandate",
+    "mandates",
+  ]);
+
+  if (!functionAttributes.has(String(fact.attribute || "").toLowerCase())) {
+    return null;
+  }
+
   return createBaseDraft(
     fact,
     blueprint,
-    `What verified function or responsibility is associated with ${fact.entity}?`,
+    `What is the function, responsibility or purpose of ${fact.entity}?`,
     fact.value,
     difficulty
   );
