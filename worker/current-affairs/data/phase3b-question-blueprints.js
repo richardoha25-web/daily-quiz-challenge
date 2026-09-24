@@ -139,9 +139,10 @@ export const QUESTION_BLUEPRINTS = [
     requiredFactFields: ["entity", "attribute", "value"],
     distractorStrategy: "related_institutions",
     familyIdentity: "institution:function",
-    promptPattern: "Ask which function, responsibility or purpose is associated with a verified institution.",
+    promptPattern: "Ask about an explicit institutional function, responsibility, mandate or purpose; do not use this blueprint for ordinary attributes such as capitals, counts or dates.",
     constraints: [
       "Use an official institutional description where available.",
+      "The fact attribute must explicitly represent a function, responsibility, mandate, role or purpose.",
       "Do not attribute a function to an institution unless supported by the source fact.",
       "Keep overlapping institutional mandates distinguishable.",
     ],
