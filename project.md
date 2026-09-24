@@ -869,3 +869,13 @@ Phase 3G — Quiz Assembler has been implemented as a separate serving-selection
 The Question Bank remains a distinct content layer; Phase 3G consumes it rather than replacing it. Premium/access-tier metadata remains present for future commercial use but is not enforced beyond the assembler's configurable access-tier filter.
 
 **Current Affairs Phase 3G: complete. Next: Phase 3H — Worker integration.**
+
+## Current Affairs Question Bank checkpoint — 24 September 2026
+
+A sequencing correction is recorded before Worker integration: **Phase 3G (Quiz Assembler) is complete, but the persistent Current Affairs Question Bank layer itself has not yet been implemented as a standalone storage/management layer.**
+
+The assembler is designed to consume active Question Bank records, but it does not create or persist that bank. Therefore Worker integration must wait until the Question Bank layer is implemented, populated and audited.
+
+Current sequence: **3A model → 3B blueprints → 3C generator → 3D distractors → 3E validator → 3F duplicate/family detection → 3G assembler → 3H Question Bank Storage & Management → 3I Worker Integration → 3J Debug Testing → 3K Stabilization.**
+
+The Question Bank remains separate from user recent_history. It is the application's curated validated content layer; user history records what an individual user has seen. No AdMob, existing category logic, or NewsData isolation should be disturbed during this stage.
