@@ -157,6 +157,17 @@ function deterministicOrder(values, seed = "") {
   return output;
 }
 
+function recentHistoryHasQuestionId(questionId, recentHistory) {
+  return recentHistory.some((item) => {
+    const history =
+      typeof item === "string"
+        ? { questionId: item }
+        : item || {};
+
+    return history.questionId === questionId;
+  });
+}
+
 function enrichRecentHistory(recentHistory, knownQuestions) {
   return recentHistory.map((item) => {
     const history = typeof item === "string"
