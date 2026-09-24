@@ -1111,3 +1111,29 @@ The first implementation remains storage-independent and does not introduce D1/K
 **3A → 3B → 3C → 3D → 3E → 3F → 3G → 3H-A → 3H-B → 3H-C → 3H-D → 3H-E: COMPLETE.**
 
 The next controlled stage is **3I — Worker Integration**. Before production serving, the populated Question Bank must be generated/inspected and the Worker route connected without reintroducing NewsData into Current Affairs.
+
+
+## Phase 3I-A / 3I-B Worker + Question Bank checkpoint — 24 September 2026
+
+Phase 3I-A Worker integration is implemented in `worker/current-affairs/index.js` and connected through `worker/index.js`. The Current Affairs request path now follows:
+
+`Worker request → audited Question Bank → access-tier filter → recent-history cooldown → Phase 3G assembler → public quiz response → Android`
+
+The Current Affairs route no longer returns the old disconnected placeholder. It still has **no NewsData dependency**. NewsData remains isolated under `worker/news-quiz/` for the future live News Quiz product.
+
+Phase 3I-B now provides the first version-controlled serving Question Bank seed in `worker/current-affairs/data/phase3i-initial-question-bank.js`, exposed through `phase3i-question-bank.js`.
+
+Current serving-bank checkpoint:
+- 29 active FREE Question Bank records.
+- 12 Easy, 13 Medium, 4 Hard.
+- Unique question IDs, families and concepts.
+- Four-option records with the correct answer represented in the options.
+- Provenance and freshness metadata retained.
+- Variant diversity represented so the Phase 3G distribution rules can assemble a complete 10-question quiz.
+- No NewsData, billing, AdMob or unrelated category integration.
+
+A dedicated real-bank audit/serving-readiness test is implemented at `worker/current-affairs/data/phase3i-b-audit-test.js`. Static contract checks and deterministic selection simulation confirm that the current real bank can supply a complete 10-question quiz with the target **4 Easy / 4 Medium / 2 Hard** distribution when no history blocks eligible content, while recent-history filtering can still produce a complete 10-question session when sufficient content remains.
+
+The 3I-B population is intentionally a bounded first serving population, not a claim that all 86 Phase 2 facts have already become Question Bank records. Further bank expansion can continue through the existing 3C → 3D → 3E → 3F → 3H pipeline.
+
+**Current Affairs status: 3I-A complete; 3I-B serving seed + audit/readiness work complete. Next: 3J debug APK/end-to-end testing, followed by 3K stabilization.**
