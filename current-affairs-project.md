@@ -1081,3 +1081,33 @@ The Question Bank must remain separate from `recent_history`. It is the applicat
 The next stage will first plan the Question Bank storage and management layer before implementation. Planning must determine the canonical storage format and location, promotion rules for validated questions, stable IDs and versioning, active/retired/superseded lifecycle handling, provenance and source retention, freshness/revalidation handling for dynamic facts, family/concept indexing for anti-repetition, audit/integrity checks, safe population from the existing 86 verified Phase 2 facts and Phase 3 pipeline, future access-tier metadata without billing implementation, and maintainability without making the bank a runtime bottleneck.
 
 No Current Affairs Worker route should consume this bank until the Question Bank stage has been implemented and audited.
+
+## Phase 3H general checkpoint — 24 September 2026
+
+Phase 3H — **Question Bank Storage & Management** is now implemented through 3H-A to 3H-E.
+
+### 3H-A — Question Bank contract
+Implemented in `worker/current-affairs/data/phase3h-question-bank.js`. The contract defines stable question identity, provenance, lifecycle, temporal metadata, generator version, validation metadata and future access-tier metadata. Question Bank lifecycle states are `validated`, `active`, `superseded` and `retired`.
+
+### 3H-B — Question Bank manager
+The Question Bank manager provides controlled add/get/list/update/promote/retire/supersede operations, fact/source lookup, statistics, audit and snapshots. Core identity fields are protected from casual mutation. The manager is storage-independent so a later persistent backend can be introduced without redesigning the content contract.
+
+### 3H-C — Population pipeline
+The controlled population flow is:
+`Phase 2 facts → 3C drafts → 3D distractors → 3E quality gate → 3F duplicate/family gate → 3H Question Bank`.
+
+Population is bounded and deterministic. Initial population defaults to one accepted variant per question family to avoid filling the bank with equivalent variants. Rejected candidates retain explicit reasons. The pipeline does not connect to the Android app, production Worker route, NewsData, billing or AdMob.
+
+### 3H-D — Audit system
+A read-only Question Bank audit now checks contract validity, duplicate IDs, fact/source provenance, fact references, inactive dependencies, freshness metadata for dynamic facts, family collisions and duplicate/possible-duplicate signals. It reports issues without silently repairing or activating records.
+
+### 3H-E — Phase 3G integration tests
+A deterministic integration test verifies that an active Question Bank can safely feed the 3G assembler: exactly 10 questions, unique families/concepts, 4 Easy/4 Medium/2 Hard distribution, recent-history cooldown, access-tier filtering and rejection of non-serving records.
+
+### Storage decision
+The first implementation remains storage-independent and does not introduce D1/KV/Firebase or paid infrastructure. A persistent backend can be evaluated later while preserving the Question Bank contract.
+
+### Current Phase 3 status
+**3A → 3B → 3C → 3D → 3E → 3F → 3G → 3H-A → 3H-B → 3H-C → 3H-D → 3H-E: COMPLETE.**
+
+The next controlled stage is **3I — Worker Integration**. Before production serving, the populated Question Bank must be generated/inspected and the Worker route connected without reintroducing NewsData into Current Affairs.
