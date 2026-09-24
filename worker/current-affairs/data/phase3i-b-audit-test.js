@@ -4,6 +4,7 @@
 import { strict as assert } from "node:assert";
 import { CURRENT_AFFAIRS_QUESTION_BANK } from "./phase3i-question-bank.js";
 import { validateQuestionBankCollection, auditQuestionBankRecords } from "./phase3h-question-bank.js";
+import { CURRENT_AFFAIRS_INITIAL_FACTS, CURRENT_AFFAIRS_SOURCES } from "./phase2-initial-facts.js";
 import { assembleCurrentAffairsQuiz } from "./phase3g-quiz-assembler.js";
 
 export function runPhase3IBAuditTests() {
@@ -16,7 +17,7 @@ export function runPhase3IBAuditTests() {
   assert.equal(new Set(bank.map((q) => q.conceptId)).size, bank.length, "concepts must be unique");
   assert.ok(bank.every((q) => q.status === "active"), "all seed records must be active");
   assert.ok(bank.every((q) => q.accessTier === "FREE"), "all initial records must be FREE");
-  const audit = auditQuestionBankRecords(bank);
+  const audit = auditQuestionBankRecords({ records: bank, facts: CURRENT_AFFAIRS_INITIAL_FACTS, sources: Object.values(CURRENT_AFFAIRS_SOURCES) });
   assert.equal(audit.valid, true, "Question Bank audit must be clean: " + JSON.stringify(audit.issues));
   const assembled = assembleCurrentAffairsQuiz({ questionBank: bank, quizSize: 10, seed: "phase-3i-b-real-bank", allowedAccessTiers: ["FREE"] });
   assert.equal(assembled.success, true, "real bank must assemble a complete quiz: " + JSON.stringify(assembled.diagnostics));
