@@ -178,13 +178,22 @@ function generateDirect(fact, blueprint, difficulty) {
 }
 
 function generateReverse(fact, blueprint, difficulty) {
-  const attribute = labelForAttribute(fact.attribute);
+  const attribute = String(fact.attribute || "").toLowerCase();
   const temporal = getTemporalContext(fact);
+  let question = null;
+
+  if (attribute === "capital") {
+    question = `Which state has ${fact.value} as its capital${temporal}?`;
+  } else if (attribute === "headquarters") {
+    question = `Which organization has its headquarters in ${fact.value}${temporal}?`;
+  }
+
+  if (!question) return null;
 
   return createBaseDraft(
     fact,
     blueprint,
-    `${fact.value} is the ${attribute} of which entity${temporal}?`,
+    question,
     fact.entity,
     difficulty
   );
