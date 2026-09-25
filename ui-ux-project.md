@@ -1013,3 +1013,16 @@ Completed implementation chain:
 6. Record any findings as stabilization fixes only; do not begin the major native Android/UI redesign during this test cycle.
 
 **Current milestone:** Current Affairs implementation complete → PR merge → Debug APK validation → V1 stabilization.
+
+
+## V1 stabilization complete — 24 September 2026
+
+The V1 functional reference app is now officially stabilized. The current React/Vite/Capacitor interface should be treated as a **frozen reference baseline** rather than the target for the major redesign.
+
+The next product-design phase moves to the separate native Android V2 architecture. Future app-wide navigation, the full Bible experience, major UI/UX redesign, design-system implementation, and native Android interaction patterns should be designed for V2 rather than retrofitted into V1.
+
+The V1 AdMob behavior must be preserved as a functional reference during the V2 migration: Debug uses test ads, release uses production AdMob IDs, and ad containers/presentation must remain regression-tested in the native implementation.
+
+**V1 UI/UX status: STABILIZED REFERENCE.**
+
+**Next milestone: Native Android V2 product architecture and UX design.**
