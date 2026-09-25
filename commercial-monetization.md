@@ -1560,3 +1560,16 @@ Completed implementation chain:
 6. Record any findings as stabilization fixes only; do not begin the major native Android/UI redesign during this test cycle.
 
 **Current milestone:** Current Affairs implementation complete → PR merge → Debug APK validation → V1 stabilization.
+
+
+## V1 stabilization complete — 24 September 2026
+
+V1 is now officially stabilized at the commercial-architecture level. The V1 AdMob system is the stabilized monetization integration: Debug builds use test ads and the release workflow uses production AdMob IDs. The Android release workflow targets **versionName 1.2.1 / versionCode 8**.
+
+No billing, subscriptions, Premium entitlements, Remove Ads purchase, or paywall enforcement has been implemented in V1. Those remain future commercial capabilities for the native Android V2 product.
+
+The commercial architecture remains intentionally separated from content generation and question selection. Future Premium, Remove Ads, Bible, Current Affairs Pro, advanced statistics, endless mode, and content-pack entitlements will be designed and implemented centrally in V2 when commercial readiness justifies them.
+
+**V1 commercial status: STABILIZED.**
+
+**Next milestone: Native Android V2 commercial/product architecture.**
