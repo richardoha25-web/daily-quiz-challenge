@@ -9,6 +9,7 @@ import {
   showAppOpenIfAppropriate,
   showInterstitial,
   showRewarded,
+  maintainAds,
 } from './adMob';
 import { getQuizQuestions } from './questionEngine';
 
@@ -56,7 +57,7 @@ function App() {
         void preloadInterstitial();
         void preloadRewarded();
         void preloadRewardedInterstitial();
-        void preloadAppOpen();
+        maintainAds();
 
         if (!firstLaunch) {
           // On a cold start, the App Open ad is allowed to show only while
@@ -86,7 +87,7 @@ function App() {
           void preloadInterstitial();
           void preloadRewarded();
           void preloadRewardedInterstitial();
-          void preloadAppOpen();
+          maintainAds();
           if (!booting) {
             setTimeout(() => {
               if (!cancelled) void showAppOpenIfAppropriate();
@@ -134,6 +135,7 @@ function App() {
     setError('');
     setLoading(true);
     setScreen('quiz');
+    // Start/reinforce all full-screen ad preloads as soon as a quiz begins.\n    maintainAds();
 
     try {
       const selected = await getQuizQuestions(all[c].name, [], 10);
