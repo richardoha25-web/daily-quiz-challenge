@@ -964,3 +964,27 @@ Completed implementation chain:
 6. Record any findings as stabilization fixes only; do not begin the major native Android/UI redesign during this test cycle.
 
 **Current milestone:** Current Affairs implementation complete → PR merge → Debug APK validation → V1 stabilization.
+
+
+## V1 stabilization complete — 24 September 2026
+
+**V1 is now officially stabilized.** The React/Vite/Capacitor V1 remains the stable reference implementation for the project.
+
+### Final V1 stabilization result
+- General Knowledge: working and verified.
+- Science: working and verified.
+- Africa & Nigeria: working and verified through the Cloudflare Worker/Africa API fact-to-question pipeline.
+- Bible: intentionally remains a V1 placeholder / future native experience; the full Bible reader, study and quiz architecture is deferred to V2.
+- Current Affairs: implementation completed and runtime exhaustion/recovery testing passed for the V1 stabilization milestone.
+- Anti-repetition/history protections remain part of the V1 question architecture.
+- AdMob lifecycle work was completed and merged in PR #8. The 15-minute App Open gap was removed, active preload/replenishment was strengthened, overlapping full-screen presentations are guarded, and startup/focus/quiz-start maintenance was added.
+- Debug builds continue to use AdMob test IDs; the release workflow uses production AdMob IDs.
+- Android release workflow now explicitly produces **versionName 1.2.1 / versionCode 8**.
+- V1.2.1 release build is the stabilization release target; release signing/update continuity remains preserved by the existing release workflow.
+
+### V1 → V2 transition rule
+No further feature expansion or major UI redesign should be added to the V1 codebase merely to prepare for V2. V1 is the stable reference point. Future app-wide navigation, Bible experience, major UI/UX redesign, native architecture, and long-term platform capabilities belong to the separate native Android V2 project.
+
+**V1 status: STABILIZED.**
+
+**Next milestone: Native Android V2 development.**
